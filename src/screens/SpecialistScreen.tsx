@@ -1,0 +1,406 @@
+import { useState, useEffect } from 'react'
+import { getLevelConfig, formatPrice } from '../data'
+import type { Screen, Review } from '../types'
+import { useAppStore } from '../store'
+import { useSpecialists } from '../specialistsData'
+import { fetchReviews } from '../lib/queries'
+import { LEVEL_ICONS, ArrowLeft, Heart, Share2, BadgeCheck, Star, MessageCircle, MapPin } from '../icons'
+
+interface Props {
+  specialistId: string
+  onNavigate: (screen: Screen) => void
+  onBack: () => void
+}
+
+type Tab = 'portfolio' | 'about' | 'reviews'
+
+export default function SpecialistScreen({ specialistId, onNavigate, onBack }: Props) {
+  const { specialists } = useSpecialists()
+  const sp = specialists.find(s => s.id === specialistId)
+  const { favorites, toggleFavorite } = useAppStore()
+  const [tab, setTab] = useState<Tab>('portfolio')
+  const [copied, setCopied] = useState(false)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const liked = favorites.includes(specialistId)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchReviews(specialistId).then(data => {
+      if (!cancelled) setReviews(data)
+    }).catch(err => console.error('Failed to load reviews', err))
+    return () => {
+      cancelled = true
+    }
+  }, [specialistId])
+
+  async function handleShare() {
+    const url = `${window.location.origin}${window.location.pathname}#specialist/${specialistId}`
+    const shareData = { title: `${sp?.name} on Whale`, text: `Check out ${sp?.name} on Whale`, url }
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData)
+        return
+      }
+    } catch {
+      // User cancelled the native share sheet — fall through to clipboard.
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1800)
+    } catch {
+      // Clipboard access can be denied by the browser — nothing more we can do.
+    }
+  }
+
+  if (!sp) return (
+    <div style={{ background: '#080808', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+      Specialist not found
+    </div>
+  )
+
+  const level = getLevelConfig(sp.level)
+  const LevelIcon = LEVEL_ICONS[sp.level].icon
+
+  return (
+    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
+
+      {/* Hero */}
+      <div style={{ position: 'relative' }}>
+        {sp.cover ? (
+          <img
+            src={sp.cover}
+            alt={sp.name}
+            style={{ width: '100%', height: 280, objectFit: 'cover', display: 'block', background: '#111' }}
+          />
+        ) : (
+          <div style={{ width: '100%', height: 280, background: 'linear-gradient(135deg, #0a2a29 0%, #0ABAB5 100%)' }} />
+        )}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(8,8,8,0.95) 100%)' }} />
+
+        {/* Back + actions */}
+        <div style={{ position: 'absolute', top: 52, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', padding: '0 20px' }}>
+          <button
+            onClick={onBack}
+            style={{
+              background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: '50%', width: 40, height: 40,
+              color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <ArrowLeft size={18} strokeWidth={2} />
+          </button>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <button
+              onClick={() => toggleFavorite(specialistId)}
+              style={{
+                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '50%', width: 40, height: 40,
+                color: liked ? '#ff4d6d' : 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'color 0.2s',
+              }}
+            >
+              <Heart size={18} strokeWidth={2} fill={liked ? '#ff4d6d' : 'none'} />
+            </button>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={handleShare}
+                style={{
+                  background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '50%', width: 40, height: 40,
+                  color: 'white',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <Share2 size={17} strokeWidth={2} />
+              </button>
+              {copied && (
+                <span className="fade-in" style={{
+                  position: 'absolute', top: 46, right: 0, whiteSpace: 'nowrap',
+                  background: '#0ABAB5', color: '#080808', fontSize: 11, fontWeight: 700,
+                  padding: '5px 10px', borderRadius: 8,
+                }}>
+                  Link copied
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Profile info overlay */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 20px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14 }}>
+            <div style={{ position: 'relative' }}>
+              <img
+                src={sp.avatar}
+                alt={sp.name}
+                style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '3px solid #0ABAB5', background: '#111', flexShrink: 0 }}
+              />
+              {sp.available && (
+                <span style={{
+                  position: 'absolute', bottom: 3, right: 3,
+                  width: 14, height: 14, borderRadius: '50%',
+                  background: '#4ade80', border: '2px solid #080808',
+                }} />
+              )}
+            </div>
+            <div style={{ flex: 1, paddingBottom: 4 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'white' }}>{sp.name}</h1>
+                {sp.verified && (
+                  <span
+                    className="verified-pulse"
+                    style={{
+                      background: '#0ABAB5', borderRadius: '50%', width: 22, height: 22,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    }}
+                  >
+                    <BadgeCheck size={13} color="#080808" strokeWidth={2.5} />
+                  </span>
+                )}
+                <LevelIcon size={17} color={level.color} strokeWidth={2} />
+              </div>
+              <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                {sp.category} · <MapPin size={12} strokeWidth={2} /> {sp.city}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Star size={13} color="#FFD700" fill="#FFD700" strokeWidth={0} />
+                <span style={{ fontSize: 14, fontWeight: 700 }}>{sp.rating}</span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>({sp.reviews} reviews)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ padding: '16px 20px' }}>
+        <div className="glass" style={{ borderRadius: 16, padding: '16px 0', display: 'flex' }}>
+          {[
+            { label: 'Projects', value: sp.projects },
+            { label: 'Reviews', value: sp.reviews },
+            { label: 'Experience', value: `${sp.experience}y` },
+            { label: 'Age', value: sp.age },
+          ].map((stat, i) => (
+            <div key={stat.label} style={{
+              flex: 1, textAlign: 'center',
+              borderRight: i < 3 ? '1px solid rgba(255,255,255,0.08)' : undefined,
+            }}>
+              <p style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, color: 'white' }}>{stat.value}</p>
+              <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ padding: '0 20px 16px' }}>
+        <div className="glass" style={{ borderRadius: 14, padding: 4, display: 'flex', gap: 2 }}>
+          {(['portfolio', 'about', 'reviews'] as Tab[]).map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              style={{
+                flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
+                fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
+                background: tab === t ? '#0ABAB5' : 'transparent',
+                color: tab === t ? '#080808' : 'rgba(255,255,255,0.5)',
+                transition: 'all 0.2s ease', textTransform: 'capitalize',
+              }}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab content */}
+      <div className="fade-in" key={tab}>
+        {tab === 'portfolio' && (
+          <div style={{ padding: '0 20px' }}>
+            {sp.portfolio.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
+                No portfolio items yet.
+              </div>
+            )}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+              {sp.portfolio.map((img, i) => (
+                <div
+                  key={i}
+                  style={{
+                    borderRadius: 14, overflow: 'hidden',
+                    aspectRatio: i === 0 ? '2/1.4' : '1/1',
+                    gridColumn: i === 0 ? 'span 2' : undefined,
+                    background: '#111',
+                  }}
+                >
+                  <img
+                    src={img}
+                    alt={`Portfolio ${i + 1}`}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab === 'about' && (
+          <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
+              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>About</h3>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,0.8)' }}>{sp.bio}</p>
+            </div>
+
+            <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
+              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Skills</h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {sp.tags.map(tag => (
+                  <span key={tag} style={{
+                    padding: '6px 14px', borderRadius: 20, fontSize: 13, fontWeight: 600,
+                    background: 'rgba(10,186,181,0.1)', color: '#0ABAB5',
+                    border: '1px solid rgba(10,186,181,0.25)',
+                  }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
+              <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing</h3>
+              {[
+                { label: 'One-time session', price: sp.price, note: 'editing included' },
+                { label: 'Rush order (48h)', price: Math.round(sp.price * 1.5), note: '+50% to base' },
+                { label: 'Monthly retainer', price: Math.round(sp.price * 3.5), note: '5 sessions' },
+              ].map(item => (
+                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.label}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{item.note}</p>
+                  </div>
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#0ABAB5' }}>{formatPrice(item.price)}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Level badge */}
+            <div
+              className="glass"
+              style={{
+                borderRadius: 16, padding: 16,
+                border: `1px solid ${level.color}22`,
+                background: `${level.color}08`,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <LevelIcon size={30} color={level.color} strokeWidth={1.8} />
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: level.color }}>{level.label} Specialist</p>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                    Based on {sp.projects} projects · {sp.reviews} reviews · {sp.rating} <Star size={10} color="#FFD700" fill="#FFD700" strokeWidth={0} /> rating
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab === 'reviews' && (
+          <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Rating summary */}
+            <div className="glass" style={{ borderRadius: 16, padding: 16, display: 'flex', gap: 16, alignItems: 'center' }}>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ margin: '0 0 2px', fontSize: 44, fontWeight: 900, color: 'white', lineHeight: 1 }}>{sp.rating}</p>
+                <p style={{ margin: '0 0 4px', display: 'flex', gap: 2, justifyContent: 'center' }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} size={14} color="#FFD700" fill="#FFD700" strokeWidth={0} />
+                  ))}
+                </p>
+                <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{sp.reviews} reviews</p>
+              </div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {[['Quality', 4.9], ['Timing', 4.7], ['Communication', 4.8], ['Result', 4.9]].map(([label, val]) => (
+                  <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', width: 90 }}>{label}</span>
+                    <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.1)' }}>
+                      <div style={{ width: `${((val as number) / 5) * 100}%`, height: '100%', borderRadius: 2, background: '#0ABAB5' }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: '#0ABAB5', width: 24 }}>{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {reviews.map(r => (
+              <div key={r.id} className="glass" style={{ borderRadius: 16, padding: 16 }}>
+                <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                  <img src={r.avatar} alt={r.author} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700 }}>{r.author}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ display: 'flex', gap: 1 }}>
+                        {Array.from({ length: r.rating }).map((_, i) => (
+                          <Star key={i} size={11} color="#FFD700" fill="#FFD700" strokeWidth={0} />
+                        ))}
+                      </span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{r.date}</span>
+                    </div>
+                  </div>
+                </div>
+                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'rgba(255,255,255,0.75)' }}>{r.text}</p>
+              </div>
+            ))}
+
+            {reviews.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
+                No reviews yet
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom CTA */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+        width: '100%', maxWidth: 430,
+        padding: '16px 20px 32px',
+        background: 'linear-gradient(to top, #080808 60%, transparent)',
+        zIndex: 50,
+      }}>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={() => onNavigate({ name: 'chats' })}
+            className="glass"
+            style={{
+              padding: '14px 18px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.15)',
+              color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <MessageCircle size={20} strokeWidth={2} />
+          </button>
+          <button
+            onClick={() => sp.available && onNavigate({ name: 'booking', specialistId: sp.id })}
+            disabled={!sp.available}
+            className={sp.available ? 'tiffany-glow' : ''}
+            style={{
+              flex: 1, padding: '14px 0', borderRadius: 16, border: 'none',
+              background: sp.available ? '#0ABAB5' : 'rgba(255,255,255,0.1)',
+              color: sp.available ? '#080808' : 'rgba(255,255,255,0.35)',
+              fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+              cursor: sp.available ? 'pointer' : 'not-allowed',
+            }}
+          >
+            {sp.available ? `Book — ${formatPrice(sp.price)}` : 'Currently unavailable'}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  )
+}

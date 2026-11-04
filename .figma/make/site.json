@@ -1,0 +1,17 @@
+{
+  "title": "Whale — Book Digital Specialists",
+  "description": "Connects businesses with verified digital specialists for booking, portfolio review, secure payments, and seamless communication to boost brand growth.",
+  "robots": {
+    "index": false
+  },
+  "icons": {
+    "icon": "/icon.svg"
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  },
+  "customScripts": {
+    "headEnd": "<link rel=\"manifest\" href=\"/manifest.json\"><meta name=\"theme-color\" content=\"#0ABAB5\"><link rel=\"apple-touch-icon\" href=\"/icon.svg\">"
+  }
+}

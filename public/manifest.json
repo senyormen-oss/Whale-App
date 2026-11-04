@@ -1,0 +1,18 @@
+{
+  "name": "Whale — Digital Specialists",
+  "short_name": "Whale",
+  "description": "Find and book top digital specialists for your brand",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#0ABAB5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable any"
+    }
+  ]
+}

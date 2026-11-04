@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Outfit', sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  background: #080808;
+  color: #ffffff;
+  font-family: 'Outfit', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+::-webkit-scrollbar { width: 0; height: 0; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseTiffany {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(10,186,181,0.4); }
+  50%       { box-shadow: 0 0 0 10px rgba(10,186,181,0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin { animation: spin 0.9s linear infinite; }
+
+.fade-up   { animation: fadeUp 0.35s ease both; }
+.fade-in   { animation: fadeIn 0.25s ease both; }
+.slide-up  { animation: slideUp 0.4s cubic-bezier(.22,.68,0,1.2) both; }
+
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.glass-dark {
+  background: rgba(8,8,8,0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.tiffany-glow {
+  box-shadow: 0 0 32px rgba(10,186,181,0.35), 0 4px 16px rgba(10,186,181,0.2);
+}
+
+.tiffany-glow-sm {
+  box-shadow: 0 0 16px rgba(10,186,181,0.3);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #0ABAB5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+.verified-pulse {
+  animation: pulseTiffany 2s ease infinite;
+}
+
+input, textarea, select {
+  font-family: 'Outfit', sans-serif;
+}
+
+button { cursor: pointer; font-family: 'Outfit', sans-serif; }
+
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }

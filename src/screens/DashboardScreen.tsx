@@ -1,0 +1,563 @@
+import { useState, useEffect, useCallback } from 'react'
+import type { Screen, Specialist } from '../types'
+import { useAppStore } from '../store'
+import { useAuth } from '../auth'
+import { useSpecialists } from '../specialistsData'
+import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder } from '../lib/queries'
+import BecomeSpecialistForm from './BecomeSpecialistForm'
+import {
+  Settings, User, Briefcase, ClipboardList, Wallet, CheckCircle2, Star,
+  Calendar, TrendingUp, Heart, BarChart3, Users, Bell, Trash2, LogOut, X, Loader2, type IconType,
+} from '../icons'
+
+interface Props {
+  onNavigate: (screen: Screen) => void
+}
+
+const STATUS_CONFIG = {
+  pending:   { label: 'Pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
+  confirmed: { label: 'Confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
+  completed: { label: 'Done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
+  cancelled: { label: 'Cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
+}
+
+function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; label: string; value: string; sub?: string; accent?: boolean }) {
+  return (
+    <div
+      className="glass"
+      style={{
+        borderRadius: 18, padding: '18px 16px',
+        border: accent ? '1px solid rgba(10,186,181,0.3)' : '1px solid rgba(255,255,255,0.08)',
+        background: accent ? 'linear-gradient(135deg, rgba(10,186,181,0.1) 0%, rgba(10,186,181,0.03) 100%)' : undefined,
+      }}
+    >
+      <div style={{
+        width: 36, height: 36, borderRadius: 10, marginBottom: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: accent ? 'rgba(10,186,181,0.15)' : 'rgba(255,255,255,0.06)',
+      }}>
+        <Icon size={17} color={accent ? '#0ABAB5' : 'rgba(255,255,255,0.7)'} strokeWidth={1.8} />
+      </div>
+      <p style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 900, color: accent ? '#0ABAB5' : 'white' }}>{value}</p>
+      <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{label}</p>
+      {sub && <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{sub}</p>}
+    </div>
+  )
+}
+
+export default function DashboardScreen({ onNavigate }: Props) {
+  const [mode, setMode] = useState<'client' | 'specialist'>('client')
+  const [showSettings, setShowSettings] = useState(false)
+  const { orders, favorites, notificationsEnabled, toggleNotifications, clearAllData } = useAppStore()
+  const { user, signOut } = useAuth()
+  const { specialists, reload: reloadSpecialists } = useSpecialists()
+
+  const totalSpent = orders.reduce((sum, o) => sum + o.amount, 0)
+  const completedCount = orders.filter(o => o.status === 'completed').length
+  const favoriteSpecialists = specialists.filter(s => favorites.includes(s.id))
+
+  const [myListing, setMyListing] = useState<Specialist | null | undefined>(undefined) // undefined = loading
+  const [myOrders, setMyOrders] = useState<SpecialistOrder[]>([])
+  const [ordersLoading, setOrdersLoading] = useState(false)
+
+  const loadListing = useCallback(() => {
+    if (!user) return
+    setMyListing(undefined)
+    fetchMySpecialistListing(user.id)
+      .then(setMyListing)
+      .catch(err => {
+        console.error('Failed to load specialist listing', err)
+        setMyListing(null)
+      })
+  }, [user])
+
+  useEffect(() => {
+    if (mode === 'specialist') loadListing()
+  }, [mode, loadListing])
+
+  useEffect(() => {
+    if (!myListing) {
+      setMyOrders([])
+      return
+    }
+    setOrdersLoading(true)
+    fetchSpecialistOrders(myListing.id)
+      .then(setMyOrders)
+      .catch(err => console.error('Failed to load specialist orders', err))
+      .finally(() => setOrdersLoading(false))
+  }, [myListing])
+
+  async function handleMarkCompleted(orderId: string) {
+    try {
+      await markOrderCompleted(orderId)
+      setMyOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: 'completed' } : o)))
+    } catch (err) {
+      console.error('Failed to mark order completed', err)
+    }
+  }
+
+  async function toggleAvailability() {
+    if (!myListing) return
+    const next = !myListing.available
+    setMyListing({ ...myListing, available: next })
+    try {
+      await updateSpecialistListing(myListing.id, { available: next })
+      reloadSpecialists()
+    } catch (err) {
+      console.error('Failed to update availability', err)
+      setMyListing({ ...myListing, available: !next })
+    }
+  }
+
+  const upcomingOrders = myOrders.filter(o => o.status === 'confirmed')
+  const totalIncome = myOrders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.amount, 0)
+  const clientCount = new Set(myOrders.map(o => o.clientName)).size
+  const profileChecklist = myListing
+    ? [
+        { label: 'Bio description', done: myListing.bio.trim().length > 0 },
+        { label: 'Price set', done: myListing.price > 0 },
+        { label: 'Skills / tags added', done: myListing.tags.length > 0 },
+        { label: 'City set', done: myListing.city.trim().length > 0 },
+      ]
+    : []
+  const completeness = profileChecklist.length
+    ? Math.round((profileChecklist.filter(i => i.done).length / profileChecklist.length) * 100)
+    : 0
+
+  return (
+    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
+
+      {/* Header */}
+      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: '50%', border: '2px solid #0ABAB5', background: 'rgba(10,186,181,0.12)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <User size={28} color="#0ABAB5" strokeWidth={1.8} />
+            </div>
+            <span style={{ position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: '#4ade80', border: '2px solid #080808' }} />
+          </div>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {(user?.user_metadata?.full_name as string) || 'Whale user'}
+            </h1>
+            <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.email}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 12, padding: '8px 12px', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center' }}
+          >
+            <Settings size={19} strokeWidth={1.8} />
+          </button>
+        </div>
+
+        {/* Mode toggle */}
+        <div className="glass" style={{ borderRadius: 14, padding: 4, display: 'flex' }}>
+          {(['client', 'specialist'] as const).map(m => {
+            const ModeIcon = m === 'client' ? User : Briefcase
+            return (
+              <button
+                key={m}
+                onClick={() => setMode(m)}
+                style={{
+                  flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                  fontSize: 13, fontWeight: 700, fontFamily: 'Outfit, sans-serif',
+                  background: mode === m ? '#0ABAB5' : 'transparent',
+                  color: mode === m ? '#080808' : 'rgba(255,255,255,0.45)',
+                  transition: 'all 0.2s',
+                  textTransform: 'capitalize',
+                }}
+              >
+                <ModeIcon size={15} strokeWidth={2} />
+                {m === 'client' ? 'Client' : 'Specialist'}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {mode === 'client' && (
+        <div className="fade-in" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+            <StatCard icon={ClipboardList} label="Total Orders" value={String(orders.length)} accent />
+            <StatCard icon={Wallet} label="Total Spent" value={(totalSpent / 1_000_000).toFixed(2) + 'M'} sub="UZS" />
+            <StatCard icon={CheckCircle2} label="Completed" value={String(completedCount)} />
+            <StatCard icon={Star} label="Avg Rating Given" value="4.7" />
+          </div>
+
+          {/* Active subscription */}
+          <div>
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>Active Subscription</h2>
+            <div
+              style={{
+                borderRadius: 18, padding: '18px',
+                background: 'linear-gradient(135deg, #0a2a29 0%, #0d3d3c 50%, #0a2a29 100%)',
+                border: '1px solid rgba(10,186,181,0.3)', position: 'relative', overflow: 'hidden',
+              }}
+            >
+              <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(10,186,181,0.1)' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>STANDARD PLAN</p>
+                  <p style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 900, color: 'white' }}>10 Videos/mo</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }}>
+                      <div style={{ width: '70%', height: '100%', borderRadius: 2, background: '#0ABAB5' }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>7/10 used</span>
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ margin: '0 0 2px', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Renews</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0ABAB5' }}>Sep 1</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent orders */}
+          <div>
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>Recent Orders</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {orders.length === 0 && (
+                <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No orders yet.</p>
+              )}
+              {orders.map(order => {
+                const sp = specialists.find(s => s.id === order.specialistId)
+                if (!sp) return null
+                const status = STATUS_CONFIG[order.status]
+                return (
+                  <button
+                    key={order.id}
+                    onClick={() => onNavigate({ name: 'specialist', id: sp.id })}
+                    className="glass"
+                    style={{
+                      borderRadius: 18, padding: '14px 16px',
+                      display: 'flex', gap: 12, alignItems: 'center',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      textAlign: 'left', cursor: 'pointer',
+                      transition: 'transform 0.15s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.01)')}
+                    onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  >
+                    <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
+                    <div style={{ flex: 1 }}>
+                      <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{order.service}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{order.date}</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
+                        {new Intl.NumberFormat().format(order.amount)}
+                      </p>
+                      <span style={{
+                        padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700,
+                        background: status.bg, color: status.color,
+                      }}>
+                        {status.label}
+                      </span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Analytics */}
+          <div>
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <BarChart3 size={16} color="#0ABAB5" strokeWidth={2} /> Analytics
+            </h2>
+            <div className="glass" style={{ borderRadius: 18, padding: 18 }}>
+              <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Spend by month
+              </p>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 80 }}>
+                {[
+                  { month: 'Apr', amount: 150000, max: 1380000 },
+                  { month: 'May', amount: 300000, max: 1380000 },
+                  { month: 'Jun', amount: 600000, max: 1380000 },
+                  { month: 'Jul', amount: 430000, max: 1380000 },
+                  { month: 'Aug', amount: 350000, max: 1380000 },
+                ].map(m => (
+                  <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                    <div
+                      style={{
+                        width: '100%', borderRadius: 6,
+                        height: `${(m.amount / m.max) * 72}px`,
+                        background: m.month === 'Aug' ? '#0ABAB5' : 'rgba(10,186,181,0.25)',
+                        transition: 'height 0.5s ease',
+                      }}
+                    />
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{m.month}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Favorites */}
+          <div style={{ paddingBottom: 20 }}>
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Heart size={16} color="#ff4d6d" strokeWidth={2.2} /> Favorites
+            </h2>
+            {favoriteSpecialists.length === 0 ? (
+              <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+                No favorites yet — tap the heart on a specialist's profile to save them here.
+              </p>
+            ) : (
+              <div className="hide-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto' }}>
+                {favoriteSpecialists.map(sp => (
+                  <button
+                    key={sp.id}
+                    onClick={() => onNavigate({ name: 'specialist', id: sp.id })}
+                    style={{
+                      flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                      padding: '14px 16px', borderRadius: 18, border: 'none',
+                      background: 'rgba(255,255,255,0.05)', cursor: 'pointer', minWidth: 88,
+                      transition: 'transform 0.15s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
+                    onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                  >
+                    <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'white', textAlign: 'center' }}>
+                      {sp.name.split(' ')[0]}
+                    </p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{sp.category.split(' ')[0]}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {mode === 'specialist' && (
+        <div className="fade-in" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {myListing === undefined && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+              <Loader2 className="spin" size={26} color="#0ABAB5" strokeWidth={2} />
+            </div>
+          )}
+
+          {myListing === null && (
+            <BecomeSpecialistForm onCreated={sp => { setMyListing(sp); reloadSpecialists() }} />
+          )}
+
+          {myListing && (
+            <>
+              {/* Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                <StatCard icon={Wallet} label="Total Income" value={(totalIncome / 1_000_000).toFixed(2) + 'M'} sub="UZS, completed orders" accent />
+                <StatCard icon={ClipboardList} label="Active Orders" value={String(upcomingOrders.length)} />
+                <StatCard icon={Star} label="My Rating" value={myListing.reviews > 0 ? myListing.rating.toFixed(1) : '—'} />
+                <StatCard icon={Users} label="Clients" value={String(clientCount)} />
+              </div>
+
+              {/* Availability toggle */}
+              <button
+                onClick={toggleAvailability}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                  padding: '14px 16px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(255,255,255,0.04)', cursor: 'pointer', textAlign: 'left',
+                }}
+              >
+                <span style={{
+                  width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+                  background: myListing.available ? '#4ade80' : 'rgba(255,255,255,0.3)',
+                }} />
+                <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
+                  {myListing.available ? 'Accepting bookings' : 'Not accepting bookings'}
+                </span>
+                <span style={{
+                  width: 40, height: 24, borderRadius: 12, position: 'relative',
+                  background: myListing.available ? '#0ABAB5' : 'rgba(255,255,255,0.15)', transition: 'background 0.2s',
+                }}>
+                  <span style={{
+                    position: 'absolute', top: 3, left: myListing.available ? 19 : 3,
+                    width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s',
+                  }} />
+                </span>
+              </button>
+
+              {/* Upcoming sessions */}
+              <div>
+                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Calendar size={16} color="#0ABAB5" strokeWidth={2} /> Upcoming Sessions
+                </h2>
+                {ordersLoading && <Loader2 className="spin" size={18} color="#0ABAB5" strokeWidth={2} />}
+                {!ordersLoading && upcomingOrders.length === 0 && (
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No upcoming sessions yet.</p>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {upcomingOrders.map(order => {
+                    const [monthDay, dayNum] = order.date.split(' ')
+                    return (
+                      <div key={order.id} className="glass" style={{ borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <div style={{
+                          flexShrink: 0, textAlign: 'center', padding: '8px 10px', borderRadius: 12,
+                          background: 'rgba(10,186,181,0.1)', border: '1px solid rgba(10,186,181,0.2)', minWidth: 52,
+                        }}>
+                          <p style={{ margin: '0 0 1px', fontSize: 11, color: '#0ABAB5', fontWeight: 700 }}>{monthDay}</p>
+                          <p style={{ margin: '0 0 1px', fontSize: 16, fontWeight: 900, color: 'white' }}>{dayNum}</p>
+                          <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>{order.bookingSlot}</p>
+                        </div>
+                        <div style={{ flex: 1, overflow: 'hidden' }}>
+                          <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.clientName}</p>
+                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{order.service}</p>
+                        </div>
+                        <button
+                          onClick={() => handleMarkCompleted(order.id)}
+                          style={{ padding: '6px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(10,186,181,0.15)', color: '#0ABAB5', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                        >
+                          Mark done
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Recent completed orders */}
+              <div>
+                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <TrendingUp size={16} color="#0ABAB5" strokeWidth={2} /> Completed
+                </h2>
+                {myOrders.filter(o => o.status === 'completed').length === 0 ? (
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No completed sessions yet.</p>
+                ) : (
+                  <div className="glass" style={{ borderRadius: 18, padding: 4 }}>
+                    {myOrders.filter(o => o.status === 'completed').map(order => (
+                      <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div>
+                          <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{order.clientName}</p>
+                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{order.service} · {order.date}</p>
+                        </div>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0ABAB5' }}>{new Intl.NumberFormat().format(order.amount)}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Profile completeness */}
+              <div style={{ paddingBottom: 20 }}>
+                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <User size={16} color="#0ABAB5" strokeWidth={2} /> Profile
+                </h2>
+                <div className="glass" style={{ borderRadius: 18, padding: 18, border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Profile Completeness</p>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0ABAB5' }}>{completeness}%</p>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.1)', marginBottom: 14 }}>
+                    <div style={{ width: `${completeness}%`, height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #0ABAB5, #08918d)' }} />
+                  </div>
+                  {profileChecklist.map(item => (
+                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
+                      <span style={{ width: 20, height: 20, borderRadius: '50%', background: item.done ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {item.done && <CheckCircle2 size={13} color="#4ade80" strokeWidth={2.5} />}
+                      </span>
+                      <span style={{ fontSize: 13, color: item.done ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {showSettings && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+          onClick={() => setShowSettings(false)}
+        >
+          <div
+            className="glass slide-up"
+            style={{
+              width: '100%', maxWidth: 430, borderRadius: '24px 24px 0 0',
+              padding: '20px 20px 40px', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none',
+              background: 'rgba(10,10,10,0.97)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800 }}>Settings</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <X size={16} strokeWidth={2} />
+              </button>
+            </div>
+
+            <button
+              onClick={toggleNotifications}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 4px', background: 'none', border: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <Bell size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
+              <span style={{ flex: 1, fontSize: 14, color: 'white' }}>Notifications</span>
+              <span style={{
+                width: 40, height: 24, borderRadius: 12, position: 'relative',
+                background: notificationsEnabled ? '#0ABAB5' : 'rgba(255,255,255,0.15)', transition: 'background 0.2s',
+              }}>
+                <span style={{
+                  position: 'absolute', top: 3, left: notificationsEnabled ? 19 : 3,
+                  width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s',
+                }} />
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                if (confirm('Delete all your bookings, chats and favorites from your account? This cannot be undone.')) {
+                  clearAllData()
+                  setShowSettings(false)
+                }
+              }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 4px', background: 'none', border: 'none',
+                borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <Trash2 size={17} color="#ff4d6d" strokeWidth={1.8} />
+              <span style={{ fontSize: 14, color: '#ff4d6d' }}>Delete my data</span>
+            </button>
+
+            <button
+              onClick={() => signOut()}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 4px', background: 'none', border: 'none',
+                cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <LogOut size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
+              <span style={{ fontSize: 14, color: 'white' }}>Sign out</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
