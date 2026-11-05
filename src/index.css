@@ -82,9 +82,11 @@ button:disabled { cursor: not-allowed; }
 }
 input:focus-visible { outline: none; }
 
+/* Opacity only on purpose: a transform on the screen container would become the containing
+   block of every position:fixed child (bottom action bars, sheets, modals) and push them off-screen. */
 @keyframes screenEnter {
-  from { opacity: 0; transform: translateY(14px) scale(0.995); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @keyframes popIn {
@@ -102,7 +104,8 @@ input:focus-visible { outline: none; }
   50%      { opacity: 0.55; }
 }
 
-.screen-enter { animation: screenEnter 0.38s cubic-bezier(.22,.68,0,1) both; }
+/* fill-mode backwards (not both): once finished there is no leftover stacking context, so modals/sheets inside a screen can sit above the fixed bottom nav */
+.screen-enter { animation: screenEnter 0.3s ease backwards; }
 .pop-in       { animation: popIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
 .floaty       { animation: floaty 3.2s ease-in-out infinite; }
 
