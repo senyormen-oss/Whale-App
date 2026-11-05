@@ -5,6 +5,51 @@
   --font-sans: 'Outfit', sans-serif;
 }
 
+/* ---- Theme tokens. Dark is the original look; light is applied via <html data-theme="light"> ---- */
+:root, :root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #080808;
+  --bg-rgb: 8,8,8;
+  --bg-outer: #030303;
+  --bg-header: #0f1410;
+  --surface: #111111;
+  --sheet: rgba(10,10,10,0.97);
+  --fg-rgb: 255,255,255;
+  --ink: #ffffff;
+  --accent-text: #0ABAB5;
+  --ok: #4ade80;
+  --glass-bg: rgba(255,255,255,0.05);
+  --glass-border: rgba(255,255,255,0.08);
+  --glass-dark-bg: rgba(8,8,8,0.92);
+  --glass-dark-border: rgba(255,255,255,0.07);
+  --shell-shadow: 0 0 80px rgba(0,0,0,0.8);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #F3F7F7;
+  --bg-rgb: 243,247,247;
+  --bg-outer: #E3EAEA;
+  --bg-header: #DDF1F0;
+  --surface: #FFFFFF;
+  --sheet: rgba(255,255,255,0.98);
+  --fg-rgb: 12,28,28;
+  --ink: #0c1c1c;
+  --accent-text: #067A76;
+  --ok: #15803d;
+  --glass-bg: rgba(255,255,255,0.78);
+  --glass-border: rgba(12,28,28,0.09);
+  --glass-dark-bg: rgba(255,255,255,0.92);
+  --glass-dark-border: rgba(12,28,28,0.08);
+  --shell-shadow: 0 0 60px rgba(12,28,28,0.12);
+}
+
+/* Elements drawn on a fixed dark/teal backdrop keep light text in both themes */
+.on-dark { --fg-rgb: 255,255,255; --ink: #ffffff; --accent-text: #ffffff; }
+
+html { transition: background-color 0.3s ease; }
+body, .glass, .glass-dark { transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; }
+
 * {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
@@ -16,8 +61,8 @@ html, body, #root {
 }
 
 body {
-  background: #080808;
-  color: #ffffff;
+  background: var(--bg);
+  color: var(--ink);
   font-family: 'Outfit', sans-serif;
   margin: 0;
   padding: 0;
@@ -112,7 +157,7 @@ input:focus-visible { outline: none; }
 /* Cards lift a little on hover (devices with a real pointer only) */
 @media (hover: hover) {
   .glass[role="button"]:hover, button.glass:hover {
-    background: rgba(255,255,255,0.08);
+    background: rgba(var(--fg-rgb),0.08);
     border-color: rgba(10,186,181,0.25);
   }
 }
@@ -129,17 +174,17 @@ img { transition: opacity 0.3s ease; }
 }
 
 .glass {
-  background: rgba(255,255,255,0.05);
+  background: var(--glass-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-dark {
-  background: rgba(8,8,8,0.92);
+  background: var(--glass-dark-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid var(--glass-dark-border);
 }
 
 .tiffany-glow {
@@ -175,3 +220,16 @@ button { cursor: pointer; font-family: 'Outfit', sans-serif; }
 
 .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* Number inputs: no native up/down arrows (they clash with the design) */
+input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Custom dropdown list */
+.select-list { animation: popIn 0.18s cubic-bezier(.22,.68,0,1.2) both; transform-origin: top center; }
+.select-option { transition: background-color 0.15s ease, color 0.15s ease; }
+.select-option:hover, .select-option[data-active='true'] { background: rgba(10,186,181,0.14); }
+
+input::placeholder, textarea::placeholder { color: rgba(var(--fg-rgb), 0.35); }
+::selection { background: rgba(10,186,181,0.35); }

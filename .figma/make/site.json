@@ -12,6 +12,6 @@
     "ignoreReducedMotion": false
   },
   "customScripts": {
-    "headEnd": "<link rel=\"manifest\" href=\"/manifest.json\"><meta name=\"theme-color\" content=\"#0ABAB5\"><link rel=\"apple-touch-icon\" href=\"/icon.svg\">"
+    "headEnd": "<link rel=\"manifest\" href=\"/manifest.json\"><meta name=\"theme-color\" content=\"#0ABAB5\"><meta name=\"color-scheme\" content=\"light dark\"><link rel=\"apple-touch-icon\" href=\"/icon.svg\"><script src=\"/theme-init.js\"></script>"
   }
 }

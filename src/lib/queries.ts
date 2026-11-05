@@ -303,3 +303,9 @@ export async function uploadChatImage(file: File, userId: string): Promise<strin
   const { data } = supabase.storage.from('chat-images').getPublicUrl(path)
   return data.publicUrl
 }
+
+/** If this user has a specialist listing, keep its public photo in sync with their profile photo. */
+export async function updateSpecialistAvatarIfAny(userId: string, avatarUrl: string): Promise<void> {
+  const { error } = await supabase.from('specialists').update({ avatar: avatarUrl }).eq('owner_id', userId)
+  if (error) throw error
+}

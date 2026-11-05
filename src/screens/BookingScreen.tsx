@@ -175,20 +175,20 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   if (booked) {
     return (
       <div style={{
-        background: '#080808', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexDirection: 'column', gap: 16, padding: 32, textAlign: 'center',
       }}>
         <div className="slide-up" style={{ marginBottom: 8 }}>
-          <PartyPopper size={64} color="#0ABAB5" strokeWidth={1.5} />
+          <PartyPopper size={64} color="var(--accent-text)" strokeWidth={1.5} />
         </div>
         <h2 className="slide-up gradient-text" style={{ margin: 0, fontSize: 28, fontWeight: 900, animationDelay: '0.1s' }}>
           {t('book.confirmed')}
         </h2>
-        <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, animationDelay: '0.2s' }}>
-          {t('book.sessionWith')} <strong style={{ color: 'white' }}>{sp.name}</strong><br />
-          <strong style={{ color: '#0ABAB5' }}>{dateLabel}, {selectedSlot}</strong>
+        <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),0.6)', lineHeight: 1.6, animationDelay: '0.2s' }}>
+          {t('book.sessionWith')} <strong style={{ color: 'var(--ink)' }}>{sp.name}</strong><br />
+          <strong style={{ color: 'var(--accent-text)' }}>{dateLabel}, {selectedSlot}</strong>
         </p>
-        <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)', animationDelay: '0.3s' }}>
+        <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)', animationDelay: '0.3s' }}>
           {t('book.openingChat')}
         </p>
       </div>
@@ -196,17 +196,17 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   }
 
   return (
-    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 120 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 120 }}>
 
       {/* Header */}
-      <div style={{ padding: '52px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+      <div style={{ padding: '52px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
           <button
             onClick={onBack}
             aria-label={t('common.back')}
             style={{
-              background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%',
-              width: 40, height: 40, color: 'white',
+              background: 'rgba(var(--fg-rgb),0.08)', border: 'none', borderRadius: '50%',
+              width: 40, height: 40, color: 'var(--ink)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
@@ -214,7 +214,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
           </button>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{t('book.title')}</h1>
-            <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{t('book.with', { name: sp.name })}</p>
+            <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.45)' }}>{t('book.with', { name: sp.name })}</p>
           </div>
         </div>
 
@@ -236,19 +236,19 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                     (s === 'sub' && (step === 'pay' || (step === 'sub'))) ||
                     (s === 'date')
                       ? 'rgba(10,186,181,0.2)'
-                      : 'rgba(255,255,255,0.1)'
+                      : 'rgba(var(--fg-rgb),0.1)'
                   ),
-                  color: step === s ? '#080808' : '#0ABAB5',
+                  color: step === s ? '#080808' : 'var(--accent-text)',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
               >
                 {i + 1}
               </div>
-              <span style={{ fontSize: 12, color: step === s ? 'white' : 'rgba(255,255,255,0.4)', fontWeight: step === s ? 600 : 400 }}>
+              <span style={{ fontSize: 12, color: step === s ? 'var(--ink)' : 'rgba(var(--fg-rgb),0.4)', fontWeight: step === s ? 600 : 400 }}>
                 {s === 'date' ? t('book.step.date') : s === 'sub' ? t('book.step.service') : t('book.step.payment')}
               </span>
-              {i < 2 && <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 14 }}>›</span>}
+              {i < 2 && <span style={{ color: 'rgba(var(--fg-rgb),0.2)', fontSize: 14 }}>›</span>}
             </div>
           ))}
         </div>
@@ -264,7 +264,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 disabled={!canGoPrevMonth}
                 style={{
                   background: 'none', border: 'none',
-                  color: canGoPrevMonth ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)',
+                  color: canGoPrevMonth ? 'rgba(var(--fg-rgb),0.6)' : 'rgba(var(--fg-rgb),0.15)',
                   cursor: canGoPrevMonth ? 'pointer' : 'not-allowed',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4,
                 }}
@@ -278,7 +278,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               <button
                 onClick={goNextMonth}
                 style={{
-                  background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+                  background: 'none', border: 'none', color: 'rgba(var(--fg-rgb),0.6)', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4,
                 }}
               >
@@ -289,7 +289,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             {/* Day headers */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8 }}>
               {weekdayLabels().map(d => (
-                <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', padding: '4px 0' }}>
+                <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(var(--fg-rgb),0.35)', padding: '4px 0' }}>
                   {d}
                 </div>
               ))}
@@ -309,8 +309,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                     onClick={() => { setSelectedDay(day); setSelectedSlot(null) }}
                     style={{
                       aspectRatio: '1', borderRadius: 10, border: sel ? '2px solid #0ABAB5' : today ? '2px solid rgba(10,186,181,0.4)' : '2px solid transparent',
-                      background: sel ? '#0ABAB5' : busy ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)',
-                      color: sel ? '#080808' : busy ? 'rgba(255,255,255,0.2)' : 'white',
+                      background: sel ? '#0ABAB5' : busy ? 'rgba(var(--fg-rgb),0.03)' : 'rgba(var(--fg-rgb),0.06)',
+                      color: sel ? '#080808' : busy ? 'rgba(var(--fg-rgb),0.2)' : 'var(--ink)',
                       fontSize: 13, fontWeight: sel ? 800 : 500,
                       cursor: busy ? 'not-allowed' : 'pointer',
                       textDecoration: busy ? 'line-through' : 'none',
@@ -324,14 +324,14 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               })}
             </div>
 
-            <div style={{ display: 'flex', gap: 14, marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', gap: 14, marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(var(--fg-rgb),0.06)' }}>
               {[
-                { color: '#0ABAB5', label: t('book.available') },
-                { color: 'rgba(255,255,255,0.15)', label: t('book.busy') },
+                { color: 'var(--accent-text)', label: t('book.available') },
+                { color: 'rgba(var(--fg-rgb),0.15)', label: t('book.busy') },
               ].map(item => (
                 <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 10, height: 10, borderRadius: 3, background: item.color }} />
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{item.label}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.5)' }}>{item.label}</span>
                 </div>
               ))}
             </div>
@@ -344,7 +344,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 {t('book.times', { date: dateLabel })}
               </h3>
               {availableSlots.length === 0 && (
-                <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>
                   {t('book.allBooked')}
                 </p>
               )}
@@ -356,8 +356,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                     style={{
                       padding: '14px 0', borderRadius: 14, border: 'none', fontSize: 15, fontWeight: 700,
                       fontFamily: 'Outfit, sans-serif',
-                      background: selectedSlot === slot ? '#0ABAB5' : 'rgba(255,255,255,0.07)',
-                      color: selectedSlot === slot ? '#080808' : 'white',
+                      background: selectedSlot === slot ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
+                      color: selectedSlot === slot ? '#080808' : 'var(--ink)',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -373,7 +373,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Service */}
       {step === 'sub' && (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }} className="fade-in">
-          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{t('book.choosePlan')}</p>
+          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)' }}>{t('book.choosePlan')}</p>
           {plans.map(s => {
             const SubIcon = SUBSCRIPTION_ICONS[s.level]
             return (
@@ -384,8 +384,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 borderRadius: 18, padding: '16px 18px', border: 'none',
                 background: selectedSub === s.id
                   ? 'linear-gradient(135deg, rgba(10,186,181,0.2) 0%, rgba(10,186,181,0.05) 100%)'
-                  : 'rgba(255,255,255,0.05)',
-                borderColor: selectedSub === s.id ? '#0ABAB5' : 'rgba(255,255,255,0.08)',
+                  : 'rgba(var(--fg-rgb),0.05)',
+                borderColor: selectedSub === s.id ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
                 borderStyle: 'solid', borderWidth: 1,
                 textAlign: 'left', cursor: 'pointer',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -406,20 +406,20 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 <span style={{
                   width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: selectedSub === s.id ? 'rgba(10,186,181,0.2)' : 'rgba(255,255,255,0.06)',
+                  background: selectedSub === s.id ? 'rgba(10,186,181,0.2)' : 'rgba(var(--fg-rgb),0.06)',
                 }}>
-                  <SubIcon size={20} color={selectedSub === s.id ? '#0ABAB5' : 'rgba(255,255,255,0.6)'} strokeWidth={1.8} />
+                  <SubIcon size={20} color={selectedSub === s.id ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.6)'} strokeWidth={1.8} />
                 </span>
                 <div>
-                  <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'white' }}>{s.name}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{s.description}</p>
+                  <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{s.name}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)' }}>{s.description}</p>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: selectedSub === s.id ? '#0ABAB5' : 'white' }}>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: selectedSub === s.id ? 'var(--accent-text)' : 'var(--ink)' }}>
                   {formatNumber(s.price)}
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{t('common.uzs')}</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('common.uzs')}</p>
               </div>
             </button>
           )})}
@@ -429,7 +429,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Payment */}
       {step === 'pay' && (
         <div style={{ padding: '0 20px' }} className="fade-in">
-          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{t('book.paymentMethod')}</p>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)' }}>{t('book.paymentMethod')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
             {PAYMENT_METHODS.map(pm => {
               const PmIcon = pm.icon
@@ -441,8 +441,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                   style={{
                     position: 'relative',
                     padding: '16px 12px', borderRadius: 16, border: 'none',
-                    background: selectedPayment === pm.id ? 'rgba(10,186,181,0.15)' : 'rgba(255,255,255,0.05)',
-                    borderColor: selectedPayment === pm.id ? '#0ABAB5' : 'rgba(255,255,255,0.08)',
+                    background: selectedPayment === pm.id ? 'rgba(10,186,181,0.15)' : 'rgba(var(--fg-rgb),0.05)',
+                    borderColor: selectedPayment === pm.id ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
                     borderStyle: 'solid', borderWidth: 1,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                     cursor: 'pointer', transition: 'all 0.15s',
@@ -451,13 +451,13 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                   {!live && (
                     <span style={{
                       position: 'absolute', top: 8, right: 8, fontSize: 8, fontWeight: 800,
-                      color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase',
+                      color: 'rgba(var(--fg-rgb),0.35)', letterSpacing: '0.04em', textTransform: 'uppercase',
                     }}>
                       {t('book.demo')}
                     </span>
                   )}
-                  <PmIcon size={22} color={selectedPayment === pm.id ? '#0ABAB5' : pm.color} strokeWidth={1.8} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: selectedPayment === pm.id ? '#0ABAB5' : 'white' }}>{pm.label}</span>
+                  <PmIcon size={22} color={selectedPayment === pm.id ? 'var(--accent-text)' : pm.color} strokeWidth={1.8} />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: selectedPayment === pm.id ? 'var(--accent-text)' : 'var(--ink)' }}>{pm.label}</span>
                 </button>
               )
             })}
@@ -472,18 +472,18 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               { label: t('book.time'), value: selectedSlot ?? '—' },
               { label: t('book.service'), value: sub.name },
             ].map(row => (
-              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{row.label}</span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'white' }}>{row.value}</span>
+              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
+                <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)' }}>{row.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{row.value}</span>
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 0', marginTop: 4 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{t('book.total')}</span>
-              <span style={{ fontSize: 18, fontWeight: 900, color: '#0ABAB5' }}>{formatPrice(sub.price)}</span>
+              <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-text)' }}>{formatPrice(sub.price)}</span>
             </div>
           </div>
 
-          <p style={{ margin: '0 0 16px', fontSize: 11, color: 'rgba(255,255,255,0.35)', textAlign: 'center', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 5 }}>
+          <p style={{ margin: '0 0 16px', fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)', textAlign: 'center', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 5 }}>
             <Lock size={12} style={{ flexShrink: 0, marginTop: 2 }} strokeWidth={2} />
             <span>
               {useRealGateway
@@ -510,7 +510,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 430,
         padding: '16px 20px 32px',
-        background: 'linear-gradient(to top, #080808 60%, transparent)',
+        background: 'linear-gradient(to top, var(--bg) 60%, transparent)',
         zIndex: 50,
       }}>
         {step === 'date' && (
@@ -520,8 +520,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             className={selectedDay && selectedSlot ? 'tiffany-glow' : ''}
             style={{
               width: '100%', padding: '16px', borderRadius: 18, border: 'none',
-              background: selectedDay && selectedSlot ? '#0ABAB5' : 'rgba(255,255,255,0.1)',
-              color: selectedDay && selectedSlot ? '#080808' : 'rgba(255,255,255,0.3)',
+              background: selectedDay && selectedSlot ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
+              color: selectedDay && selectedSlot ? '#080808' : 'rgba(var(--fg-rgb),0.3)',
               fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
               cursor: selectedDay && selectedSlot ? 'pointer' : 'not-allowed',
               transition: 'all 0.2s',
@@ -532,7 +532,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         )}
         {step === 'sub' && (
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => setStep('date')} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.15)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
+            <button onClick={() => setStep('date')} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(var(--fg-rgb),0.15)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
             <button
               onClick={() => setStep('pay')}
               className="tiffany-glow"
@@ -544,7 +544,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         )}
         {step === 'pay' && (
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => setStep('sub')} disabled={confirming} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(255,255,255,0.15)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
+            <button onClick={() => setStep('sub')} disabled={confirming} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(var(--fg-rgb),0.15)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
             <button
               onClick={handleConfirm}
               disabled={confirming}

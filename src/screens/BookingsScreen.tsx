@@ -16,8 +16,8 @@ interface Props {
 
 const STATUS_CONFIG: Record<string, { label: Parameters<typeof import('../i18n').t>[0]; color: string; bg: string }> = {
   pending:   { label: 'status.pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
-  confirmed: { label: 'status.confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
-  completed: { label: 'status.done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
+  confirmed: { label: 'status.confirmed', color: 'var(--accent-text)', bg: 'rgba(10,186,181,0.12)' },
+  completed: { label: 'status.done',      color: 'var(--ok)', bg: 'rgba(74,222,128,0.12)' },
   cancelled: { label: 'status.cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
 }
 
@@ -52,14 +52,14 @@ export default function BookingsScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
-      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
+      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{t('bookings.title')}</h1>
       </div>
 
       {orders.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(255,255,255,0.4)' }}>
-          <ClipboardList size={44} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(var(--fg-rgb),0.4)' }}>
+          <ClipboardList size={44} color="rgba(var(--fg-rgb),0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
           <p>{t('bookings.empty')}</p>
         </div>
       ) : (
@@ -74,7 +74,7 @@ export default function BookingsScreen({ onNavigate }: Props) {
               <div
                 key={order.id}
                 className="glass fade-up"
-                style={{ borderRadius: 18, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.08)' }}
+                style={{ borderRadius: 18, padding: '14px 16px', border: '1px solid rgba(var(--fg-rgb),0.08)' }}
               >
                 <div
                   role="button"
@@ -83,14 +83,14 @@ export default function BookingsScreen({ onNavigate }: Props) {
                   onKeyDown={e => e.key === 'Enter' && onNavigate({ name: 'specialist', id: sp.id })}
                   style={{ display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer' }}
                 >
-                  <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
+                  <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: 'var(--surface)' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{localizeService(order.service)}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{formatDate(order.date)}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>{localizeService(order.service)}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)' }}>{formatDate(order.date)}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
+                    <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
                       {formatNumber(order.amount)}
                     </p>
                     <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: status.bg, color: status.color }}>
@@ -100,7 +100,7 @@ export default function BookingsScreen({ onNavigate }: Props) {
                 </div>
 
                 {(canReview || canCancel) && (
-                  <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(var(--fg-rgb),0.06)' }}>
                     {canReview && (
                       <button
                         onClick={() => setReviewing({ orderId: order.id, specialistId: sp.id, name: sp.name })}

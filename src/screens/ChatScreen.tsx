@@ -23,14 +23,14 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
   const { specialists } = useSpecialists()
 
   return (
-    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
-      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
+      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{t('chat.title')}</h1>
       </div>
 
       {conversations.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(255,255,255,0.4)' }}>
-          <MessageSquareText size={44} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(var(--fg-rgb),0.4)' }}>
+          <MessageSquareText size={44} color="rgba(var(--fg-rgb),0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
           <p>{t('chat.empty')}</p>
         </div>
       ) : (
@@ -45,31 +45,31 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
                 style={{
                   display: 'flex', alignItems: 'center', gap: 14,
                   padding: '14px 16px', borderRadius: 18, border: 'none',
-                  background: 'rgba(255,255,255,0.03)', textAlign: 'left', cursor: 'pointer',
+                  background: 'rgba(var(--fg-rgb),0.03)', textAlign: 'left', cursor: 'pointer',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(var(--fg-rgb),0.07)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'rgba(var(--fg-rgb),0.03)')}
               >
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <img
                     src={sp.avatar}
                     alt={sp.name}
-                    style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'cover', background: '#111' }}
+                    style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }}
                   />
                   <span style={{
                     position: 'absolute', bottom: 1, right: 1,
                     width: 13, height: 13, borderRadius: '50%',
-                    background: sp.available ? '#4ade80' : 'rgba(255,255,255,0.25)', border: '2px solid #080808',
+                    background: sp.available ? 'var(--ok)' : 'rgba(var(--fg-rgb),0.25)', border: '2px solid var(--bg)',
                   }} />
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>{conv.lastTime}</span>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                    <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)', flexShrink: 0 }}>{conv.lastTime}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8 }}>
+                    <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8 }}>
                       {localizeSystemMessage(conv.lastMessage)}
                     </p>
                     {conv.unread > 0 && (
@@ -148,31 +148,31 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
   if (!sp) return null
 
   return (
-    <div style={{ background: '#080808', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: 'var(--bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
 
       {/* Header */}
-      <div className="glass-dark" style={{ padding: '52px 20px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="glass-dark" style={{ padding: '52px 20px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
             onClick={onBack}
             aria-label={t('common.back')}
             style={{
-              background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%',
-              width: 36, height: 36, color: 'white',
+              background: 'rgba(var(--fg-rgb),0.08)', border: 'none', borderRadius: '50%',
+              width: 36, height: 36, color: 'var(--ink)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}
           >
             <ArrowLeft size={16} strokeWidth={2} />
           </button>
           <div style={{ position: 'relative' }}>
-            <img src={sp.avatar} alt={sp.name} style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
+            <img src={sp.avatar} alt={sp.name} style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }} />
             {sp.available && (
-              <span style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: '#4ade80', border: '2px solid #111' }} />
+              <span style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: 'var(--ok)', border: '2px solid var(--surface)' }} />
             )}
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 1px', fontSize: 15, fontWeight: 700 }}>{sp.name}</p>
-            <p style={{ margin: 0, fontSize: 11, color: sp.available ? '#4ade80' : 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+            <p style={{ margin: 0, fontSize: 11, color: sp.available ? 'var(--ok)' : 'rgba(var(--fg-rgb),0.4)', fontWeight: 500 }}>
               {sp.available ? t('chat.accepting') : t('chat.notAccepting')}
             </p>
           </div>
@@ -186,13 +186,13 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
       >
         {/* Date separator */}
         <div style={{ textAlign: 'center', margin: '8px 0' }}>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.06)', padding: '4px 12px', borderRadius: 20 }}>
+          <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)', background: 'rgba(var(--fg-rgb),0.06)', padding: '4px 12px', borderRadius: 20 }}>
             {t('chat.today')}
           </span>
         </div>
 
         {messages.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),0.35)', fontSize: 13 }}>
             {t('chat.sayHello', { name: sp.name.split(' ')[0] })} 👋
           </div>
         )}
@@ -208,7 +208,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
             }}
           >
             {msg.from === 'them' && (
-              <img src={sp.avatar} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
+              <img src={sp.avatar} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: 'var(--surface)' }} />
             )}
             <div
               style={{
@@ -217,8 +217,8 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
                 borderRadius: msg.from === 'me' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
                 background: msg.from === 'me'
                   ? 'linear-gradient(135deg, #0ABAB5 0%, #08918d 100%)'
-                  : 'rgba(255,255,255,0.08)',
-                color: 'white',
+                  : 'rgba(var(--fg-rgb),0.08)',
+                color: 'var(--ink)',
                 fontSize: 14,
                 lineHeight: 1.5,
               }}
@@ -231,7 +231,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
                 />
               )}
               {msg.type !== 'image' && <p style={{ margin: '0 0 4px', overflowWrap: 'anywhere' }}>{localizeSystemMessage(msg.text)}</p>}
-              <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : 0, fontSize: 10, color: msg.from === 'me' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
+              <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : 0, fontSize: 10, color: msg.from === 'me' ? 'rgba(0,0,0,0.45)' : 'rgba(var(--fg-rgb),0.35)', textAlign: 'right' }}>
                 {msg.time}
               </p>
             </div>
@@ -248,7 +248,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer',
-            background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)',
+            background: 'rgba(var(--fg-rgb),0.07)', color: 'rgba(var(--fg-rgb),0.7)',
             fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 500,
             opacity: uploading ? 0.5 : 1,
           }}
@@ -273,7 +273,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
             <button
               key={e}
               onClick={() => setInput(prev => prev + e)}
-              style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, width: 34, height: 34, fontSize: 17, cursor: 'pointer' }}
+              style={{ background: 'rgba(var(--fg-rgb),0.06)', border: 'none', borderRadius: 10, width: 34, height: 34, fontSize: 17, cursor: 'pointer' }}
             >
               {e}
             </button>
@@ -294,13 +294,13 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
             placeholder={t('chat.placeholder')}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif',
+              color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif',
             }}
           />
           <button
             onClick={() => setShowEmoji(v => !v)}
             aria-label={t('chat.emoji')}
-            style={{ background: 'none', border: 'none', color: showEmoji ? '#0ABAB5' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'none', border: 'none', color: showEmoji ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.4)', display: 'flex', alignItems: 'center' }}
           >
             <Smile size={18} strokeWidth={1.8} />
           </button>
@@ -311,8 +311,8 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           className={input.trim() ? 'tiffany-glow-sm' : ''}
           style={{
             width: 48, height: 48, borderRadius: '50%', border: 'none',
-            background: input.trim() ? '#0ABAB5' : 'rgba(255,255,255,0.08)',
-            color: input.trim() ? '#080808' : 'rgba(255,255,255,0.3)',
+            background: input.trim() ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
+            color: input.trim() ? '#080808' : 'rgba(var(--fg-rgb),0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s', flexShrink: 0,
           }}

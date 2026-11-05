@@ -5,6 +5,7 @@ import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatNumber } from '../i18n'
+import UserAvatar from '../UserAvatar'
 import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase } from '../icons'
 
 function greetingKey() {
@@ -23,7 +24,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
       <Star size={12} color="#FFD700" fill="#FFD700" strokeWidth={0} />
-      <span style={{ color: 'white', fontSize: 11, fontWeight: 600 }}>{rating}</span>
+      <span style={{ color: 'var(--ink)', fontSize: 11, fontWeight: 600 }}>{rating}</span>
     </span>
   )
 }
@@ -60,13 +61,13 @@ export default function HomeScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Header */}
-      <div style={{ padding: '56px 20px 24px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+      <div style={{ padding: '56px 20px 24px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
-            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <p style={{ color: 'rgba(var(--fg-rgb),0.45)', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
               {t(greetingKey())}
             </p>
             <h1 className="gradient-text" style={{ margin: 0, fontSize: 26, fontWeight: 800, lineHeight: 1.2 }}>
@@ -79,15 +80,15 @@ export default function HomeScreen({ onNavigate }: Props) {
               aria-label={t('home.notifications')}
               style={{
                 width: 44, height: 44, borderRadius: '50%', border: 'none',
-                background: showNotifications ? 'rgba(10,186,181,0.18)' : 'rgba(255,255,255,0.07)', color: 'white',
+                background: showNotifications ? 'rgba(10,186,181,0.18)' : 'rgba(var(--fg-rgb),0.07)', color: 'var(--ink)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative',
               }}
             >
-              <Bell size={19} color="white" strokeWidth={1.8} />
+              <Bell size={19} color="var(--ink)" strokeWidth={1.8} />
               {hasNotifications && (
                 <span style={{
                   position: 'absolute', top: 8, right: 8, width: 8, height: 8,
-                  borderRadius: '50%', background: '#0ABAB5', border: '2px solid #080808',
+                  borderRadius: '50%', background: '#0ABAB5', border: '2px solid var(--bg)',
                 }} />
               )}
             </button>
@@ -97,17 +98,17 @@ export default function HomeScreen({ onNavigate }: Props) {
                 className="glass fade-in"
                 style={{
                   position: 'absolute', top: 52, right: 0, width: 280, zIndex: 200,
-                  borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 16, border: '1px solid rgba(var(--fg-rgb),0.1)',
                   overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
-                  background: 'rgba(10,10,10,0.97)',
+                  background: 'var(--sheet)',
                 }}
               >
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(var(--fg-rgb),0.08)' }}>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{t('home.notifications')}</p>
                 </div>
                 {unreadConversations.length === 0 ? (
                   <div style={{ padding: '24px 16px', textAlign: 'center' }}>
-                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t('home.caughtUp')}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('home.caughtUp')}</p>
                   </div>
                 ) : (
                   unreadConversations.map(conv => {
@@ -120,13 +121,13 @@ export default function HomeScreen({ onNavigate }: Props) {
                         style={{
                           width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                           padding: '10px 16px', background: 'none', border: 'none',
-                          borderBottom: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', cursor: 'pointer',
+                          borderBottom: '1px solid rgba(var(--fg-rgb),0.05)', textAlign: 'left', cursor: 'pointer',
                         }}
                       >
-                        <MessageSquareText size={15} color="#0ABAB5" strokeWidth={1.8} style={{ flexShrink: 0 }} />
+                        <MessageSquareText size={15} color="var(--accent-text)" strokeWidth={1.8} style={{ flexShrink: 0 }} />
                         <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <p style={{ margin: '0 0 1px', fontSize: 12, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ margin: '0 0 1px', fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {conv.lastMessage}
                           </p>
                         </div>
@@ -137,14 +138,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               </div>
             )}
 
-            <div
-              style={{
-                width: 44, height: 44, borderRadius: '50%', border: '2px solid #0ABAB5',
-                background: 'rgba(10,186,181,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              <User size={20} color="#0ABAB5" strokeWidth={1.8} />
-            </div>
+            <UserAvatar size={44} />
           </div>
         </div>
 
@@ -157,14 +151,14 @@ export default function HomeScreen({ onNavigate }: Props) {
               padding: '14px 18px', borderRadius: 16,
             }}
           >
-            <Search size={17} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
+            <Search size={17} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
             <input
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
               placeholder={t('home.searchPlaceholder')}
               style={{
                 flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif',
+                color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif',
               }}
             />
             <button
@@ -184,24 +178,24 @@ export default function HomeScreen({ onNavigate }: Props) {
       {/* Promo banner */}
       <div style={{ padding: '0 20px', marginBottom: 28 }}>
         <div
-          className="fade-up"
+          className="fade-up on-dark"
           style={{
             borderRadius: 20, overflow: 'hidden', position: 'relative',
             background: 'linear-gradient(135deg, #0a2a29 0%, #0ABAB5 100%)',
             padding: '24px 20px', minHeight: 130,
           }}
         >
-          <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.06)' }} />
-          <div style={{ position: 'absolute', bottom: -20, right: 30, width: 80, height: 80, borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+          <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(var(--fg-rgb),0.06)' }} />
+          <div style={{ position: 'absolute', bottom: -20, right: 30, width: 80, height: 80, borderRadius: '50%', background: 'rgba(var(--fg-rgb),0.04)' }} />
           <div style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
-              <Sparkles size={13} color="rgba(255,255,255,0.8)" strokeWidth={2} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(var(--fg-rgb),0.7)', marginBottom: 6 }}>
+              <Sparkles size={13} color="rgba(var(--fg-rgb),0.8)" strokeWidth={2} />
               {t('home.promo.badge')}
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, lineHeight: 1.2 }}>
               {t('home.promo.title')}
             </div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),0.75)', marginBottom: 16 }}>
               {t('home.promo.subtitle')}
             </div>
             <button
@@ -224,7 +218,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{t('home.categories')}</h2>
           <button
             onClick={() => onNavigate({ name: 'search' })}
-            style={{ background: 'none', border: 'none', color: '#0ABAB5', fontSize: 13, fontWeight: 600 }}
+            style={{ background: 'none', border: 'none', color: 'var(--accent-text)', fontSize: 13, fontWeight: 600 }}
           >
             {t('common.seeAll')}
           </button>
@@ -239,8 +233,8 @@ export default function HomeScreen({ onNavigate }: Props) {
                 style={{
                   flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center',
                   gap: 8, padding: '14px 18px', borderRadius: 16,
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                  color: 'white', cursor: 'pointer', minWidth: 78,
+                  background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.08)',
+                  color: 'var(--ink)', cursor: 'pointer', minWidth: 78,
                   transition: 'transform 0.15s ease',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.04)')}
@@ -263,7 +257,7 @@ export default function HomeScreen({ onNavigate }: Props) {
 
       {specialists.length === 0 && (
         <div style={{ padding: '0 20px', marginBottom: 32 }}>
-          <div className="glass" style={{ borderRadius: 18, padding: 20, textAlign: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 14, lineHeight: 1.6 }}>
+          <div className="glass" style={{ borderRadius: 18, padding: 20, textAlign: 'center', color: 'rgba(var(--fg-rgb),0.55)', fontSize: 14, lineHeight: 1.6 }}>
             {t('home.noSpecialists')}
           </div>
         </div>
@@ -278,7 +272,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           </h2>
           <button
             onClick={() => onNavigate({ name: 'search' })}
-            style={{ background: 'none', border: 'none', color: '#0ABAB5', fontSize: 13, fontWeight: 600 }}
+            style={{ background: 'none', border: 'none', color: 'var(--accent-text)', fontSize: 13, fontWeight: 600 }}
           >
             {t('common.seeAll')}
           </button>
@@ -290,7 +284,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               onClick={() => onNavigate({ name: 'specialist', id: sp.id })}
               style={{
                 flexShrink: 0, width: 180, borderRadius: 20, overflow: 'hidden',
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.08)',
                 cursor: 'pointer', padding: 0, textAlign: 'left',
                 transition: 'transform 0.15s ease',
               }}
@@ -302,7 +296,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   <img
                     src={sp.cover}
                     alt={sp.name}
-                    style={{ width: '100%', height: 110, objectFit: 'cover', display: 'block', background: '#111' }}
+                    style={{ width: '100%', height: 110, objectFit: 'cover', display: 'block', background: 'var(--surface)' }}
                   />
                 ) : (
                   <div style={{ width: '100%', height: 110, background: 'linear-gradient(135deg, #0a2a29 0%, #0ABAB5 100%)' }} />
@@ -325,20 +319,20 @@ export default function HomeScreen({ onNavigate }: Props) {
                   style={{
                     position: 'absolute', bottom: -16, left: 12,
                     width: 36, height: 36, borderRadius: '50%', objectFit: 'cover',
-                    border: '2px solid #0ABAB5', background: '#111',
+                    border: '2px solid #0ABAB5', background: 'var(--surface)',
                   }}
                 />
               </div>
               <div style={{ padding: '22px 12px 12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                    <p style={{ margin: '0 0 6px', fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{categoryLabel(sp.categoryKey)}</p>
+                    <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                    <p style={{ margin: '0 0 6px', fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)' }}>{categoryLabel(sp.categoryKey)}</p>
                   </div>
                   <LevelBadge level={sp.level} />
                 </div>
                 <StarRating rating={sp.rating} />
-                <p style={{ margin: '6px 0 0', fontSize: 11, color: '#0ABAB5', fontWeight: 600 }}>
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: 'var(--accent-text)', fontWeight: 600 }}>
                   {t('common.from')} {formatNumber(sp.price)} {t('common.uzs')}
                 </p>
               </div>
@@ -353,7 +347,7 @@ export default function HomeScreen({ onNavigate }: Props) {
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', marginBottom: 14 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Sparkles size={17} color="#0ABAB5" strokeWidth={2} /> {t('home.new')}
+            <Sparkles size={17} color="var(--accent-text)" strokeWidth={2} /> {t('home.new')}
           </h2>
         </div>
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -365,7 +359,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               style={{
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: '14px 16px', borderRadius: 18, cursor: 'pointer',
-                border: '1px solid rgba(255,255,255,0.08)', textAlign: 'left',
+                border: '1px solid rgba(var(--fg-rgb),0.08)', textAlign: 'left',
                 transition: 'transform 0.15s ease',
               }}
               onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.01)')}
@@ -375,29 +369,29 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <img
                   src={sp.avatar}
                   alt={sp.name}
-                  style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'cover', background: '#111' }}
+                  style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }}
                 />
                 {sp.available && (
                   <span style={{
                     position: 'absolute', bottom: 1, right: 1,
                     width: 13, height: 13, borderRadius: '50%',
-                    background: '#4ade80', border: '2px solid #080808',
+                    background: 'var(--ok)', border: '2px solid var(--bg)',
                   }} />
                 )}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                  {sp.verified && <BadgeCheck size={14} color="#0ABAB5" strokeWidth={2} />}
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                  {sp.verified && <BadgeCheck size={14} color="var(--accent-text)" strokeWidth={2} />}
                 </div>
-                <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{categoryLabel(sp.categoryKey)} · {sp.city}</p>
+                <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>{categoryLabel(sp.categoryKey)} · {sp.city}</p>
                 <StarRating rating={sp.rating} />
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#0ABAB5' }}>
+                <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'var(--accent-text)' }}>
                   {formatNumber(sp.price)}
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{t('common.uzs')}</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.35)' }}>{t('common.uzs')}</p>
               </div>
             </button>
           ))}
@@ -420,10 +414,10 @@ export default function HomeScreen({ onNavigate }: Props) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: 'rgba(10,186,181,0.15)',
           }}>
-            <Briefcase size={22} color="#0ABAB5" strokeWidth={1.8} />
+            <Briefcase size={22} color="var(--accent-text)" strokeWidth={1.8} />
           </div>
           <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700 }}>{t('home.offer.title')}</h3>
-          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.55)', lineHeight: 1.5 }}>
             {t('home.offer.text')}
           </p>
           <button

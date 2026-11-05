@@ -15,7 +15,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
       <Star size={12} color="#FFD700" fill="#FFD700" strokeWidth={0} />
-      <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12 }}>{rating}</span>
+      <span style={{ color: 'rgba(var(--fg-rgb),0.7)', fontSize: 12 }}>{rating}</span>
     </span>
   )
 }
@@ -49,29 +49,29 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
   }, [specialists, query, activeCategory, sortBy, lang])
 
   return (
-    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Header */}
-      <div style={{ padding: '56px 20px 16px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+      <div style={{ padding: '56px 20px 16px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <h1 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 800 }}>{t('search.title')}</h1>
         <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 16 }}>
-          <Search size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
+          <Search size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder={t('search.placeholder')}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif',
+              color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif',
             }}
           />
           <button
             onClick={() => setShowFilters(f => !f)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
-              background: showFilters ? '#0ABAB5' : 'rgba(255,255,255,0.1)',
+              background: showFilters ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
               border: 'none', borderRadius: 8, padding: '5px 12px',
-              color: showFilters ? '#080808' : 'white', fontSize: 12, fontWeight: 600,
+              color: showFilters ? '#080808' : 'var(--ink)', fontSize: 12, fontWeight: 600,
               fontFamily: 'Outfit, sans-serif',
             }}
           >
@@ -85,7 +85,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       {showFilters && (
         <div style={{ padding: '0 20px 16px' }} className="fade-in">
           <div className="glass" style={{ borderRadius: 16, padding: '14px 16px' }}>
-            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('search.sortBy')}</p>
+            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('search.sortBy')}</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {[
                 { key: 'rating', label: t('search.sort.rating') },
@@ -99,8 +99,8 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                   style={{
                     padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
                     border: 'none', fontFamily: 'Outfit, sans-serif',
-                    background: sortBy === opt.key ? '#0ABAB5' : 'rgba(255,255,255,0.08)',
-                    color: sortBy === opt.key ? '#080808' : 'rgba(255,255,255,0.7)',
+                    background: sortBy === opt.key ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
+                    color: sortBy === opt.key ? '#080808' : 'rgba(var(--fg-rgb),0.7)',
                   }}
                 >
                   {opt.label}
@@ -118,8 +118,8 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
           style={{
             flexShrink: 0, padding: '8px 16px', borderRadius: 20,
             border: 'none', fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
-            background: !activeCategory ? '#0ABAB5' : 'rgba(255,255,255,0.07)',
-            color: !activeCategory ? '#080808' : 'rgba(255,255,255,0.7)',
+            background: !activeCategory ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
+            color: !activeCategory ? '#080808' : 'rgba(var(--fg-rgb),0.7)',
           }}
         >
           {t('search.all')}
@@ -135,12 +135,12 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                 flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
                 padding: '8px 14px', borderRadius: 20, border: 'none',
                 fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
-                background: active ? '#0ABAB5' : 'rgba(255,255,255,0.07)',
-                color: active ? '#080808' : 'rgba(255,255,255,0.7)',
+                background: active ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
+                color: active ? '#080808' : 'rgba(var(--fg-rgb),0.7)',
                 transition: 'all 0.15s ease',
               }}
             >
-              <Icon size={14} color={active ? '#080808' : 'rgba(255,255,255,0.7)'} strokeWidth={1.8} />
+              <Icon size={14} color={active ? '#080808' : 'rgba(var(--fg-rgb),0.7)'} strokeWidth={1.8} />
               {categoryLabel(cat.key)}
             </button>
           )
@@ -149,7 +149,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
 
       {/* Results count */}
       <div style={{ padding: '0 20px 14px' }}>
-        <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+        <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>
           {t('search.found', { n: results.length })}
         </p>
       </div>
@@ -163,7 +163,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
             className="glass fade-up"
             style={{
               borderRadius: 20, overflow: 'hidden', cursor: 'pointer',
-              border: '1px solid rgba(255,255,255,0.08)',
+              border: '1px solid rgba(var(--fg-rgb),0.08)',
               padding: 0, textAlign: 'left', width: '100%',
               animationDelay: `${i * 0.05}s`,
               transition: 'transform 0.15s ease',
@@ -177,7 +177,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                 <img
                   src={sp.cover}
                   alt={sp.name}
-                  style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', background: '#111' }}
+                  style={{ width: '100%', height: 130, objectFit: 'cover', display: 'block', background: 'var(--surface)' }}
                 />
               ) : (
                 <div style={{ width: '100%', height: 130, background: 'linear-gradient(135deg, #0a2a29 0%, #0ABAB5 100%)' }} />
@@ -201,7 +201,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                     position: 'absolute', top: 10, left: 10,
                     background: 'rgba(10,186,181,0.2)', border: '1px solid rgba(10,186,181,0.4)',
                     borderRadius: 8, padding: '3px 8px', fontSize: 10, fontWeight: 700,
-                    color: '#0ABAB5',
+                    color: 'var(--accent-text)',
                   }}
                 >
                   {t('common.new')}
@@ -215,35 +215,35 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                 <img
                   src={sp.avatar}
                   alt={sp.name}
-                  style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '2px solid #0ABAB5', background: '#111' }}
+                  style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '2px solid #0ABAB5', background: 'var(--surface)' }}
                 />
                 {sp.available && (
                   <span style={{
                     position: 'absolute', bottom: 1, right: 1, width: 13, height: 13,
-                    borderRadius: '50%', background: '#4ade80', border: '2px solid #111',
+                    borderRadius: '50%', background: 'var(--ok)', border: '2px solid var(--surface)',
                   }} />
                 )}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                   <div>
-                    <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       {categoryLabel(sp.categoryKey)} · <MapPin size={11} strokeWidth={2} /> {sp.city}
                     </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0ABAB5' }}>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--accent-text)' }}>
                       {formatNumber(sp.price)}
                     </p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{t('common.uzs')}{t('common.perSession')}</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)' }}>{t('common.uzs')}{t('common.perSession')}</p>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                   <StarRating rating={sp.rating} />
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{t('search.reviewsCount', { n: sp.reviews })}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{t('search.projectsCount', { n: sp.projects })}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>{t('search.reviewsCount', { n: sp.reviews })}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>{t('search.projectsCount', { n: sp.projects })}</span>
                 </div>
 
                 {/* Tags */}
@@ -253,7 +253,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                       key={tag}
                       style={{
                         padding: '3px 8px', borderRadius: 6, fontSize: 10, fontWeight: 600,
-                        background: 'rgba(10,186,181,0.1)', color: '#0ABAB5',
+                        background: 'rgba(10,186,181,0.1)', color: 'var(--accent-text)',
                         border: '1px solid rgba(10,186,181,0.2)',
                       }}
                     >
@@ -268,8 +268,8 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
 
         {results.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <SearchX size={44} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15 }}>{t('search.empty')}</p>
+            <SearchX size={44} color="rgba(var(--fg-rgb),0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
+            <p style={{ color: 'rgba(var(--fg-rgb),0.5)', fontSize: 15 }}>{t('search.empty')}</p>
           </div>
         )}
       </div>

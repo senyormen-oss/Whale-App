@@ -60,7 +60,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             onClick={e => e.stopPropagation()}
             style={{
               width: '100%', maxWidth: 340, borderRadius: 22, padding: 22, textAlign: 'center',
-              background: '#111', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+              background: 'var(--surface)', border: '1px solid rgba(var(--fg-rgb),0.1)', boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
               transform: closing ? 'scale(0.94)' : 'scale(1)', transition: 'transform 0.18s ease',
               animation: 'popIn 0.28s cubic-bezier(.22,.68,0,1.2) both',
             }}
@@ -73,13 +73,13 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             </div>
             <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 800 }}>{options.title}</h2>
             {options.message && (
-              <p style={{ margin: '0 0 20px', fontSize: 13.5, lineHeight: 1.55, color: 'rgba(255,255,255,0.6)' }}>{options.message}</p>
+              <p style={{ margin: '0 0 20px', fontSize: 13.5, lineHeight: 1.55, color: 'rgba(var(--fg-rgb),0.6)' }}>{options.message}</p>
             )}
             <div style={{ display: 'flex', gap: 10, marginTop: options.message ? 0 : 18 }}>
               <button
                 autoFocus
                 onClick={() => close(false)}
-                style={{ flex: 1, padding: '12px 0', borderRadius: 14, border: 'none', background: 'rgba(255,255,255,0.08)', color: 'white', fontSize: 14, fontWeight: 700 }}
+                style={{ flex: 1, padding: '12px 0', borderRadius: 14, border: 'none', background: 'rgba(var(--fg-rgb),0.08)', color: 'var(--ink)', fontSize: 14, fontWeight: 700 }}
               >
                 {options.cancelLabel ?? t('common.cancel')}
               </button>
@@ -87,7 +87,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => close(true)}
                 style={{
                   flex: 1, padding: '12px 0', borderRadius: 14, border: 'none', fontSize: 14, fontWeight: 800,
-                  background: options.danger ? '#ff4d6d' : '#0ABAB5', color: options.danger ? 'white' : '#080808',
+                  background: options.danger ? '#ff4d6d' : '#0ABAB5', color: options.danger ? 'var(--ink)' : 'var(--bg)',
                 }}
               >
                 {options.confirmLabel ?? t('common.confirm')}

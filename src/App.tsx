@@ -39,7 +39,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
         className="glass-dark"
         style={{
           display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          padding: '10px 0 26px', borderTop: '1px solid rgba(255,255,255,0.07)',
+          padding: '10px 0 26px', borderTop: '1px solid rgba(var(--fg-rgb),0.07)',
           borderRadius: '24px 24px 0 0',
         }}
       >
@@ -61,7 +61,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
               <Icon
                 size={22}
                 strokeWidth={isActive ? 2.3 : 1.8}
-                color={isActive ? '#0ABAB5' : 'rgba(255,255,255,0.35)'}
+                color={isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.35)'}
                 style={{
                   transform: isActive ? 'scale(1.1)' : 'scale(1)',
                   transition: 'transform 0.2s ease',
@@ -69,7 +69,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
               />
               <span style={{
                 fontSize: 10, fontWeight: isActive ? 700 : 500,
-                color: isActive ? '#0ABAB5' : 'rgba(255,255,255,0.35)',
+                color: isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.35)',
                 transition: 'color 0.2s',
               }}>
                 {t(tab.label)}
@@ -80,7 +80,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
                   background: '#0ABAB5', borderRadius: '50%',
                   width: 16, height: 16, fontSize: 9, fontWeight: 900,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#080808', border: '2px solid #111',
+                  color: '#080808', border: '2px solid var(--surface)',
                 }}>
                   {unreadMessages}
                 </span>
@@ -97,9 +97,9 @@ function LoadingScreen() {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#080808',
+      background: 'var(--bg)',
     }}>
-      <Loader2 className="spin" size={30} color="#0ABAB5" strokeWidth={2} />
+      <Loader2 className="spin" size={30} color="var(--accent-text)" strokeWidth={2} />
     </div>
   )
 }
@@ -116,7 +116,7 @@ export default function App() {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#080808', color: '#ff4d6d', padding: 32, textAlign: 'center', fontSize: 14, flexDirection: 'column',
+        background: 'var(--bg)', color: '#ff4d6d', padding: 32, textAlign: 'center', fontSize: 14, flexDirection: 'column',
       }}>
         {t('app.loadFailed')}
         <button onClick={() => window.location.reload()} style={{ marginTop: 16, padding: '10px 20px', borderRadius: 12, border: 'none', background: '#0ABAB5', color: '#080808', fontWeight: 800 }}>{t('app.reload')}</button>
@@ -196,7 +196,7 @@ function AuthenticatedApp() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#030303',
+        background: 'var(--bg-outer)',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
@@ -218,8 +218,8 @@ function AuthenticatedApp() {
           maxWidth: 430,
           minHeight: '100vh',
           position: 'relative',
-          background: '#080808',
-          boxShadow: '0 0 80px rgba(0,0,0,0.8)',
+          background: 'var(--bg)',
+          boxShadow: 'var(--shell-shadow)',
           overflow: 'hidden',
         }}
       >

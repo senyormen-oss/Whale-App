@@ -27,7 +27,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const api = useMemo(() => ({ notify }), [notify])
 
-  const color = (k: ToastKind) => (k === 'error' ? '#ff4d6d' : k === 'success' ? '#4ade80' : '#0ABAB5')
+  const color = (k: ToastKind) => (k === 'error' ? '#ff4d6d' : k === 'success' ? 'var(--ok)' : '#0ABAB5')
 
   return (
     <ToastContext.Provider value={api}>
@@ -47,9 +47,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className="slide-down"
             style={{
               pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 10,
-              padding: '12px 14px', borderRadius: 14, background: 'rgba(16,16,16,0.97)',
+              padding: '12px 14px', borderRadius: 14, background: 'var(--sheet)',
               border: `1px solid ${color(t.kind)}55`, boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-              fontSize: 13, color: 'white',
+              fontSize: 13, color: 'var(--ink)',
             }}
           >
             {t.kind === 'success'
@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <button
               onClick={() => dismiss(t.id)}
               aria-label={translate('common.close')}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', display: 'flex', padding: 2 }}
+              style={{ background: 'none', border: 'none', color: 'rgba(var(--fg-rgb),0.5)', display: 'flex', padding: 2 }}
             >
               <X size={15} strokeWidth={2} />
             </button>

@@ -3,13 +3,15 @@ import { useAuth, validatePassword } from '../auth'
 import { useI18n } from '../i18n'
 import LanguageSwitcher from '../LanguageSwitcher'
 import Segmented from '../Segmented'
+import ThemeSwitcher from '../ThemeSwitcher'
+import { Checkbox } from '../Controls'
 import LegalScreen from './LegalScreen'
 import { Mail, Lock, User, ArrowUp, CheckCircle2, Eye, EyeOff, AlertCircle } from '../icons'
 
 type View = 'signin' | 'signup' | 'forgot' | 'confirm' | 'reset-sent'
 
 const inputStyle = {
-  flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'white',
+  flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)',
   fontSize: 16, fontFamily: 'Outfit, sans-serif',
 } as const
 
@@ -22,13 +24,13 @@ const primaryBtn = {
 } as const
 
 const linkBtn = {
-  background: 'none', border: 'none', color: '#0ABAB5', fontSize: 13, fontWeight: 700, padding: 0,
+  background: 'none', border: 'none', color: 'var(--accent-text)', fontSize: 13, fontWeight: 700, padding: 0,
   fontFamily: 'Outfit, sans-serif',
 } as const
 
 function Shell({ children, center }: { children: React.ReactNode; center?: boolean }) {
   return (
-    <div style={{ background: '#080808', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
       <div
         className="fade-in"
         style={{
@@ -52,7 +54,7 @@ function PasswordField({ value, onChange, placeholder, autoComplete }: {
   const [show, setShow] = useState(false)
   return (
     <div className="glass" style={fieldStyle}>
-      <Lock size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
+      <Lock size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -66,7 +68,7 @@ function PasswordField({ value, onChange, placeholder, autoComplete }: {
         type="button"
         onClick={() => setShow(s => !s)}
         aria-label={show ? t('auth.hidePassword') : t('auth.showPassword')}
-        style={{ background: 'none', border: 'none', padding: 4, color: 'rgba(255,255,255,0.5)', display: 'flex' }}
+        style={{ background: 'none', border: 'none', padding: 4, color: 'rgba(var(--fg-rgb),0.5)', display: 'flex' }}
       >
         {show ? <EyeOff size={17} strokeWidth={1.8} /> : <Eye size={17} strokeWidth={1.8} />}
       </button>
@@ -105,7 +107,7 @@ function NewPasswordForm() {
   return (
     <Shell>
       <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800 }}>{t('auth.newPassword')}</h1>
-      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>{t('auth.pw.hint')}</p>
+      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'rgba(var(--fg-rgb),0.5)' }}>{t('auth.pw.hint')}</p>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <PasswordField value={password} onChange={setPassword} placeholder={t('auth.newPasswordPlaceholder')} autoComplete="new-password" />
         <ErrorLine message={error} />
@@ -194,17 +196,17 @@ export default function AuthScreen() {
     return (
       <Shell center>
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(10,186,181,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-          <Mail size={26} color="#0ABAB5" strokeWidth={1.8} />
+          <Mail size={26} color="var(--accent-text)" strokeWidth={1.8} />
         </div>
         <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>{t('auth.checkEmail')}</h1>
-        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, maxWidth: 320 }}>
+        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(var(--fg-rgb),0.55)', lineHeight: 1.6, maxWidth: 320 }}>
           {isReset
-            ? <>{t('auth.resetSent')} <strong style={{ color: 'white' }}>{pendingEmail}</strong></>
-            : <>{t('auth.confirmSent')} <strong style={{ color: 'white' }}>{pendingEmail}</strong>. {t('auth.confirmThen')}</>}
+            ? <>{t('auth.resetSent')} <strong style={{ color: 'var(--ink)' }}>{pendingEmail}</strong></>
+            : <>{t('auth.confirmSent')} <strong style={{ color: 'var(--ink)' }}>{pendingEmail}</strong>. {t('auth.confirmThen')}</>}
         </p>
 
         {!isReset && (resendState === 'sent' ? (
-          <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#4ade80', margin: '0 0 20px' }}>
+          <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ok)', margin: '0 0 20px' }}>
             <CheckCircle2 size={15} strokeWidth={2} /> {t('auth.resent')}
           </p>
         ) : (
@@ -232,12 +234,13 @@ export default function AuthScreen() {
 
   return (
     <Shell>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+        <ThemeSwitcher compact />
         <LanguageSwitcher compact />
       </div>
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <h1 className="gradient-text floaty" style={{ margin: '0 0 6px', fontSize: 32, fontWeight: 900 }}>Whale</h1>
-        <p style={{ margin: 0, fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
+        <p style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),0.5)' }}>
           {view === 'forgot' ? t('auth.resetTitle') : t('auth.tagline')}
         </p>
       </div>
@@ -263,12 +266,12 @@ export default function AuthScreen() {
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {view === 'signup' && (
           <div className="glass fade-in" style={fieldStyle}>
-            <User size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
+            <User size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
             <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t('auth.fullName')} autoComplete="name" maxLength={100} style={inputStyle} />
           </div>
         )}
         <div className="glass" style={fieldStyle}>
-          <Mail size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
+          <Mail size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
           <input value={email} onChange={e => setEmail(e.target.value)} placeholder={t('auth.email')} type="email" autoComplete="email" inputMode="email" maxLength={254} style={inputStyle} />
         </div>
         {view !== 'forgot' && (
@@ -282,21 +285,13 @@ export default function AuthScreen() {
 
         {view === 'signup' && (
           <>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,0.4)' }}>{t('auth.pw.hint')}</p>
-            <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={agreed}
-                onChange={e => setAgreed(e.target.checked)}
-                style={{ width: 18, height: 18, marginTop: 1, accentColor: '#0ABAB5', flexShrink: 0 }}
-              />
-              <span>
-                {t('auth.agree1')}{' '}
-                <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.terms')}</button>
-                {' '}{t('auth.and')}{' '}
-                <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.privacy')}</button>.
-              </span>
-            </label>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('auth.pw.hint')}</p>
+            <Checkbox checked={agreed} onChange={setAgreed}>
+              {t('auth.agree1')}{' '}
+              <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.terms')}</button>
+              {' '}{t('auth.and')}{' '}
+              <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.privacy')}</button>.
+            </Checkbox>
           </>
         )}
 
@@ -319,10 +314,10 @@ export default function AuthScreen() {
       </form>
 
       {view !== 'signup' && (
-        <p style={{ margin: '24px 0 0', textAlign: 'center', fontSize: 11.5, color: 'rgba(255,255,255,0.3)' }}>
-          <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.termsShort')}</button>
+        <p style={{ margin: '24px 0 0', textAlign: 'center', fontSize: 11.5, color: 'rgba(var(--fg-rgb),0.3)' }}>
+          <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, color: 'rgba(var(--fg-rgb),0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.termsShort')}</button>
           {' · '}
-          <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.privacyShort')}</button>
+          <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, color: 'rgba(var(--fg-rgb),0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.privacyShort')}</button>
         </p>
       )}
     </Shell>

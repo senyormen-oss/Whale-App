@@ -16,7 +16,7 @@ interface Props {
 function StarPicker({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
-      <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{label}</span>
+      <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),0.7)' }}>{label}</span>
       <div style={{ display: 'flex', gap: 4 }} role="radiogroup" aria-label={label}>
         {[1, 2, 3, 4, 5].map(n => (
           <button
@@ -80,12 +80,12 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 430, borderRadius: '24px 24px 0 0', padding: '20px 20px 32px',
-          border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none', background: 'rgba(10,10,10,0.97)',
+          border: '1px solid rgba(var(--fg-rgb),0.1)', borderBottom: 'none', background: 'var(--sheet)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800 }}>{t('review.title', { name: specialistName })}</h2>
-          <button onClick={onClose} aria-label={t('common.close')} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={onClose} aria-label={t('common.close')} style={{ background: 'rgba(var(--fg-rgb),0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <X size={16} strokeWidth={2} />
           </button>
         </div>
@@ -102,8 +102,8 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
           rows={4}
           placeholder={t('review.placeholder')}
           style={{
-            width: '100%', marginTop: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 12, padding: '12px 14px', color: 'white', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical',
+            width: '100%', marginTop: 12, background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)',
+            borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical',
           }}
         />
 

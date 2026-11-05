@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CATEGORIES, categoryLabel } from '../data'
 import { useI18n } from '../i18n'
+import { Select } from '../Controls'
 import { useAuth } from '../auth'
 import { createSpecialistListing } from '../lib/queries'
 import type { Specialist, CategoryKey } from '../types'
@@ -11,11 +12,11 @@ interface Props {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 12, padding: '12px 14px', color: 'white', fontSize: 14, fontFamily: 'Outfit, sans-serif',
+  width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)',
+  borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif',
   outline: 'none',
 }
-const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 6, fontWeight: 600 }
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', marginBottom: 6, fontWeight: 600 }
 
 export default function BecomeSpecialistForm({ onCreated }: Props) {
   const { t } = useI18n()
@@ -77,21 +78,22 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
   return (
     <div className="glass fade-in" style={{ borderRadius: 20, padding: 20, border: '1px solid rgba(10,186,181,0.2)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        <Briefcase size={18} color="#0ABAB5" strokeWidth={2} />
+        <Briefcase size={18} color="var(--accent-text)" strokeWidth={2} />
         <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('form.title')}</h3>
       </div>
-      <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
+      <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(var(--fg-rgb),0.5)', lineHeight: 1.5 }}>
         {t('form.intro')}
       </p>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
           <label style={labelStyle}>{t('form.category')}</label>
-          <select value={categoryKey} onChange={e => setCategoryKey(e.target.value as CategoryKey)} style={{ ...inputStyle, appearance: 'auto' }}>
-            {CATEGORIES.map(c => (
-              <option key={c.key} value={c.key} style={{ background: '#111' }}>{categoryLabel(c.key)}</option>
-            ))}
-          </select>
+          <Select<CategoryKey>
+            value={categoryKey}
+            onChange={setCategoryKey}
+            ariaLabel={t('form.category')}
+            options={CATEGORIES.map(c => ({ value: c.key as CategoryKey, label: categoryLabel(c.key) }))}
+          />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -101,13 +103,13 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
           </div>
           <div>
             <label style={labelStyle}>{t('spec.stat.age')}</label>
-            <input value={age} onChange={e => setAge(e.target.value)} type="number" min={16} max={99} placeholder="25" style={inputStyle} />
+            <input value={age} onChange={e => setAge(e.target.value)} type="number" inputMode="numeric" min={16} max={99} placeholder="25" style={inputStyle} />
           </div>
         </div>
 
         <div>
           <label style={labelStyle}>{t('form.price')}</label>
-          <input value={price} onChange={e => setPrice(e.target.value)} type="number" min={0} step={1000} placeholder="250000" style={inputStyle} />
+          <input value={price} onChange={e => setPrice(e.target.value)} type="number" inputMode="numeric" min={0} step={1000} placeholder="250000" style={inputStyle} />
         </div>
 
         <div>

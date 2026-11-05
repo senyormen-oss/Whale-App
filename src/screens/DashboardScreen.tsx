@@ -8,6 +8,8 @@ import { useI18n, formatDate, formatNumber, monthName } from '../i18n'
 import { useConfirm } from '../confirm'
 import { categoryLabel, localizeService } from '../data'
 import LanguageSwitcher from '../LanguageSwitcher'
+import ThemeSwitcher from '../ThemeSwitcher'
+import UserAvatar from '../UserAvatar'
 import Segmented from '../Segmented'
 import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder, type InboxItem } from '../lib/queries'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
@@ -24,8 +26,8 @@ interface Props {
 
 const STATUS_CONFIG: Record<string, { label: Parameters<typeof import('../i18n').t>[0]; color: string; bg: string }> = {
   pending:   { label: 'status.pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
-  confirmed: { label: 'status.confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
-  completed: { label: 'status.done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
+  confirmed: { label: 'status.confirmed', color: 'var(--accent-text)', bg: 'rgba(10,186,181,0.12)' },
+  completed: { label: 'status.done',      color: 'var(--ok)', bg: 'rgba(74,222,128,0.12)' },
   cancelled: { label: 'status.cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
 }
 
@@ -35,20 +37,20 @@ function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; l
       className="glass"
       style={{
         borderRadius: 18, padding: '18px 16px',
-        border: accent ? '1px solid rgba(10,186,181,0.3)' : '1px solid rgba(255,255,255,0.08)',
+        border: accent ? '1px solid rgba(10,186,181,0.3)' : '1px solid rgba(var(--fg-rgb),0.08)',
         background: accent ? 'linear-gradient(135deg, rgba(10,186,181,0.1) 0%, rgba(10,186,181,0.03) 100%)' : undefined,
       }}
     >
       <div style={{
         width: 36, height: 36, borderRadius: 10, marginBottom: 10,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: accent ? 'rgba(10,186,181,0.15)' : 'rgba(255,255,255,0.06)',
+        background: accent ? 'rgba(10,186,181,0.15)' : 'rgba(var(--fg-rgb),0.06)',
       }}>
-        <Icon size={17} color={accent ? '#0ABAB5' : 'rgba(255,255,255,0.7)'} strokeWidth={1.8} />
+        <Icon size={17} color={accent ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.7)'} strokeWidth={1.8} />
       </div>
-      <p style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 900, color: accent ? '#0ABAB5' : 'white' }}>{value}</p>
-      <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{label}</p>
-      {sub && <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{sub}</p>}
+      <p style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 900, color: accent ? 'var(--accent-text)' : 'var(--ink)' }}>{value}</p>
+      <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)' }}>{label}</p>
+      {sub && <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>{sub}</p>}
     </div>
   )
 }
@@ -162,32 +164,27 @@ export default function DashboardScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
+    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Header */}
-      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
+      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
           <div style={{ position: 'relative' }}>
-            <div style={{
-              width: 64, height: 64, borderRadius: '50%', border: '2px solid #0ABAB5', background: 'rgba(10,186,181,0.12)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <User size={28} color="#0ABAB5" strokeWidth={1.8} />
-            </div>
-            <span style={{ position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: '#4ade80', border: '2px solid #080808' }} />
+            <UserAvatar size={64} editable />
+            <span style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'var(--ok)', border: '2px solid var(--bg)', pointerEvents: 'none' }} />
           </div>
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {(user?.user_metadata?.full_name as string) || t('dash.user')}
             </h1>
-            <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.email}
             </p>
           </div>
           <button
             onClick={() => setShowSettings(true)}
             aria-label={t('dash.settings')}
-            style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 12, padding: '8px 12px', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'rgba(var(--fg-rgb),0.07)', border: 'none', borderRadius: 12, padding: '8px 12px', color: 'rgba(var(--fg-rgb),0.7)', display: 'flex', alignItems: 'center' }}
           >
             <Settings size={19} strokeWidth={1.8} />
           </button>
@@ -202,6 +199,9 @@ export default function DashboardScreen({ onNavigate }: Props) {
             { value: 'specialist', label: t('dash.specialist') },
           ]}
         />
+        <p key={mode} className="fade-in" style={{ margin: '10px 4px 0', fontSize: 12, lineHeight: 1.5, color: 'rgba(var(--fg-rgb),0.5)' }}>
+          {mode === 'client' ? t('dash.clientHint') : t('dash.specialistHint')}
+        </p>
       </div>
 
       {mode === 'client' && (
@@ -220,7 +220,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>{t('dash.recentOrders')}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {orders.length === 0 && (
-                <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noOrders')}</p>
+                <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noOrders')}</p>
               )}
               {orders.map(order => {
                 const sp = specialists.find(s => s.id === order.specialistId)
@@ -234,21 +234,21 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     style={{
                       borderRadius: 18, padding: '14px 16px',
                       display: 'flex', gap: 12, alignItems: 'center',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      border: '1px solid rgba(var(--fg-rgb),0.08)',
                       textAlign: 'left', cursor: 'pointer',
                       transition: 'transform 0.15s',
                     }}
                     onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.01)')}
                     onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                   >
-                    <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
+                    <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: 'var(--surface)' }} />
                     <div style={{ flex: 1 }}>
-                      <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{localizeService(order.service)}</p>
-                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{formatDate(order.date)}</p>
+                      <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>{localizeService(order.service)}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)' }}>{formatDate(order.date)}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
+                      <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
                         {formatNumber(order.amount)}
                       </p>
                       <span style={{
@@ -267,14 +267,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
           {/* Analytics */}
           <div>
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <BarChart3 size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.analytics')}
+              <BarChart3 size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.analytics')}
             </h2>
             <div className="glass" style={{ borderRadius: 18, padding: 18 }}>
-              <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {t('dash.spendByMonth')}
               </p>
               {maxSpend === 0 && (
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noSpending')}</p>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noSpending')}</p>
               )}
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 80 }}>
                 {spendByMonth.map(m => (
@@ -287,7 +287,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                         transition: 'height 0.5s ease',
                       }}
                     />
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{m.label}</span>
+                    <span style={{ fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)' }}>{m.label}</span>
                   </div>
                 ))}
               </div>
@@ -300,7 +300,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               <Heart size={16} color="#ff4d6d" strokeWidth={2.2} /> {t('dash.favorites')}
             </h2>
             {favoriteSpecialists.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
+              <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>
                 {t('dash.noFavorites')}
               </p>
             ) : (
@@ -312,17 +312,17 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     style={{
                       flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
                       padding: '14px 16px', borderRadius: 18, border: 'none',
-                      background: 'rgba(255,255,255,0.05)', cursor: 'pointer', minWidth: 88,
+                      background: 'rgba(var(--fg-rgb),0.05)', cursor: 'pointer', minWidth: 88,
                       transition: 'transform 0.15s',
                     }}
                     onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.05)')}
                     onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
                   >
-                    <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
-                    <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'white', textAlign: 'center' }}>
+                    <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }} />
+                    <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }}>
                       {sp.name.split(' ')[0]}
                     </p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{categoryLabel(sp.categoryKey).split(' ')[0]}</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)' }}>{categoryLabel(sp.categoryKey).split(' ')[0]}</p>
                   </button>
                 ))}
               </div>
@@ -336,7 +336,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
 
           {myListing === undefined && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-              <Loader2 className="spin" size={26} color="#0ABAB5" strokeWidth={2} />
+              <Loader2 className="spin" size={26} color="var(--accent-text)" strokeWidth={2} />
             </div>
           )}
 
@@ -359,20 +359,20 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 onClick={toggleAvailability}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12, width: '100%',
-                  padding: '14px 16px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)',
-                  background: 'rgba(255,255,255,0.04)', cursor: 'pointer', textAlign: 'left',
+                  padding: '14px 16px', borderRadius: 16, border: '1px solid rgba(var(--fg-rgb),0.08)',
+                  background: 'rgba(var(--fg-rgb),0.04)', cursor: 'pointer', textAlign: 'left',
                 }}
               >
                 <span style={{
                   width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                  background: myListing.available ? '#4ade80' : 'rgba(255,255,255,0.3)',
+                  background: myListing.available ? 'var(--ok)' : 'rgba(var(--fg-rgb),0.3)',
                 }} />
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
                   {myListing.available ? t('chat.accepting') : t('chat.notAccepting')}
                 </span>
                 <span style={{
                   width: 40, height: 24, borderRadius: 12, position: 'relative',
-                  background: myListing.available ? '#0ABAB5' : 'rgba(255,255,255,0.15)', transition: 'background 0.2s',
+                  background: myListing.available ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.15)', transition: 'background 0.2s',
                 }}>
                   <span style={{
                     position: 'absolute', top: 3, left: myListing.available ? 19 : 3,
@@ -384,7 +384,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Client messages */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MessageSquareText size={16} color="#0ABAB5" strokeWidth={2} /> {t('chat.title')}
+                  <MessageSquareText size={16} color="var(--accent-text)" strokeWidth={2} /> {t('chat.title')}
                   {inboxUnread > 0 && (
                     <span style={{ background: '#0ABAB5', color: '#080808', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 800 }}>{inboxUnread}</span>
                   )}
@@ -395,32 +395,32 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Upcoming sessions */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Calendar size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.upcoming')}
+                  <Calendar size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.upcoming')}
                 </h2>
-                {ordersLoading && <Loader2 className="spin" size={18} color="#0ABAB5" strokeWidth={2} />}
+                {ordersLoading && <Loader2 className="spin" size={18} color="var(--accent-text)" strokeWidth={2} />}
                 {!ordersLoading && upcomingOrders.length === 0 && (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noUpcoming')}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noUpcoming')}</p>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {upcomingOrders.map(order => {
                     const [dayNum, monthDay] = formatDate(order.date).split(' ')
                     return (
-                      <div key={order.id} className="glass" style={{ borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div key={order.id} className="glass" style={{ borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'center', border: '1px solid rgba(var(--fg-rgb),0.08)' }}>
                         <div style={{
                           flexShrink: 0, textAlign: 'center', padding: '8px 10px', borderRadius: 12,
                           background: 'rgba(10,186,181,0.1)', border: '1px solid rgba(10,186,181,0.2)', minWidth: 52,
                         }}>
-                          <p style={{ margin: '0 0 1px', fontSize: 11, color: '#0ABAB5', fontWeight: 700 }}>{monthDay}</p>
-                          <p style={{ margin: '0 0 1px', fontSize: 16, fontWeight: 900, color: 'white' }}>{dayNum}</p>
-                          <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>{order.bookingSlot}</p>
+                          <p style={{ margin: '0 0 1px', fontSize: 11, color: 'var(--accent-text)', fontWeight: 700 }}>{monthDay}</p>
+                          <p style={{ margin: '0 0 1px', fontSize: 16, fontWeight: 900, color: 'var(--ink)' }}>{dayNum}</p>
+                          <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.45)' }}>{order.bookingSlot}</p>
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{localizeService(order.service)}</p>
+                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)' }}>{localizeService(order.service)}</p>
                         </div>
                         <button
                           onClick={() => handleMarkCompleted(order.id)}
-                          style={{ padding: '6px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(10,186,181,0.15)', color: '#0ABAB5', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                          style={{ padding: '6px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(10,186,181,0.15)', color: 'var(--accent-text)', border: 'none', cursor: 'pointer', flexShrink: 0 }}
                         >
                           {t('dash.markDone')}
                         </button>
@@ -433,19 +433,19 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Recent completed orders */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <TrendingUp size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.completed')}
+                  <TrendingUp size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.completed')}
                 </h2>
                 {myOrders.filter(o => o.status === 'completed').length === 0 ? (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noCompleted')}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noCompleted')}</p>
                 ) : (
                   <div className="glass" style={{ borderRadius: 18, padding: 4 }}>
                     {myOrders.filter(o => o.status === 'completed').map(order => (
-                      <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
                         <div>
                           <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{localizeService(order.service)} · {formatDate(order.date)}</p>
+                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)' }}>{localizeService(order.service)} · {formatDate(order.date)}</p>
                         </div>
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0ABAB5' }}>{formatNumber(order.amount)}</p>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatNumber(order.amount)}</p>
                       </div>
                     ))}
                   </div>
@@ -455,22 +455,22 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Profile completeness */}
               <div style={{ paddingBottom: 20 }}>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <User size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.profile')}
+                  <User size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.profile')}
                 </h2>
-                <div className="glass" style={{ borderRadius: 18, padding: 18, border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="glass" style={{ borderRadius: 18, padding: 18, border: '1px solid rgba(var(--fg-rgb),0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>{t('dash.completeness')}</p>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0ABAB5' }}>{completeness}%</p>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: 'var(--accent-text)' }}>{completeness}%</p>
                   </div>
-                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.1)', marginBottom: 14 }}>
+                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(var(--fg-rgb),0.1)', marginBottom: 14 }}>
                     <div style={{ width: `${completeness}%`, height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #0ABAB5, #08918d)' }} />
                   </div>
                   {profileChecklist.map(item => (
                     <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
-                      <span style={{ width: 20, height: 20, borderRadius: '50%', background: item.done ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {item.done && <CheckCircle2 size={13} color="#4ade80" strokeWidth={2.5} />}
+                      <span style={{ width: 20, height: 20, borderRadius: '50%', background: item.done ? 'rgba(74,222,128,0.2)' : 'rgba(var(--fg-rgb),0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {item.done && <CheckCircle2 size={13} color="var(--ok)" strokeWidth={2.5} />}
                       </span>
-                      <span style={{ fontSize: 13, color: item.done ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.4)' }}>{item.label}</span>
+                      <span style={{ fontSize: 13, color: item.done ? 'rgba(var(--fg-rgb),0.7)' : 'rgba(var(--fg-rgb),0.4)' }}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -492,8 +492,8 @@ export default function DashboardScreen({ onNavigate }: Props) {
             className="glass slide-up"
             style={{
               width: '100%', maxWidth: 430, borderRadius: '24px 24px 0 0',
-              padding: '20px 20px 40px', border: '1px solid rgba(255,255,255,0.1)', borderBottom: 'none',
-              background: 'rgba(10,10,10,0.97)',
+              padding: '20px 20px 40px', border: '1px solid rgba(var(--fg-rgb),0.1)', borderBottom: 'none',
+              background: 'var(--sheet)',
             }}
             onClick={e => e.stopPropagation()}
           >
@@ -502,15 +502,17 @@ export default function DashboardScreen({ onNavigate }: Props) {
               <button
                 onClick={() => setShowSettings(false)}
                 aria-label={t('common.close')}
-                style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                style={{ background: 'rgba(var(--fg-rgb),0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={16} strokeWidth={2} />
               </button>
             </div>
 
-            <div style={{ padding: '4px 0 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-              <p style={{ margin: '0 0 8px', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>{t('dash.language')}</p>
+            <div style={{ padding: '4px 0 16px', borderBottom: '1px solid rgba(var(--fg-rgb),0.08)' }}>
+              <p style={{ margin: '0 0 8px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600 }}>{t('dash.language')}</p>
               <LanguageSwitcher />
+              <p style={{ margin: '14px 0 8px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600 }}>{t('dash.theme')}</p>
+              <ThemeSwitcher />
             </div>
 
             <button
@@ -518,14 +520,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                 padding: '14px 4px', background: 'none', border: 'none',
-                borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
+                borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
               }}
             >
-              <Bell size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
-              <span style={{ flex: 1, fontSize: 14, color: 'white' }}>{t('home.notifications')}</span>
+              <Bell size={17} color="rgba(var(--fg-rgb),0.7)" strokeWidth={1.8} />
+              <span style={{ flex: 1, fontSize: 14, color: 'var(--ink)' }}>{t('home.notifications')}</span>
               <span style={{
                 width: 40, height: 24, borderRadius: 12, position: 'relative',
-                background: notificationsEnabled ? '#0ABAB5' : 'rgba(255,255,255,0.15)', transition: 'background 0.2s',
+                background: notificationsEnabled ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.15)', transition: 'background 0.2s',
               }}>
                 <span style={{
                   position: 'absolute', top: 3, left: notificationsEnabled ? 19 : 3,
@@ -541,11 +543,11 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                   padding: '14px 4px', background: 'none', border: 'none',
-                  borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
+                  borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
                 }}
               >
-                <FileText size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
-                <span style={{ fontSize: 14, color: 'white' }}>{doc === 'terms' ? t('legal.terms') : t('legal.privacy')}</span>
+                <FileText size={17} color="rgba(var(--fg-rgb),0.7)" strokeWidth={1.8} />
+                <span style={{ fontSize: 14, color: 'var(--ink)' }}>{doc === 'terms' ? t('legal.terms') : t('legal.privacy')}</span>
               </button>
             ))}
 
@@ -554,11 +556,11 @@ export default function DashboardScreen({ onNavigate }: Props) {
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                 padding: '14px 4px', background: 'none', border: 'none',
-                borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
+                borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
               }}
             >
-              <LogOut size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
-              <span style={{ fontSize: 14, color: 'white' }}>{t('dash.signOut')}</span>
+              <LogOut size={17} color="rgba(var(--fg-rgb),0.7)" strokeWidth={1.8} />
+              <span style={{ fontSize: 14, color: 'var(--ink)' }}>{t('dash.signOut')}</span>
             </button>
 
             <button

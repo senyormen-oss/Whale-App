@@ -31,7 +31,7 @@ export default function LanguageSwitcher({ compact = false }: { compact?: boolea
           style={{
             position: 'relative', flex: 1, padding: compact ? '6px 0' : '9px 0', border: 'none', background: 'transparent',
             fontSize: compact ? 12 : 13, fontWeight: 800, letterSpacing: '0.03em',
-            color: lang === l.code ? '#080808' : 'rgba(255,255,255,0.55)', transition: 'color 0.25s ease',
+            color: lang === l.code ? '#080808' : 'rgba(var(--fg-rgb),0.55)', transition: 'color 0.25s ease',
           }}
         >
           {l.label}

@@ -37,10 +37,10 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
   }, [load])
 
   if (items === null) {
-    return <Loader2 className="spin" size={18} color="#0ABAB5" strokeWidth={2} />
+    return <Loader2 className="spin" size={18} color="var(--accent-text)" strokeWidth={2} />
   }
   if (items.length === 0) {
-    return <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('inbox.empty')}</p>
+    return <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('inbox.empty')}</p>
   }
 
   return (
@@ -52,21 +52,21 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
           className="glass"
           style={{
             display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 16,
-            border: '1px solid rgba(255,255,255,0.08)', textAlign: 'left', cursor: 'pointer', width: '100%',
+            border: '1px solid rgba(var(--fg-rgb),0.08)', textAlign: 'left', cursor: 'pointer', width: '100%',
           }}
         >
           <div style={{
             width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'rgba(10,186,181,0.15)',
-            color: '#0ABAB5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15,
+            color: 'var(--accent-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15,
           }}>
             {item.clientName.charAt(0).toUpperCase()}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.clientName}</p>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>{item.lastTime}</span>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.clientName}</p>
+              <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)', flexShrink: 0 }}>{item.lastTime}</span>
             </div>
-            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {localizeSystemMessage(item.lastMessage) || t('inbox.noMessages')}
             </p>
           </div>
@@ -152,28 +152,28 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
   }
 
   return (
-    <div style={{ background: '#080808', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div className="glass-dark" style={{ padding: '52px 20px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+    <div style={{ background: 'var(--bg)', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div className="glass-dark" style={{ padding: '52px 20px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
             onClick={onBack}
             aria-label={t('common.back')}
-            style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 36, height: 36, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ background: 'rgba(var(--fg-rgb),0.08)', border: 'none', borderRadius: '50%', width: 36, height: 36, color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <ArrowLeft size={16} strokeWidth={2} />
           </button>
           <div>
             <p style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{clientName}</p>
-            <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{t('common.client')}</p>
+            <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)' }}>{t('common.client')}</p>
           </div>
         </div>
       </div>
 
       <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {loading && <Loader2 className="spin" size={20} color="#0ABAB5" strokeWidth={2} style={{ alignSelf: 'center' }} />}
+        {loading && <Loader2 className="spin" size={20} color="var(--accent-text)" strokeWidth={2} style={{ alignSelf: 'center' }} />}
         {!loading && messages.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
-            <MessageSquareText size={32} color="rgba(255,255,255,0.2)" strokeWidth={1.5} style={{ marginBottom: 8 }} />
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),0.35)', fontSize: 13 }}>
+            <MessageSquareText size={32} color="rgba(var(--fg-rgb),0.2)" strokeWidth={1.5} style={{ marginBottom: 8 }} />
             <p style={{ margin: 0 }}>{t('inbox.noMessages')}</p>
           </div>
         )}
@@ -182,14 +182,14 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
           return (
             <div key={msg.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start' }}>
               <div style={{
-                maxWidth: '75%', padding: msg.type === 'image' ? 6 : '10px 14px', fontSize: 14, lineHeight: 1.5, color: 'white',
+                maxWidth: '75%', padding: msg.type === 'image' ? 6 : '10px 14px', fontSize: 14, lineHeight: 1.5, color: 'var(--ink)',
                 borderRadius: mine ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: mine ? 'linear-gradient(135deg, #0ABAB5 0%, #08918d 100%)' : 'rgba(255,255,255,0.08)',
+                background: mine ? 'linear-gradient(135deg, #0ABAB5 0%, #08918d 100%)' : 'rgba(var(--fg-rgb),0.08)',
               }}>
                 {msg.type === 'image' && msg.image
                   ? <img src={msg.image} alt="Attachment" style={{ width: '100%', maxWidth: 220, borderRadius: 12, display: 'block' }} />
                   : <p style={{ margin: 0, overflowWrap: 'anywhere' }}>{localizeSystemMessage(msg.text)}</p>}
-                <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : '4px 0 0', fontSize: 10, textAlign: 'right', color: mine ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.35)' }}>{msg.time}</p>
+                <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : '4px 0 0', fontSize: 10, textAlign: 'right', color: mine ? 'rgba(0,0,0,0.45)' : 'rgba(var(--fg-rgb),0.35)' }}>{msg.time}</p>
               </div>
             </div>
           )
@@ -201,7 +201,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
         <button
           onClick={() => fileRef.current?.click()}
           aria-label={t('chat.photo')}
-          style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '50%', width: 44, height: 44, color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+          style={{ background: 'rgba(var(--fg-rgb),0.07)', border: 'none', borderRadius: '50%', width: 44, height: 44, color: 'rgba(var(--fg-rgb),0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <ImageIcon size={18} strokeWidth={1.8} />
         </button>
@@ -213,7 +213,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             maxLength={4000}
             placeholder={t('inbox.reply')}
-            style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif' }}
+            style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif' }}
           />
         </div>
         <button
@@ -222,7 +222,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
           aria-label={t('chat.send')}
           style={{
             width: 48, height: 48, borderRadius: '50%', border: 'none', flexShrink: 0,
-            background: input.trim() ? '#0ABAB5' : 'rgba(255,255,255,0.08)', color: input.trim() ? '#080808' : 'rgba(255,255,255,0.3)',
+            background: input.trim() ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)', color: input.trim() ? '#080808' : 'rgba(var(--fg-rgb),0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >
