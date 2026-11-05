@@ -10,6 +10,7 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
 }) {
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
+  const [openUp, setOpenUp] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const listId = useId()
   const current = options.find(o => o.value === value)
@@ -28,6 +29,9 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
   }, [open])
 
   function openList() {
+    // The fixed bottom navigation covers ~110px; open upwards when the list would be hidden behind it.
+    const rect = rootRef.current?.getBoundingClientRect()
+    if (rect) setOpenUp(window.innerHeight - rect.bottom - 110 < 270 && rect.top > 280)
     setActive(Math.max(0, options.findIndex(o => o.value === value)))
     setOpen(true)
   }
@@ -75,7 +79,8 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
           role="listbox"
           className="select-list"
           style={{
-            position: 'absolute', zIndex: 60, left: 0, right: 0, top: 'calc(100% + 6px)', margin: 0, padding: 6,
+            position: 'absolute', zIndex: 60, left: 0, right: 0, margin: 0, padding: 6,
+            ...(openUp ? { bottom: 'calc(100% + 6px)', transformOrigin: 'bottom center' } : { top: 'calc(100% + 6px)' }),
             listStyle: 'none', maxHeight: 260, overflowY: 'auto', borderRadius: 14,
             background: 'var(--sheet)', border: '1px solid rgba(var(--fg-rgb),0.12)', boxShadow: '0 16px 40px rgba(0,0,0,0.35)',
           }}
