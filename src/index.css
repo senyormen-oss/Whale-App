@@ -8,22 +8,23 @@
 /* ---- Theme tokens. Dark is the original look; light is applied via <html data-theme="light"> ---- */
 :root, :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #080808;
-  --bg-rgb: 8,8,8;
-  --bg-outer: #030303;
-  --bg-header: #0f1410;
-  --surface: #111111;
-  --sheet: rgba(10,10,10,0.97);
+  --bg: #0E1618;
+  --bg-rgb: 14,22,24;
+  --bg-outer: #091012;
+  --bg-header: #143134;
+  --surface: #172528;
+  --sheet: rgba(19,31,34,0.97);
+  --shell-glow: radial-gradient(120% 55% at 50% -8%, rgba(10,186,181,0.20), transparent 62%), radial-gradient(70% 38% at 108% 42%, rgba(10,186,181,0.07), transparent 70%);
   --fg-rgb: 255,255,255;
   --ink: #ffffff;
   --accent-text: #0ABAB5;
   --ok: #4ade80;
-  --glass-bg: rgba(255,255,255,0.05);
-  --glass-border: rgba(255,255,255,0.08);
-  --glass-dark-bg: rgba(8,8,8,0.96);
-  --glass-dark-border: rgba(255,255,255,0.07);
-  --shell-shadow: 0 0 80px rgba(0,0,0,0.8);
-  --card-shadow: none;
+  --glass-bg: rgba(255,255,255,0.065);
+  --glass-border: rgba(255,255,255,0.11);
+  --glass-dark-bg: rgba(15,25,27,0.94);
+  --glass-dark-border: rgba(255,255,255,0.09);
+  --shell-shadow: 0 0 80px rgba(0,0,0,0.7);
+  --card-shadow: 0 6px 20px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.05);
   --nav-shadow: 0 -10px 30px rgba(0,0,0,0.45);
   --tb: 1;
 }
@@ -32,6 +33,7 @@
   color-scheme: light;
   --bg: #F3F7F7;
   --bg-rgb: 243,247,247;
+  --shell-glow: radial-gradient(120% 50% at 50% -6%, rgba(10,186,181,0.16), transparent 62%), radial-gradient(70% 36% at 108% 45%, rgba(10,186,181,0.07), transparent 70%);
   --bg-outer: #E3EAEA;
   --bg-header: #C8EBE8;
   --surface: #FFFFFF;
@@ -259,3 +261,17 @@ body { font-weight: 450; letter-spacing: 0.005em; }
 :root[data-theme='light'] input::placeholder, :root[data-theme='light'] textarea::placeholder { color: rgba(12,28,28,0.42); }
 
 :focus-visible { outline: 2px solid rgba(10,186,181,0.7); outline-offset: 2px; border-radius: 10px; }
+/* Availability indicator: soft pulsing ring */
+@keyframes onlinePing {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }
+  70%  { box-shadow: 0 0 0 7px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+.online-dot { animation: onlinePing 2.2s ease-out infinite; }
+
+/* "NEW" badge: solid, readable on any cover photo */
+.badge-new {
+  background: linear-gradient(135deg, #fff 0%, #e6fbfa 100%);
+  color: #067A76;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}

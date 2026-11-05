@@ -219,6 +219,7 @@ function AuthenticatedApp() {
           minHeight: '100vh',
           position: 'relative',
           background: 'var(--bg)',
+          backgroundImage: 'var(--shell-glow)',
           boxShadow: 'var(--shell-shadow)',
           overflow: 'hidden',
         }}

@@ -3,7 +3,7 @@ import { CATEGORIES, categoryLabel } from '../data'
 import type { Screen, CategoryKey } from '../types'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatNumber } from '../i18n'
-import { CATEGORY_ICONS, Search, BadgeCheck, Star, SlidersHorizontal, SearchX, MapPin } from '../icons'
+import { CATEGORY_ICONS, Search, BadgeCheck, Star, SlidersHorizontal, SearchX, MapPin, Sparkles } from '../icons'
 
 interface Props {
   initialCategory?: CategoryKey
@@ -49,10 +49,10 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
   }, [specialists, query, activeCategory, sortBy, lang])
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
+    <div style={{ minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Header */}
-      <div style={{ padding: '56px 20px 16px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
+      <div style={{ padding: '56px 20px 16px', background: 'linear-gradient(180deg, var(--bg-header) 0%, transparent 100%)' }}>
         <h1 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 800 }}>{t('search.title')}</h1>
         <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 16 }}>
           <Search size={16} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
@@ -197,13 +197,13 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
               )}
               {sp.isNew && (
                 <div
+                  className="badge-new"
                   style={{
-                    position: 'absolute', top: 10, left: 10,
-                    background: 'rgba(10,186,181,0.2)', border: '1px solid rgba(10,186,181,0.4)',
-                    borderRadius: 8, padding: '3px 8px', fontSize: 10, fontWeight: 700,
-                    color: 'var(--accent-text)',
+                    position: 'absolute', top: 10, left: 10, borderRadius: 8, padding: '3px 9px',
+                    fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', display: 'flex', alignItems: 'center', gap: 4,
                   }}
                 >
+                  <Sparkles size={11} strokeWidth={2.4} />
                   {t('common.new')}
                 </div>
               )}
@@ -218,7 +218,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                   style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '2px solid #0ABAB5', background: 'var(--surface)' }}
                 />
                 {sp.available && (
-                  <span style={{
+                  <span className="online-dot" style={{
                     position: 'absolute', bottom: 1, right: 1, width: 13, height: 13,
                     borderRadius: '50%', background: 'var(--ok)', border: '2px solid var(--surface)',
                   }} />

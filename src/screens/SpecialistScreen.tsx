@@ -57,7 +57,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
   }
 
   if (!sp) return (
-    <div style={{ background: 'var(--bg)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink)' }}>
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ink)' }}>
       {t('spec.notFound')}
     </div>
   )
@@ -68,7 +68,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
   const LevelIcon = LEVEL_ICONS[sp.level].icon
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
+    <div style={{ minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Hero */}
       <div style={{ position: 'relative' }}>
@@ -147,7 +147,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover', border: '3px solid #0ABAB5', background: 'var(--surface)', flexShrink: 0 }}
               />
               {sp.available && (
-                <span style={{
+                <span className="online-dot" style={{
                   position: 'absolute', bottom: 3, right: 3,
                   width: 14, height: 14, borderRadius: '50%',
                   background: 'var(--ok)', border: '2px solid var(--bg)',

@@ -30,7 +30,7 @@ const linkBtn = {
 
 function Shell({ children, center }: { children: React.ReactNode; center?: boolean }) {
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', justifyContent: 'center' }}>
       <div
         className="fade-in"
         style={{

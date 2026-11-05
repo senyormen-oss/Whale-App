@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CATEGORIES, categoryLabel } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
@@ -6,7 +6,7 @@ import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatNumber } from '../i18n'
 import UserAvatar from '../UserAvatar'
-import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase } from '../icons'
+import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase, X } from '../icons'
 
 function greetingKey() {
   const h = new Date().getHours()
@@ -44,6 +44,13 @@ export default function HomeScreen({ onNavigate }: Props) {
   const { user } = useAuth()
   const firstName = ((user?.user_metadata?.full_name as string) || '').trim().split(' ')[0] || t('home.there')
 
+  useEffect(() => {
+    if (!showNotifications) return
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setShowNotifications(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showNotifications])
+
   const featured = specialists.filter(s => s.reviews > 0).sort((a, b) => b.rating - a.rating).slice(0, 5)
   const newOnes  = specialists.filter(s => s.isNew).slice(0, 4)
   const unreadConversations = conversations.filter(c => c.unread > 0)
@@ -61,10 +68,10 @@ export default function HomeScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
+    <div style={{ minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Header */}
-      <div style={{ padding: '56px 20px 24px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
+      <div style={{ padding: '56px 20px 24px', background: 'linear-gradient(180deg, var(--bg-header) 0%, transparent 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
             <p style={{ color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
@@ -95,7 +102,14 @@ export default function HomeScreen({ onNavigate }: Props) {
 
             {showNotifications && (
               <div
-                className="glass fade-in"
+                aria-hidden
+                onClick={() => setShowNotifications(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 199 }}
+              />
+            )}
+            {showNotifications && (
+              <div
+                className="glass pop-in"
                 style={{
                   position: 'absolute', top: 52, right: 0, width: 280, zIndex: 200,
                   borderRadius: 16, border: '1px solid rgba(var(--fg-rgb),0.1)',
@@ -103,8 +117,15 @@ export default function HomeScreen({ onNavigate }: Props) {
                   background: 'var(--sheet)',
                 }}
               >
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(var(--fg-rgb),0.08)' }}>
+                <div style={{ padding: '10px 10px 10px 16px', borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{t('home.notifications')}</p>
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    aria-label={t('common.close')}
+                    style={{ width: 28, height: 28, borderRadius: '50%', border: 'none', background: 'rgba(var(--fg-rgb),0.08)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <X size={14} strokeWidth={2.2} />
+                  </button>
                 </div>
                 {unreadConversations.length === 0 ? (
                   <div style={{ padding: '24px 16px', textAlign: 'center' }}>
@@ -372,7 +393,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   style={{ width: 54, height: 54, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }}
                 />
                 {sp.available && (
-                  <span style={{
+                  <span className="online-dot" style={{
                     position: 'absolute', bottom: 1, right: 1,
                     width: 13, height: 13, borderRadius: '50%',
                     background: 'var(--ok)', border: '2px solid var(--bg)',

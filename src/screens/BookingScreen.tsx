@@ -175,7 +175,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   if (booked) {
     return (
       <div style={{
-        background: 'var(--bg)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
         flexDirection: 'column', gap: 16, padding: 32, textAlign: 'center',
       }}>
         <div className="slide-up" style={{ marginBottom: 8 }}>
@@ -196,10 +196,10 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 120 }}>
+    <div style={{ minHeight: '100%', paddingBottom: 120 }}>
 
       {/* Header */}
-      <div style={{ padding: '52px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
+      <div style={{ padding: '52px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, transparent 100%)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
           <button
             onClick={onBack}

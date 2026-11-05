@@ -52,8 +52,8 @@ export default function BookingsScreen({ onNavigate }: Props) {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
-      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
+    <div style={{ minHeight: '100%', paddingBottom: 100 }}>
+      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, transparent 100%)' }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{t('bookings.title')}</h1>
       </div>
 

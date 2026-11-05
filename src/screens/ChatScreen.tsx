@@ -23,8 +23,8 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
   const { specialists } = useSpecialists()
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100%', paddingBottom: 100 }}>
-      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
+    <div style={{ minHeight: '100%', paddingBottom: 100 }}>
+      <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, var(--bg-header) 0%, transparent 100%)' }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{t('chat.title')}</h1>
       </div>
 
@@ -148,7 +148,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
   if (!sp) return null
 
   return (
-    <div style={{ background: 'var(--bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
 
       {/* Header */}
       <div className="glass-dark" style={{ padding: '52px 20px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
@@ -167,7 +167,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           <div style={{ position: 'relative' }}>
             <img src={sp.avatar} alt={sp.name} style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }} />
             {sp.available && (
-              <span style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: 'var(--ok)', border: '2px solid var(--surface)' }} />
+              <span className="online-dot" style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: 'var(--ok)', border: '2px solid var(--surface)' }} />
             )}
           </div>
           <div style={{ flex: 1 }}>

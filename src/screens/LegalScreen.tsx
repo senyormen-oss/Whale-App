@@ -9,8 +9,8 @@ export default function LegalScreen({ doc, onBack }: { doc: 'terms' | 'privacy';
   const title = doc === 'terms' ? t('legal.terms') : t('legal.privacy')
 
   return (
-    <div className="fade-in" style={{ background: 'var(--bg)', minHeight: '100vh', paddingBottom: 48 }}>
-      <div style={{ padding: '52px 20px 16px', display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
+    <div className="fade-in" style={{ minHeight: '100vh', paddingBottom: 48 }}>
+      <div style={{ padding: '52px 20px 16px', display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(180deg, var(--bg-header) 0%, transparent 100%)' }}>
         <button
           onClick={onBack}
           aria-label={t('common.back')}

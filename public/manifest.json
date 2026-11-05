@@ -4,7 +4,7 @@
   "description": "Find and book top digital specialists for your brand",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#080808",
+  "background_color": "#0E1618",
   "theme_color": "#0ABAB5",
   "orientation": "portrait",
   "icons": [
