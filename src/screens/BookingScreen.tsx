@@ -3,6 +3,7 @@ import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
 import { useSpecialists } from '../specialistsData'
+import { useI18n, formatDate, formatNumber, monthName, weekdayLabels } from '../i18n'
 import { fetchBookedSlotsInRange } from '../lib/queries'
 import { isClickConfigured, isPaymeConfigured, buildClickPaymentUrl, buildPaymePaymentUrl } from '../lib/payments'
 import { ArrowLeft, ChevronLeft, ChevronRight, CreditCard, Wallet, Landmark, Lock, PartyPopper, AlertCircle, SUBSCRIPTION_ICONS } from '../icons'
@@ -13,8 +14,6 @@ interface Props {
   onBack: () => void
 }
 
-const DAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 const PAYMENT_METHODS = [
   { id: 'click',   label: 'Click',     icon: CreditCard, color: '#1B9CF0' },
@@ -28,6 +27,7 @@ function pad2(n: number) {
 }
 
 export default function BookingScreen({ specialistId, onNavigate, onBack }: Props) {
+  const { t } = useI18n()
   const { specialists } = useSpecialists()
   const sp = specialists.find(s => s.id === specialistId)
   const { confirmBooking, createPendingOrder } = useAppStore()
@@ -112,7 +112,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   }
 
   const sub = plans.find(s => s.id === selectedSub) ?? plans[0]
-  const dateLabel = selectedDay ? `${MONTH_NAMES[viewMonth].slice(0, 3)} ${selectedDay}, ${viewYear}` : '—'
+  const dateLabel = selectedDay ? formatDate(new Date(viewYear, viewMonth, selectedDay)) : '—'
   const dateKey = selectedDay ? dayKey(selectedDay) : ''
   const takenSlotsForSelectedDay = selectedDay ? (bookedByDate[dateKey] ?? []) : []
   const availableSlots = AVAILABLE_SLOTS.filter(slot => !takenSlotsForSelectedDay.includes(slot))
@@ -131,7 +131,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         specialistId,
         dateKey,
         slot: selectedSlot,
-        serviceName: sub.name,
+        serviceName: sub.canonical,
         amount: sub.price,
       })
       setConfirming(false)
@@ -155,7 +155,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       specialistId,
       dateKey,
       slot: selectedSlot,
-      serviceName: sub.name,
+      serviceName: sub.canonical,
       amount: sub.price,
     })
     setConfirming(false)
@@ -182,14 +182,14 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
           <PartyPopper size={64} color="#0ABAB5" strokeWidth={1.5} />
         </div>
         <h2 className="slide-up gradient-text" style={{ margin: 0, fontSize: 28, fontWeight: 900, animationDelay: '0.1s' }}>
-          Booking Confirmed!
+          {t('book.confirmed')}
         </h2>
         <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6, animationDelay: '0.2s' }}>
-          Your session with <strong style={{ color: 'white' }}>{sp.name}</strong> is booked for<br />
+          {t('book.sessionWith')} <strong style={{ color: 'white' }}>{sp.name}</strong><br />
           <strong style={{ color: '#0ABAB5' }}>{dateLabel}, {selectedSlot}</strong>
         </p>
         <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)', animationDelay: '0.3s' }}>
-          Opening chat...
+          {t('book.openingChat')}
         </p>
       </div>
     )
@@ -203,6 +203,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
           <button
             onClick={onBack}
+            aria-label={t('common.back')}
             style={{
               background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%',
               width: 40, height: 40, color: 'white',
@@ -212,8 +213,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             <ArrowLeft size={18} strokeWidth={2} />
           </button>
           <div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>Book a Session</h1>
-            <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>with {sp.name}</p>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{t('book.title')}</h1>
+            <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>{t('book.with', { name: sp.name })}</p>
           </div>
         </div>
 
@@ -245,7 +246,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 {i + 1}
               </div>
               <span style={{ fontSize: 12, color: step === s ? 'white' : 'rgba(255,255,255,0.4)', fontWeight: step === s ? 600 : 400 }}>
-                {s === 'date' ? 'Date & Time' : s === 'sub' ? 'Service' : 'Payment'}
+                {s === 'date' ? t('book.step.date') : s === 'sub' ? t('book.step.service') : t('book.step.payment')}
               </span>
               {i < 2 && <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 14 }}>›</span>}
             </div>
@@ -271,7 +272,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 <ChevronLeft size={20} strokeWidth={2} />
               </button>
               <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                {MONTH_NAMES[viewMonth]} {viewYear}
+                {monthName(viewMonth)} {viewYear}
                 {slotsLoading && <span className="spin" style={{ display: 'inline-block', width: 12, height: 12, border: '2px solid rgba(10,186,181,0.3)', borderTopColor: '#0ABAB5', borderRadius: '50%' }} />}
               </h3>
               <button
@@ -287,7 +288,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
 
             {/* Day headers */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8 }}>
-              {DAYS.map(d => (
+              {weekdayLabels().map(d => (
                 <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.35)', padding: '4px 0' }}>
                   {d}
                 </div>
@@ -325,8 +326,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
 
             <div style={{ display: 'flex', gap: 14, marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
               {[
-                { color: '#0ABAB5', label: 'Available' },
-                { color: 'rgba(255,255,255,0.15)', label: 'Busy' },
+                { color: '#0ABAB5', label: t('book.available') },
+                { color: 'rgba(255,255,255,0.15)', label: t('book.busy') },
               ].map(item => (
                 <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 10, height: 10, borderRadius: 3, background: item.color }} />
@@ -340,11 +341,11 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
           {selectedDay && (
             <div className="slide-up">
               <h3 style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 700 }}>
-                Available times — {dateLabel}
+                {t('book.times', { date: dateLabel })}
               </h3>
               {availableSlots.length === 0 && (
                 <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-                  All slots on this day are already booked. Pick another date.
+                  {t('book.allBooked')}
                 </p>
               )}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
@@ -372,7 +373,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Service */}
       {step === 'sub' && (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }} className="fade-in">
-          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Choose your plan</p>
+          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{t('book.choosePlan')}</p>
           {plans.map(s => {
             const SubIcon = SUBSCRIPTION_ICONS[s.level]
             return (
@@ -398,7 +399,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                   background: '#0ABAB5', color: '#080808',
                   fontSize: 10, fontWeight: 800, padding: '3px 10px', borderRadius: '0 0 8px 8px',
                 }}>
-                  POPULAR
+                  {t('book.popular')}
                 </div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -416,9 +417,9 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: selectedSub === s.id ? '#0ABAB5' : 'white' }}>
-                  {new Intl.NumberFormat().format(s.price)}
+                  {formatNumber(s.price)}
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>UZS</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{t('common.uzs')}</p>
               </div>
             </button>
           )})}
@@ -428,7 +429,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Payment */}
       {step === 'pay' && (
         <div style={{ padding: '0 20px' }} className="fade-in">
-          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Payment method</p>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{t('book.paymentMethod')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
             {PAYMENT_METHODS.map(pm => {
               const PmIcon = pm.icon
@@ -452,7 +453,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                       position: 'absolute', top: 8, right: 8, fontSize: 8, fontWeight: 800,
                       color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase',
                     }}>
-                      Demo
+                      {t('book.demo')}
                     </span>
                   )}
                   <PmIcon size={22} color={selectedPayment === pm.id ? '#0ABAB5' : pm.color} strokeWidth={1.8} />
@@ -464,12 +465,12 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
 
           {/* Order summary */}
           <div className="glass" style={{ borderRadius: 18, padding: 18, marginBottom: 16 }}>
-            <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700 }}>Order Summary</h3>
+            <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700 }}>{t('book.summary')}</h3>
             {[
-              { label: 'Specialist', value: sp.name },
-              { label: 'Date', value: dateLabel },
-              { label: 'Time', value: selectedSlot ?? '—' },
-              { label: 'Service', value: sub.name },
+              { label: t('book.specialist'), value: sp.name },
+              { label: t('book.date'), value: dateLabel },
+              { label: t('book.time'), value: selectedSlot ?? '—' },
+              { label: t('book.service'), value: sub.name },
             ].map(row => (
               <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{row.label}</span>
@@ -477,7 +478,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 0', marginTop: 4 }}>
-              <span style={{ fontSize: 15, fontWeight: 700 }}>Total</span>
+              <span style={{ fontSize: 15, fontWeight: 700 }}>{t('book.total')}</span>
               <span style={{ fontSize: 18, fontWeight: 900, color: '#0ABAB5' }}>{formatPrice(sub.price)}</span>
             </div>
           </div>
@@ -486,8 +487,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             <Lock size={12} style={{ flexShrink: 0, marginTop: 2 }} strokeWidth={2} />
             <span>
               {useRealGateway
-                ? `You'll be redirected to ${selectedPayment === 'click' ? 'Click' : 'Payme'} to complete payment securely.`
-                : 'Demo mode: no real charge happens. Payment is simulated as held by Whale until the session is completed.'}
+                ? t('book.redirectNote', { provider: selectedPayment === 'click' ? 'Click' : 'Payme' })
+                : t('book.demoNote')}
             </span>
           </p>
 
@@ -526,7 +527,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               transition: 'all 0.2s',
             }}
           >
-            {selectedDay && selectedSlot ? `Continue — ${dateLabel}, ${selectedSlot}` : 'Select a date & time'}
+            {selectedDay && selectedSlot ? t('book.continueDate', { date: `${dateLabel}, ${selectedSlot}` }) : t('book.selectDate')}
           </button>
         )}
         {step === 'sub' && (
@@ -537,7 +538,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               className="tiffany-glow"
               style={{ flex: 1, padding: '16px', borderRadius: 18, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif' }}
             >
-              Continue — {formatPrice(sub.price)}
+              {t('book.continuePrice', { price: formatPrice(sub.price) })}
             </button>
           </div>
         )}
@@ -555,10 +556,10 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               }}
             >
               {confirming
-                ? (useRealGateway ? 'Redirecting…' : 'Confirming…')
+                ? (useRealGateway ? t('book.redirecting') : t('book.confirming'))
                 : useRealGateway
-                  ? `Continue to ${selectedPayment === 'click' ? 'Click' : 'Payme'} →`
-                  : `Pay ${formatPrice(sub.price)} → (demo)`}
+                  ? t('book.continueTo', { provider: selectedPayment === 'click' ? 'Click' : 'Payme' })
+                  : t('book.payDemo', { price: formatPrice(sub.price) })}
             </button>
           </div>
         )}

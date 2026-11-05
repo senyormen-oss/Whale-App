@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../auth'
 import { useToast } from '../toast'
 import { createReview } from '../lib/queries'
+import { useI18n } from '../i18n'
 import { Star, X } from '../icons'
 
 interface Props {
@@ -23,11 +24,11 @@ function StarPicker({ label, value, onChange }: { label: string; value: number; 
             type="button"
             role="radio"
             aria-checked={value === n}
-            aria-label={`${n} star${n > 1 ? 's' : ''}`}
+            aria-label={`${n} / 5`}
             onClick={() => onChange(n)}
             style={{ background: 'none', border: 'none', padding: 2, display: 'flex' }}
           >
-            <Star size={22} color="#FFD700" fill={n <= value ? '#FFD700' : 'none'} strokeWidth={1.8} />
+            <Star size={22} color="#FFD700" fill={n <= value ? '#FFD700' : 'none'} strokeWidth={1.8} style={{ transition: 'fill 0.2s ease', transform: n <= value ? 'scale(1.08)' : 'scale(1)' }} />
           </button>
         ))}
       </div>
@@ -36,6 +37,7 @@ function StarPicker({ label, value, onChange }: { label: string; value: number; 
 }
 
 export default function ReviewModal({ orderId, specialistId, specialistName, onClose, onSubmitted }: Props) {
+  const { t } = useI18n()
   const { user } = useAuth()
   const { notify } = useToast()
   const [rating, setRating] = useState(5)
@@ -49,17 +51,17 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
     if (!user || busy) return
     const trimmed = text.trim()
     if (trimmed.length < 5) {
-      notify('Please write a few words about your experience.')
+      notify(t('review.tooShort'))
       return
     }
     setBusy(true)
     try {
       await createReview(user.id, { orderId, specialistId, rating, quality, timing, communication, text: trimmed })
-      notify('Thank you — your review is published.', 'success')
+      notify(t('review.thanks'), 'success')
       onSubmitted()
     } catch (err) {
       const code = (err as { code?: string }).code
-      notify(code === '23505' ? 'You have already reviewed this order.' : 'Could not publish your review. Please try again.')
+      notify(code === '23505' ? t('review.already') : t('review.failed'))
     } finally {
       setBusy(false)
     }
@@ -73,7 +75,7 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
       <div
         role="dialog"
         aria-modal="true"
-        aria-label={`Review ${specialistName}`}
+        aria-label={t('review.title', { name: specialistName })}
         className="glass slide-up"
         onClick={e => e.stopPropagation()}
         style={{
@@ -82,23 +84,23 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800 }}>Review {specialistName}</h2>
-          <button onClick={onClose} aria-label="Close" style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800 }}>{t('review.title', { name: specialistName })}</h2>
+          <button onClick={onClose} aria-label={t('common.close')} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <X size={16} strokeWidth={2} />
           </button>
         </div>
 
-        <StarPicker label="Overall" value={rating} onChange={setRating} />
-        <StarPicker label="Quality" value={quality} onChange={setQuality} />
-        <StarPicker label="Timing" value={timing} onChange={setTiming} />
-        <StarPicker label="Communication" value={communication} onChange={setCommunication} />
+        <StarPicker label={t('review.overall')} value={rating} onChange={setRating} />
+        <StarPicker label={t('review.quality')} value={quality} onChange={setQuality} />
+        <StarPicker label={t('review.timing')} value={timing} onChange={setTiming} />
+        <StarPicker label={t('review.communication')} value={communication} onChange={setCommunication} />
 
         <textarea
           value={text}
           onChange={e => setText(e.target.value)}
           maxLength={1500}
           rows={4}
-          placeholder="How was your experience?"
+          placeholder={t('review.placeholder')}
           style={{
             width: '100%', marginTop: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 12, padding: '12px 14px', color: 'white', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical',
@@ -115,7 +117,7 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
             opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
           }}
         >
-          {busy ? 'Publishing…' : 'Publish review'}
+          {busy ? t('review.publishing') : t('review.publish')}
         </button>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { CATEGORIES } from '../data'
+import { CATEGORIES, categoryLabel } from '../data'
+import { useI18n } from '../i18n'
 import { useAuth } from '../auth'
 import { createSpecialistListing } from '../lib/queries'
 import type { Specialist, CategoryKey } from '../types'
@@ -17,6 +18,7 @@ const inputStyle: React.CSSProperties = {
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(255,255,255,0.5)', marginBottom: 6, fontWeight: 600 }
 
 export default function BecomeSpecialistForm({ onCreated }: Props) {
+  const { t } = useI18n()
   const { user } = useAuth()
   const [categoryKey, setCategoryKey] = useState<CategoryKey>(CATEGORIES[0].key)
   const [city, setCity] = useState('')
@@ -35,12 +37,20 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
     const ageNum = Number(age)
     const priceNum = Number(price)
     if (!city.trim() || !bio.trim() || !ageNum || !priceNum) {
-      setError('Please fill in all fields.')
+      setError(t('auth.fillAll'))
+      return
+    }
+    if (ageNum < 16 || ageNum > 99) {
+      setError(t('form.ageRange'))
+      return
+    }
+    if (priceNum < 1000 || priceNum > 100_000_000) {
+      setError(t('form.priceRange'))
       return
     }
 
     const category = CATEGORIES.find(c => c.key === categoryKey)!
-    const fullName = (user.user_metadata?.full_name as string) || user.email || 'Specialist'
+    const fullName = (user.user_metadata?.full_name as string) || user.email || t('dash.specialist')
     const avatar = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}&backgroundColor=0ABAB5`
 
     setBusy(true)
@@ -53,12 +63,12 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
         age: ageNum,
         price: priceNum,
         bio: bio.trim(),
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
         avatar,
       })
       onCreated(specialist)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create your listing.')
+      setError(t('form.failed'))
     } finally {
       setBusy(false)
     }
@@ -68,46 +78,46 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
     <div className="glass fade-in" style={{ borderRadius: 20, padding: 20, border: '1px solid rgba(10,186,181,0.2)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
         <Briefcase size={18} color="#0ABAB5" strokeWidth={2} />
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>Become a Specialist</h3>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('form.title')}</h3>
       </div>
       <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5 }}>
-        Fill this in once — it creates your public listing, bookable by any client on Whale.
+        {t('form.intro')}
       </p>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div>
-          <label style={labelStyle}>Category</label>
+          <label style={labelStyle}>{t('form.category')}</label>
           <select value={categoryKey} onChange={e => setCategoryKey(e.target.value as CategoryKey)} style={{ ...inputStyle, appearance: 'auto' }}>
             {CATEGORIES.map(c => (
-              <option key={c.key} value={c.key} style={{ background: '#111' }}>{c.label}</option>
+              <option key={c.key} value={c.key} style={{ background: '#111' }}>{categoryLabel(c.key)}</option>
             ))}
           </select>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div>
-            <label style={labelStyle}>City</label>
-            <input value={city} onChange={e => setCity(e.target.value)} placeholder="Tashkent" style={inputStyle} />
+            <label style={labelStyle}>{t('form.city')}</label>
+            <input value={city} onChange={e => setCity(e.target.value)} placeholder={t('form.cityPlaceholder')} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Age</label>
+            <label style={labelStyle}>{t('spec.stat.age')}</label>
             <input value={age} onChange={e => setAge(e.target.value)} type="number" min={16} max={99} placeholder="25" style={inputStyle} />
           </div>
         </div>
 
         <div>
-          <label style={labelStyle}>Price per session (UZS)</label>
+          <label style={labelStyle}>{t('form.price')}</label>
           <input value={price} onChange={e => setPrice(e.target.value)} type="number" min={0} step={1000} placeholder="250000" style={inputStyle} />
         </div>
 
         <div>
-          <label style={labelStyle}>Bio</label>
-          <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="What you do, your experience, equipment, style…" style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, sans-serif' }} />
+          <label style={labelStyle}>{t('form.bio')}</label>
+          <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder={t('form.bioPlaceholder')} maxLength={1000} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, sans-serif' }} />
         </div>
 
         <div>
-          <label style={labelStyle}>Skills / tags (comma separated)</label>
-          <input value={tags} onChange={e => setTags(e.target.value)} placeholder="Reels, Branding, Studio" style={inputStyle} />
+          <label style={labelStyle}>{t('form.tags')}</label>
+          <input value={tags} onChange={e => setTags(e.target.value)} placeholder={t('form.tagsPlaceholder')} style={inputStyle} />
         </div>
 
         {error && (
@@ -126,7 +136,7 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
             opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
           }}
         >
-          {busy ? 'Creating…' : 'Create My Listing'}
+          {busy ? t('form.creating') : t('form.create')}
         </button>
       </form>
     </div>

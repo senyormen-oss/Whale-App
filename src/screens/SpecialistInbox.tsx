@@ -7,6 +7,7 @@ import {
   type InboxItem,
 } from '../lib/queries'
 import type { Message } from '../types'
+import { useI18n, localizeSystemMessage } from '../i18n'
 import { ArrowLeft, ArrowUp, ImageIcon, MessageSquareText, Loader2 } from '../icons'
 
 /** List of client conversations on the specialist's own listing. */
@@ -15,6 +16,7 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
   onOpen: (item: InboxItem) => void
   onUnreadChange?: (count: number) => void
 }) {
+  const { t } = useI18n()
   const [items, setItems] = useState<InboxItem[] | null>(null)
 
   const load = useCallback(() => {
@@ -38,7 +40,7 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
     return <Loader2 className="spin" size={18} color="#0ABAB5" strokeWidth={2} />
   }
   if (items.length === 0) {
-    return <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No messages from clients yet.</p>
+    return <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('inbox.empty')}</p>
   }
 
   return (
@@ -65,7 +67,7 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>{item.lastTime}</span>
             </div>
             <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {item.lastMessage || 'No messages yet'}
+              {localizeSystemMessage(item.lastMessage) || t('inbox.noMessages')}
             </p>
           </div>
           {item.unread > 0 && (
@@ -88,6 +90,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
   clientName: string
   onBack: () => void
 }) {
+  const { t } = useI18n()
   const { user } = useAuth()
   const { notify } = useToast()
   const [messages, setMessages] = useState<Message[]>([])
@@ -123,7 +126,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
       load()
     } catch (err) {
       console.error('Failed to send', err)
-      notify('Message was not sent. Please try again.')
+      notify(t('err.messageNotSent'))
     } finally {
       setSending(false)
     }
@@ -144,7 +147,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
       const url = await uploadChatImage(file, user.id)
       await send(file.name, url)
     } catch (err) {
-      notify(err instanceof Error ? err.message : 'Failed to upload the photo.')
+      notify(err instanceof Error ? err.message : t('err.upload'))
     }
   }
 
@@ -154,14 +157,14 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
             onClick={onBack}
-            aria-label="Back"
+            aria-label={t('common.back')}
             style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 36, height: 36, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             <ArrowLeft size={16} strokeWidth={2} />
           </button>
           <div>
             <p style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{clientName}</p>
-            <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>Client</p>
+            <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{t('common.client')}</p>
           </div>
         </div>
       </div>
@@ -171,7 +174,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
         {!loading && messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
             <MessageSquareText size={32} color="rgba(255,255,255,0.2)" strokeWidth={1.5} style={{ marginBottom: 8 }} />
-            <p style={{ margin: 0 }}>No messages yet.</p>
+            <p style={{ margin: 0 }}>{t('inbox.noMessages')}</p>
           </div>
         )}
         {messages.map(msg => {
@@ -185,7 +188,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
               }}>
                 {msg.type === 'image' && msg.image
                   ? <img src={msg.image} alt="Attachment" style={{ width: '100%', maxWidth: 220, borderRadius: 12, display: 'block' }} />
-                  : <p style={{ margin: 0, overflowWrap: 'anywhere' }}>{msg.text}</p>}
+                  : <p style={{ margin: 0, overflowWrap: 'anywhere' }}>{localizeSystemMessage(msg.text)}</p>}
                 <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : '4px 0 0', fontSize: 10, textAlign: 'right', color: mine ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.35)' }}>{msg.time}</p>
               </div>
             </div>
@@ -197,7 +200,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
       <div style={{ padding: '8px 20px 28px', display: 'flex', gap: 10, alignItems: 'center' }}>
         <button
           onClick={() => fileRef.current?.click()}
-          aria-label="Send a photo"
+          aria-label={t('chat.photo')}
           style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '50%', width: 44, height: 44, color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <ImageIcon size={18} strokeWidth={1.8} />
@@ -209,14 +212,14 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             maxLength={4000}
-            placeholder="Reply to client…"
+            placeholder={t('inbox.reply')}
             style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif' }}
           />
         </div>
         <button
           onClick={handleSend}
           disabled={!input.trim() || sending}
-          aria-label="Send"
+          aria-label={t('chat.send')}
           style={{
             width: 48, height: 48, borderRadius: '50%', border: 'none', flexShrink: 0,
             background: input.trim() ? '#0ABAB5' : 'rgba(255,255,255,0.08)', color: input.trim() ? '#080808' : 'rgba(255,255,255,0.3)',

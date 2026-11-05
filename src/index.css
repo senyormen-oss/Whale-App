@@ -82,6 +82,40 @@ button:disabled { cursor: not-allowed; }
 }
 input:focus-visible { outline: none; }
 
+@keyframes screenEnter {
+  from { opacity: 0; transform: translateY(14px) scale(0.995); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes softPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+.screen-enter { animation: screenEnter 0.38s cubic-bezier(.22,.68,0,1) both; }
+.pop-in       { animation: popIn 0.3s cubic-bezier(.22,.68,0,1.2) both; }
+.floaty       { animation: floaty 3.2s ease-in-out infinite; }
+
+/* Cards lift a little on hover (devices with a real pointer only) */
+@media (hover: hover) {
+  .glass[role="button"]:hover, button.glass:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(10,186,181,0.25);
+  }
+}
+
+html { scroll-behavior: smooth; }
+img { transition: opacity 0.3s ease; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

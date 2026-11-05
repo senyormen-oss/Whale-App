@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
-import { CATEGORIES } from '../data'
+import { CATEGORIES, categoryLabel } from '../data'
 import type { Screen, CategoryKey } from '../types'
 import { useSpecialists } from '../specialistsData'
+import { useI18n, formatNumber } from '../i18n'
 import { CATEGORY_ICONS, Search, BadgeCheck, Star, SlidersHorizontal, SearchX, MapPin } from '../icons'
 
 interface Props {
@@ -20,6 +21,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function SearchScreen({ initialCategory, initialQuery, onNavigate }: Props) {
+  const { t, lang } = useI18n()
   const [query, setQuery] = useState(initialQuery ?? '')
   const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(initialCategory ?? null)
   const [sortBy, setSortBy] = useState<'rating' | 'price_low' | 'price_high' | 'projects'>('rating')
@@ -34,7 +36,8 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       list = list.filter(s =>
         s.name.toLowerCase().includes(q) ||
         s.category.toLowerCase().includes(q) ||
-        s.tags.some(t => t.toLowerCase().includes(q))
+        categoryLabel(s.categoryKey).toLowerCase().includes(q) ||
+        s.tags.some(tag => tag.toLowerCase().includes(q))
       )
     }
     switch (sortBy) {
@@ -43,20 +46,20 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       case 'price_high': return list.sort((a, b) => b.price - a.price)
       case 'projects':   return list.sort((a, b) => b.projects - a.projects)
     }
-  }, [specialists, query, activeCategory, sortBy])
+  }, [specialists, query, activeCategory, sortBy, lang])
 
   return (
     <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
 
       {/* Header */}
       <div style={{ padding: '56px 20px 16px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
-        <h1 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 800 }}>Find Specialists</h1>
+        <h1 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 800 }}>{t('search.title')}</h1>
         <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 16 }}>
           <Search size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Name, skill, category..."
+            placeholder={t('search.placeholder')}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif',
@@ -73,7 +76,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
             }}
           >
             <SlidersHorizontal size={13} strokeWidth={2} />
-            Filters
+            {t('search.filters')}
           </button>
         </div>
       </div>
@@ -82,13 +85,13 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       {showFilters && (
         <div style={{ padding: '0 20px 16px' }} className="fade-in">
           <div className="glass" style={{ borderRadius: 16, padding: '14px 16px' }}>
-            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sort by</p>
+            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('search.sortBy')}</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {[
-                { key: 'rating', label: 'Rating' },
-                { key: 'price_low', label: 'Price ↑' },
-                { key: 'price_high', label: 'Price ↓' },
-                { key: 'projects', label: 'Projects' },
+                { key: 'rating', label: t('search.sort.rating') },
+                { key: 'price_low', label: t('search.sort.priceLow') },
+                { key: 'price_high', label: t('search.sort.priceHigh') },
+                { key: 'projects', label: t('search.sort.projects') },
               ].map(opt => (
                 <button
                   key={opt.key}
@@ -119,7 +122,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
             color: !activeCategory ? '#080808' : 'rgba(255,255,255,0.7)',
           }}
         >
-          All
+          {t('search.all')}
         </button>
         {CATEGORIES.map(cat => {
           const Icon = CATEGORY_ICONS[cat.key]
@@ -138,7 +141,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
               }}
             >
               <Icon size={14} color={active ? '#080808' : 'rgba(255,255,255,0.7)'} strokeWidth={1.8} />
-              {cat.label}
+              {categoryLabel(cat.key)}
             </button>
           )
         })}
@@ -147,7 +150,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       {/* Results count */}
       <div style={{ padding: '0 20px 14px' }}>
         <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-          {results.length} specialists found
+          {t('search.found', { n: results.length })}
         </p>
       </div>
 
@@ -189,7 +192,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                     color: '#080808', display: 'flex', alignItems: 'center', gap: 4,
                   }}
                 >
-                  <BadgeCheck size={12} strokeWidth={2.5} /> VERIFIED
+                  <BadgeCheck size={12} strokeWidth={2.5} /> {t('common.verified')}
                 </div>
               )}
               {sp.isNew && (
@@ -201,7 +204,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                     color: '#0ABAB5',
                   }}
                 >
-                  NEW
+                  {t('common.new')}
                 </div>
               )}
             </div>
@@ -226,21 +229,21 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                   <div>
                     <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'white' }}>{sp.name}</p>
                     <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      {sp.category} · <MapPin size={11} strokeWidth={2} /> {sp.city}
+                      {categoryLabel(sp.categoryKey)} · <MapPin size={11} strokeWidth={2} /> {sp.city}
                     </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0ABAB5' }}>
-                      {new Intl.NumberFormat().format(sp.price)}
+                      {formatNumber(sp.price)}
                     </p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>UZS/session</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{t('common.uzs')}{t('common.perSession')}</p>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                   <StarRating rating={sp.rating} />
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{sp.reviews} reviews</span>
-                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{sp.projects} projects</span>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{t('search.reviewsCount', { n: sp.reviews })}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{t('search.projectsCount', { n: sp.projects })}</span>
                 </div>
 
                 {/* Tags */}
@@ -266,7 +269,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
         {results.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
             <SearchX size={44} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15 }}>No specialists found.<br />Try a different search.</p>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 15 }}>{t('search.empty')}</p>
           </div>
         )}
       </div>

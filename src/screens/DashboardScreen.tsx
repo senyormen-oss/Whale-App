@@ -4,6 +4,11 @@ import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { useToast } from '../toast'
+import { useI18n, formatDate, formatNumber, monthName } from '../i18n'
+import { useConfirm } from '../confirm'
+import { categoryLabel, localizeService } from '../data'
+import LanguageSwitcher from '../LanguageSwitcher'
+import Segmented from '../Segmented'
 import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder, type InboxItem } from '../lib/queries'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
 import { SpecialistInbox, SpecialistChatThread } from './SpecialistInbox'
@@ -17,11 +22,11 @@ interface Props {
   onNavigate: (screen: Screen) => void
 }
 
-const STATUS_CONFIG = {
-  pending:   { label: 'Pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
-  confirmed: { label: 'Confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
-  completed: { label: 'Done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
-  cancelled: { label: 'Cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
+const STATUS_CONFIG: Record<string, { label: Parameters<typeof import('../i18n').t>[0]; color: string; bg: string }> = {
+  pending:   { label: 'status.pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
+  confirmed: { label: 'status.confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
+  completed: { label: 'status.done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
+  cancelled: { label: 'status.cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
 }
 
 function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; label: string; value: string; sub?: string; accent?: boolean }) {
@@ -49,6 +54,8 @@ function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; l
 }
 
 export default function DashboardScreen({ onNavigate }: Props) {
+  const { t } = useI18n()
+  const confirm = useConfirm()
   const [mode, setMode] = useState<'client' | 'specialist'>('client')
   const [showSettings, setShowSettings] = useState(false)
   const { orders, favorites, notificationsEnabled, toggleNotifications, deleteAccount } = useAppStore()
@@ -68,7 +75,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
     const amount = orders
       .filter(o => o.status !== 'cancelled' && o.rawDate?.startsWith(key))
       .reduce((sum, o) => sum + o.amount, 0)
-    return { key, label: d.toLocaleDateString('en', { month: 'short' }), amount, current: i === 4 }
+    return { key, label: monthName(d.getMonth()).slice(0, 3), amount, current: i === 4 }
   })
   const maxSpend = Math.max(...spendByMonth.map(m => m.amount))
   const totalSpent = orders.reduce((sum, o) => sum + o.amount, 0)
@@ -110,10 +117,10 @@ export default function DashboardScreen({ onNavigate }: Props) {
     try {
       await markOrderCompleted(orderId)
       setMyOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: 'completed' } : o)))
-      notify('Session marked as completed.', 'success')
+      notify(t('toast.sessionDone'), 'success')
     } catch (err) {
       console.error('Failed to mark order completed', err)
-      notify('Could not update this session. Please try again.')
+      notify(t('err.updateSession'))
     }
   }
 
@@ -127,7 +134,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
     } catch (err) {
       console.error('Failed to update availability', err)
       setMyListing({ ...myListing, available: !next })
-      notify('Could not change your availability. Please try again.')
+      notify(t('err.availability'))
     }
   }
 
@@ -136,10 +143,10 @@ export default function DashboardScreen({ onNavigate }: Props) {
   const clientCount = new Set(myOrders.map(o => o.clientName)).size
   const profileChecklist = myListing
     ? [
-        { label: 'Bio description', done: myListing.bio.trim().length > 0 },
-        { label: 'Price set', done: myListing.price > 0 },
-        { label: 'Skills / tags added', done: myListing.tags.length > 0 },
-        { label: 'City set', done: myListing.city.trim().length > 0 },
+        { label: t('dash.check.bio'), done: myListing.bio.trim().length > 0 },
+        { label: t('dash.check.price'), done: myListing.price > 0 },
+        { label: t('dash.check.skills'), done: myListing.tags.length > 0 },
+        { label: t('dash.check.city'), done: myListing.city.trim().length > 0 },
       ]
     : []
   const completeness = profileChecklist.length
@@ -171,7 +178,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
           </div>
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {(user?.user_metadata?.full_name as string) || 'Whale user'}
+              {(user?.user_metadata?.full_name as string) || t('dash.user')}
             </h1>
             <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.email}
@@ -179,6 +186,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
           </div>
           <button
             onClick={() => setShowSettings(true)}
+            aria-label={t('dash.settings')}
             style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: 12, padding: '8px 12px', color: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center' }}
           >
             <Settings size={19} strokeWidth={1.8} />
@@ -186,29 +194,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
         </div>
 
         {/* Mode toggle */}
-        <div className="glass" style={{ borderRadius: 14, padding: 4, display: 'flex' }}>
-          {(['client', 'specialist'] as const).map(m => {
-            const ModeIcon = m === 'client' ? User : Briefcase
-            return (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-                  fontSize: 13, fontWeight: 700, fontFamily: 'Outfit, sans-serif',
-                  background: mode === m ? '#0ABAB5' : 'transparent',
-                  color: mode === m ? '#080808' : 'rgba(255,255,255,0.45)',
-                  transition: 'all 0.2s',
-                  textTransform: 'capitalize',
-                }}
-              >
-                <ModeIcon size={15} strokeWidth={2} />
-                {m === 'client' ? 'Client' : 'Specialist'}
-              </button>
-            )
-          })}
-        </div>
+        <Segmented<'client' | 'specialist'>
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'client', label: t('dash.client') },
+            { value: 'specialist', label: t('dash.specialist') },
+          ]}
+        />
       </div>
 
       {mode === 'client' && (
@@ -216,18 +209,18 @@ export default function DashboardScreen({ onNavigate }: Props) {
 
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-            <StatCard icon={ClipboardList} label="Total Orders" value={String(orders.length)} accent />
-            <StatCard icon={Wallet} label="Total Spent" value={(totalSpent / 1_000_000).toFixed(2) + 'M'} sub="UZS" />
-            <StatCard icon={CheckCircle2} label="Completed" value={String(completedCount)} />
-            <StatCard icon={Heart} label="Favorites" value={String(favorites.length)} />
+            <StatCard icon={ClipboardList} label={t('dash.totalOrders')} value={String(orders.length)} accent />
+            <StatCard icon={Wallet} label={t('dash.totalSpent')} value={(totalSpent / 1_000_000).toFixed(2) + 'M'} sub={t('common.uzs')} />
+            <StatCard icon={CheckCircle2} label={t('dash.completed')} value={String(completedCount)} />
+            <StatCard icon={Heart} label={t('dash.favorites')} value={String(favorites.length)} />
           </div>
 
           {/* Recent orders */}
           <div>
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>Recent Orders</h2>
+            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>{t('dash.recentOrders')}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {orders.length === 0 && (
-                <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No orders yet.</p>
+                <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noOrders')}</p>
               )}
               {orders.map(order => {
                 const sp = specialists.find(s => s.id === order.specialistId)
@@ -251,18 +244,18 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
                     <div style={{ flex: 1 }}>
                       <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{order.service}</p>
-                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{order.date}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{localizeService(order.service)}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{formatDate(order.date)}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
-                        {new Intl.NumberFormat().format(order.amount)}
+                        {formatNumber(order.amount)}
                       </p>
                       <span style={{
                         padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700,
                         background: status.bg, color: status.color,
                       }}>
-                        {status.label}
+                        {t(status.label)}
                       </span>
                     </div>
                   </button>
@@ -274,14 +267,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
           {/* Analytics */}
           <div>
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <BarChart3 size={16} color="#0ABAB5" strokeWidth={2} /> Analytics
+              <BarChart3 size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.analytics')}
             </h2>
             <div className="glass" style={{ borderRadius: 18, padding: 18 }}>
               <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Spend by month
+                {t('dash.spendByMonth')}
               </p>
               {maxSpend === 0 && (
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>No spending yet.</p>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noSpending')}</p>
               )}
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 80 }}>
                 {spendByMonth.map(m => (
@@ -304,11 +297,11 @@ export default function DashboardScreen({ onNavigate }: Props) {
           {/* Favorites */}
           <div style={{ paddingBottom: 20 }}>
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Heart size={16} color="#ff4d6d" strokeWidth={2.2} /> Favorites
+              <Heart size={16} color="#ff4d6d" strokeWidth={2.2} /> {t('dash.favorites')}
             </h2>
             {favoriteSpecialists.length === 0 ? (
               <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
-                No favorites yet — tap the heart on a specialist's profile to save them here.
+                {t('dash.noFavorites')}
               </p>
             ) : (
               <div className="hide-scrollbar" style={{ display: 'flex', gap: 12, overflowX: 'auto' }}>
@@ -329,7 +322,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'white', textAlign: 'center' }}>
                       {sp.name.split(' ')[0]}
                     </p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{sp.category.split(' ')[0]}</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{categoryLabel(sp.categoryKey).split(' ')[0]}</p>
                   </button>
                 ))}
               </div>
@@ -355,10 +348,10 @@ export default function DashboardScreen({ onNavigate }: Props) {
             <>
               {/* Stats */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                <StatCard icon={Wallet} label="Total Income" value={(totalIncome / 1_000_000).toFixed(2) + 'M'} sub="UZS, completed orders" accent />
-                <StatCard icon={ClipboardList} label="Active Orders" value={String(upcomingOrders.length)} />
-                <StatCard icon={Star} label="My Rating" value={myListing.reviews > 0 ? myListing.rating.toFixed(1) : '—'} />
-                <StatCard icon={Users} label="Clients" value={String(clientCount)} />
+                <StatCard icon={Wallet} label={t('dash.totalIncome')} value={(totalIncome / 1_000_000).toFixed(2) + 'M'} sub={t('dash.incomeSub')} accent />
+                <StatCard icon={ClipboardList} label={t('dash.activeOrders')} value={String(upcomingOrders.length)} />
+                <StatCard icon={Star} label={t('dash.myRating')} value={myListing.reviews > 0 ? myListing.rating.toFixed(1) : '—'} />
+                <StatCard icon={Users} label={t('dash.clients')} value={String(clientCount)} />
               </div>
 
               {/* Availability toggle */}
@@ -375,7 +368,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                   background: myListing.available ? '#4ade80' : 'rgba(255,255,255,0.3)',
                 }} />
                 <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
-                  {myListing.available ? 'Accepting bookings' : 'Not accepting bookings'}
+                  {myListing.available ? t('chat.accepting') : t('chat.notAccepting')}
                 </span>
                 <span style={{
                   width: 40, height: 24, borderRadius: 12, position: 'relative',
@@ -391,7 +384,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Client messages */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MessageSquareText size={16} color="#0ABAB5" strokeWidth={2} /> Messages
+                  <MessageSquareText size={16} color="#0ABAB5" strokeWidth={2} /> {t('chat.title')}
                   {inboxUnread > 0 && (
                     <span style={{ background: '#0ABAB5', color: '#080808', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 800 }}>{inboxUnread}</span>
                   )}
@@ -402,15 +395,15 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Upcoming sessions */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Calendar size={16} color="#0ABAB5" strokeWidth={2} /> Upcoming Sessions
+                  <Calendar size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.upcoming')}
                 </h2>
                 {ordersLoading && <Loader2 className="spin" size={18} color="#0ABAB5" strokeWidth={2} />}
                 {!ordersLoading && upcomingOrders.length === 0 && (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No upcoming sessions yet.</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noUpcoming')}</p>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {upcomingOrders.map(order => {
-                    const [monthDay, dayNum] = order.date.split(' ')
+                    const [dayNum, monthDay] = formatDate(order.date).split(' ')
                     return (
                       <div key={order.id} className="glass" style={{ borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'center', border: '1px solid rgba(255,255,255,0.08)' }}>
                         <div style={{
@@ -423,13 +416,13 @@ export default function DashboardScreen({ onNavigate }: Props) {
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{order.service}</p>
+                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>{localizeService(order.service)}</p>
                         </div>
                         <button
                           onClick={() => handleMarkCompleted(order.id)}
                           style={{ padding: '6px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(10,186,181,0.15)', color: '#0ABAB5', border: 'none', cursor: 'pointer', flexShrink: 0 }}
                         >
-                          Mark done
+                          {t('dash.markDone')}
                         </button>
                       </div>
                     )
@@ -440,19 +433,19 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Recent completed orders */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <TrendingUp size={16} color="#0ABAB5" strokeWidth={2} /> Completed
+                  <TrendingUp size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.completed')}
                 </h2>
                 {myOrders.filter(o => o.status === 'completed').length === 0 ? (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>No completed sessions yet.</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{t('dash.noCompleted')}</p>
                 ) : (
                   <div className="glass" style={{ borderRadius: 18, padding: 4 }}>
                     {myOrders.filter(o => o.status === 'completed').map(order => (
                       <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                         <div>
                           <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{order.service} · {order.date}</p>
+                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{localizeService(order.service)} · {formatDate(order.date)}</p>
                         </div>
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0ABAB5' }}>{new Intl.NumberFormat().format(order.amount)}</p>
+                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0ABAB5' }}>{formatNumber(order.amount)}</p>
                       </div>
                     ))}
                   </div>
@@ -462,11 +455,11 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {/* Profile completeness */}
               <div style={{ paddingBottom: 20 }}>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <User size={16} color="#0ABAB5" strokeWidth={2} /> Profile
+                  <User size={16} color="#0ABAB5" strokeWidth={2} /> {t('dash.profile')}
                 </h2>
                 <div className="glass" style={{ borderRadius: 18, padding: 18, border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>Profile Completeness</p>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>{t('dash.completeness')}</p>
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: '#0ABAB5' }}>{completeness}%</p>
                   </div>
                   <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.1)', marginBottom: 14 }}>
@@ -505,13 +498,19 @@ export default function DashboardScreen({ onNavigate }: Props) {
             onClick={e => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800 }}>Settings</h2>
+              <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800 }}>{t('dash.settings')}</h2>
               <button
                 onClick={() => setShowSettings(false)}
+                aria-label={t('common.close')}
                 style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 32, height: 32, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >
                 <X size={16} strokeWidth={2} />
               </button>
+            </div>
+
+            <div style={{ padding: '4px 0 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+              <p style={{ margin: '0 0 8px', fontSize: 12, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>{t('dash.language')}</p>
+              <LanguageSwitcher />
             </div>
 
             <button
@@ -523,7 +522,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               }}
             >
               <Bell size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
-              <span style={{ flex: 1, fontSize: 14, color: 'white' }}>Notifications</span>
+              <span style={{ flex: 1, fontSize: 14, color: 'white' }}>{t('home.notifications')}</span>
               <span style={{
                 width: 40, height: 24, borderRadius: 12, position: 'relative',
                 background: notificationsEnabled ? '#0ABAB5' : 'rgba(255,255,255,0.15)', transition: 'background 0.2s',
@@ -546,7 +545,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 }}
               >
                 <FileText size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
-                <span style={{ fontSize: 14, color: 'white' }}>{doc === 'terms' ? 'Terms of Service' : 'Privacy Policy'}</span>
+                <span style={{ fontSize: 14, color: 'white' }}>{doc === 'terms' ? t('legal.terms') : t('legal.privacy')}</span>
               </button>
             ))}
 
@@ -559,14 +558,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
               }}
             >
               <LogOut size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
-              <span style={{ fontSize: 14, color: 'white' }}>Sign out</span>
+              <span style={{ fontSize: 14, color: 'white' }}>{t('dash.signOut')}</span>
             </button>
 
             <button
               onClick={async () => {
                 if (deleting) return
-                if (!confirm('Delete your account? Your profile, bookings, messages, favorites and any specialist listing will be permanently erased. This cannot be undone.')) return
-                if (!confirm('Last check — really delete everything and close your account?')) return
+                if (!(await confirm({ title: t('dash.deleteTitle'), message: t('dash.deleteText'), confirmLabel: t('dash.deleteConfirm'), danger: true }))) return
+                if (!(await confirm({ title: t('dash.deleteTitle2'), message: t('dash.deleteText2'), confirmLabel: t('dash.deleteFinal'), danger: true }))) return
                 setDeleting(true)
                 const ok = await deleteAccount()
                 setDeleting(false)
@@ -580,7 +579,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               }}
             >
               <Trash2 size={17} color="#ff4d6d" strokeWidth={1.8} />
-              <span style={{ fontSize: 14, color: '#ff4d6d' }}>{deleting ? 'Deleting…' : 'Delete account'}</span>
+              <span style={{ fontSize: 14, color: '#ff4d6d' }}>{deleting ? t('dash.deleting') : t('dash.deleteAccount')}</span>
             </button>
           </div>
         </div>

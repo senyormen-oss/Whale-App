@@ -3,6 +3,7 @@ import { supabase } from './lib/supabaseClient'
 import { subscribeToTables } from './lib/realtime'
 import { useAuth } from './auth'
 import { useToast } from './toast'
+import { t, formatTime } from './i18n'
 import type { Conversation, Message, Order } from './types'
 
 const NOTIF_PREF_KEY = 'whale.notificationsEnabled'
@@ -11,7 +12,7 @@ function mapOrderRow(row: Record<string, any>): Order {
   return {
     id: row.id,
     specialistId: row.specialist_id,
-    date: new Date(row.booking_date).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' }),
+    date: row.booking_date as string, // ISO; formatted at render time
     rawDate: row.booking_date,
     service: row.service,
     status: row.status,
@@ -24,7 +25,7 @@ function mapConversationRow(row: Record<string, any>): Conversation {
     id: row.id,
     specialistId: row.specialist_id,
     lastMessage: row.last_message,
-    lastTime: new Date(row.last_time).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    lastTime: formatTime(row.last_time),
     unread: row.unread,
     specialistUnread: row.specialist_unread,
   }
@@ -35,7 +36,7 @@ function mapMessageRow(row: Record<string, any>): Message {
     id: row.id,
     from: row.sender,
     text: row.text,
-    time: new Date(row.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    time: formatTime(row.created_at),
     type: row.message_type,
     image: row.image_url ?? undefined,
   }
@@ -79,10 +80,26 @@ interface AppStore {
 
 const AppStoreContext = createContext<AppStore | null>(null)
 
+/** The booking function raises short English validation errors; map them to the active language. */
+function bookingServerMessage(message: string): string | null {
+  const map: [string, Parameters<typeof t>[0]][] = [
+    ['Invalid time slot', 'err.invalidSlot'],
+    ['Invalid amount', 'err.invalidAmount'],
+    ['You cannot book your own listing', 'err.ownListing'],
+    ['not accepting bookings', 'err.notAvailable'],
+    ['Choose a valid date', 'err.dateRange'],
+    ['Specialist not found', 'err.bookingFailed'],
+    ['Invalid service', 'err.bookingFailed'],
+    ['Invalid status', 'err.bookingFailed'],
+  ]
+  for (const [text, key] of map) if (message.includes(text)) return t(key)
+  return null
+}
+
 function bookingErrorMessage(error: { code?: string; message: string }): string {
-  if (error.code === '23505') return 'That slot was just booked by someone else. Please pick another.'
-  if (error.code === '28000') return 'Please sign in again to book.'
-  return error.message || 'Could not complete the booking. Please try again.'
+  if (error.code === '23505') return t('err.slotTaken')
+  if (error.code === '28000') return t('err.signInAgain')
+  return bookingServerMessage(error.message) ?? t('err.bookingFailed')
 }
 
 export function AppStoreProvider({ children }: { children: ReactNode }) {
@@ -162,7 +179,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   }, [user, refreshData, fetchThread])
 
   const book = useCallback(async (input: BookingInput, status: 'pending' | 'confirmed'): Promise<{ order: Order } | { error: string }> => {
-    if (!user) return { error: 'You must be signed in to book.' }
+    if (!user) return { error: t('err.signInAgain') }
     const { data, error } = await supabase.rpc('create_booking', {
       p_specialist_id: input.specialistId,
       p_date: input.dateKey,
@@ -203,7 +220,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         .single()
       if (error || !data) {
         console.error('Failed to send message', error)
-        notify('Message was not sent. Check your connection and try again.')
+        notify(t('err.messageNotSent'))
         return false
       }
       const mapped = mapMessageRow(data)
@@ -212,7 +229,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         return existing.some(m => m.id === mapped.id) ? prev : { ...prev, [conversationId]: [...existing, mapped] }
       })
       setConversations(prev => prev.map(c =>
-        c.id === conversationId ? { ...c, lastMessage: message.type === 'image' ? 'Photo' : message.text, lastTime: mapped.time } : c
+        c.id === conversationId ? { ...c, lastMessage: message.type === 'image' ? t('chat.photo') : message.text, lastTime: mapped.time } : c
       ))
       return true
     },
@@ -233,7 +250,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Failed to update favorite', error)
         setFavorites(prev => (isFav ? [...prev, specialistId] : prev.filter(id => id !== specialistId)))
-        notify('Could not update favorites. Please try again.')
+        notify(t('err.favorites'))
       }
     },
 
@@ -260,7 +277,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         .single()
       if (error || !data) {
         console.error('Failed to start conversation', error)
-        notify('Could not open the chat. Please try again.')
+        notify(t('err.openChat'))
         return null
       }
       setConversations(prev => [mapConversationRow(data), ...prev])
@@ -271,11 +288,11 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.from('orders').update({ status: 'cancelled' }).eq('id', orderId)
       if (error) {
         console.error('Failed to cancel order', error)
-        notify('Could not cancel this booking. Please try again.')
+        notify(t('err.cancel'))
         return false
       }
       setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: 'cancelled' } : o)))
-      notify('Booking cancelled.', 'success')
+      notify(t('toast.cancelled'), 'success')
       return true
     },
 
@@ -293,7 +310,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.rpc('delete_my_account')
       if (error) {
         console.error('Failed to delete account', error)
-        notify('Could not delete your account. Please try again or contact support.')
+        notify(t('err.deleteAccount'))
         return false
       }
       await signOut()
@@ -312,7 +329,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user!.id)
         .eq('specialist_id', input.specialistId)
         .maybeSingle()
-      if (error || !conv) return { error: 'Booking confirmed, but the chat could not be opened. Find it under Messages.' }
+      if (error || !conv) return { error: t('err.chatAfterBooking') }
 
       setConversations(prev => [mapConversationRow(conv), ...prev.filter(c => c.id !== conv.id)])
       return { order: result.order, conversationId: conv.id }

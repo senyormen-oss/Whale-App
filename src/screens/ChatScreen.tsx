@@ -4,6 +4,7 @@ import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { uploadChatImage } from '../lib/queries'
+import { useI18n, localizeSystemMessage } from '../i18n'
 import {
   ArrowLeft, ImageIcon, Smile, ArrowUp, MessageSquareText, AlertCircle,
 } from '../icons'
@@ -17,19 +18,20 @@ interface Props {
 const EMOJIS = ['😀', '😂', '😍', '👍', '🙏', '🔥', '🎉', '❤️', '👌', '😢']
 
 function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void }) {
+  const { t } = useI18n()
   const { conversations } = useAppStore()
   const { specialists } = useSpecialists()
 
   return (
     <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
       <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>Messages</h1>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{t('chat.title')}</h1>
       </div>
 
       {conversations.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(255,255,255,0.4)' }}>
           <MessageSquareText size={44} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
-          <p>No conversations yet.<br />Book a specialist to start chatting.</p>
+          <p>{t('chat.empty')}</p>
         </div>
       ) : (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -68,7 +70,7 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <p style={{ margin: 0, fontSize: 13, color: 'rgba(255,255,255,0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8 }}>
-                      {conv.lastMessage}
+                      {localizeSystemMessage(conv.lastMessage)}
                     </p>
                     {conv.unread > 0 && (
                       <span style={{
@@ -91,6 +93,7 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
 }
 
 function ChatThread({ conversationId, onBack }: { conversationId: string; onBack: () => void }) {
+  const { t } = useI18n()
   const { conversations, messagesByConversation, sendMessage, markConversationRead, loadMessages } = useAppStore()
   const { specialists } = useSpecialists()
   const { user } = useAuth()
@@ -136,7 +139,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
       const url = await uploadChatImage(file, user.id)
       await pushMine({ text: file.name, type: 'image', image: url })
     } catch (err) {
-      setUploadError(err instanceof Error ? err.message : 'Failed to upload image.')
+      setUploadError(err instanceof Error ? err.message : t('err.upload'))
     } finally {
       setUploading(false)
     }
@@ -152,6 +155,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
             onClick={onBack}
+            aria-label={t('common.back')}
             style={{
               background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%',
               width: 36, height: 36, color: 'white',
@@ -169,7 +173,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 1px', fontSize: 15, fontWeight: 700 }}>{sp.name}</p>
             <p style={{ margin: 0, fontSize: 11, color: sp.available ? '#4ade80' : 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
-              {sp.available ? 'Accepting bookings' : 'Not accepting bookings'}
+              {sp.available ? t('chat.accepting') : t('chat.notAccepting')}
             </p>
           </div>
         </div>
@@ -183,13 +187,13 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
         {/* Date separator */}
         <div style={{ textAlign: 'center', margin: '8px 0' }}>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(255,255,255,0.06)', padding: '4px 12px', borderRadius: 20 }}>
-            Today
+            {t('chat.today')}
           </span>
         </div>
 
         {messages.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.35)', fontSize: 13 }}>
-            Say hello to {sp.name.split(' ')[0]} 👋
+            {t('chat.sayHello', { name: sp.name.split(' ')[0] })} 👋
           </div>
         )}
 
@@ -226,7 +230,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
                   style={{ width: '100%', maxWidth: 220, borderRadius: 12, display: 'block', marginBottom: 4 }}
                 />
               )}
-              {msg.type !== 'image' && <p style={{ margin: '0 0 4px' }}>{msg.text}</p>}
+              {msg.type !== 'image' && <p style={{ margin: '0 0 4px', overflowWrap: 'anywhere' }}>{localizeSystemMessage(msg.text)}</p>}
               <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : 0, fontSize: 10, color: msg.from === 'me' ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.35)', textAlign: 'right' }}>
                 {msg.time}
               </p>
@@ -250,7 +254,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           }}
         >
           <ImageIcon size={13} strokeWidth={1.8} />
-          {uploading ? 'Uploading…' : 'Photo'}
+          {uploading ? t('chat.uploading') : t('chat.photo')}
         </button>
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChosen} style={{ display: 'none' }} />
       </div>
@@ -287,7 +291,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
-            placeholder="Message..."
+            placeholder={t('chat.placeholder')}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif',
@@ -295,6 +299,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           />
           <button
             onClick={() => setShowEmoji(v => !v)}
+            aria-label={t('chat.emoji')}
             style={{ background: 'none', border: 'none', color: showEmoji ? '#0ABAB5' : 'rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center' }}
           >
             <Smile size={18} strokeWidth={1.8} />
@@ -302,6 +307,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
         </div>
         <button
           onClick={handleSend}
+          aria-label={t('chat.send')}
           className={input.trim() ? 'tiffany-glow-sm' : ''}
           style={{
             width: 48, height: 48, borderRadius: '50%', border: 'none',

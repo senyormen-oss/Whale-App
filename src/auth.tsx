@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient'
 import { LEGAL } from './legal'
+import { t } from './i18n'
 
 interface AuthState {
   user: User | null
@@ -20,20 +21,20 @@ interface AuthState {
 
 /** Returns a human-readable problem with the password, or null if it is acceptable. */
 export function validatePassword(password: string): string | null {
-  if (password.length < 8) return 'Password must be at least 8 characters.'
-  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return 'Password must contain at least one letter and one digit.'
-  if (password.length > 72) return 'Password is too long (72 characters max).'
+  if (password.length < 8) return t('auth.pw.short')
+  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return t('auth.pw.weak')
+  if (password.length > 72) return t('auth.pw.long')
   return null
 }
 
 /** Turns raw Supabase auth errors into short, friendly messages. */
 function friendlyAuthError(message: string): string {
-  if (/invalid login credentials/i.test(message)) return 'Incorrect email or password.'
-  if (/already registered|already been registered/i.test(message)) return 'An account with this email already exists. Try signing in.'
-  if (/rate limit|too many/i.test(message)) return 'Too many attempts. Please wait a few minutes and try again.'
-  if (/network|failed to fetch/i.test(message)) return 'No connection. Check your internet and try again.'
-  if (/same.*password/i.test(message)) return 'Choose a password different from your current one.'
-  if (/invalid.*email|email.*invalid/i.test(message)) return 'Please enter a valid email address.'
+  if (/invalid login credentials/i.test(message)) return t('auth.err.credentials')
+  if (/already registered|already been registered/i.test(message)) return t('auth.err.exists')
+  if (/rate limit|too many/i.test(message)) return t('auth.err.rate')
+  if (/network|failed to fetch/i.test(message)) return t('auth.err.network')
+  if (/same.*password/i.test(message)) return t('auth.err.samePassword')
+  if (/invalid.*email|email.*invalid/i.test(message)) return t('auth.err.email')
   return message
 }
 

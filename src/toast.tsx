@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 import { AlertCircle, CheckCircle2, X } from './icons'
+import { t as translate } from './i18n'
 
 type ToastKind = 'error' | 'success' | 'info'
 interface Toast { id: number; kind: ToastKind; message: string }
@@ -57,7 +58,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <span style={{ flex: 1, lineHeight: 1.4 }}>{t.message}</span>
             <button
               onClick={() => dismiss(t.id)}
-              aria-label="Dismiss"
+              aria-label={translate('common.close')}
               style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', display: 'flex', padding: 2 }}
             >
               <X size={15} strokeWidth={2} />

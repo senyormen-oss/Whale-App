@@ -9,16 +9,17 @@ import DashboardScreen from './screens/DashboardScreen'
 import AuthScreen from './screens/AuthScreen'
 import type { Screen, TabName } from './types'
 import { useAppStore } from './store'
+import { useI18n } from './i18n'
 import { useAuth } from './auth'
 import { useSpecialists } from './specialistsData'
 import { Home, Search, ClipboardList, MessageCircle, User, Loader2, type IconType } from './icons'
 
-const TABS: { name: TabName; icon: IconType; label: string }[] = [
-  { name: 'home',     icon: Home,          label: 'Home' },
-  { name: 'explore',  icon: Search,        label: 'Explore' },
-  { name: 'bookings', icon: ClipboardList, label: 'Bookings' },
-  { name: 'messages', icon: MessageCircle, label: 'Messages' },
-  { name: 'profile',  icon: User,          label: 'Profile' },
+const TABS: { name: TabName; icon: IconType; label: Parameters<typeof import('./i18n').t>[0] }[] = [
+  { name: 'home',     icon: Home,          label: 'nav.home' },
+  { name: 'explore',  icon: Search,        label: 'nav.explore' },
+  { name: 'bookings', icon: ClipboardList, label: 'nav.bookings' },
+  { name: 'messages', icon: MessageCircle, label: 'nav.messages' },
+  { name: 'profile',  icon: User,          label: 'nav.profile' },
 ]
 
 function BottomNav({ activeTab, onTabChange, unreadMessages }: {
@@ -26,6 +27,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
   onTabChange: (tab: TabName) => void
   unreadMessages: number
 }) {
+  const { t } = useI18n()
   return (
     <div
       style={{
@@ -70,7 +72,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
                 color: isActive ? '#0ABAB5' : 'rgba(255,255,255,0.35)',
                 transition: 'color 0.2s',
               }}>
-                {tab.label}
+                {t(tab.label)}
               </span>
               {tab.name === 'messages' && unreadMessages > 0 && (
                 <span style={{
@@ -103,6 +105,7 @@ function LoadingScreen() {
 }
 
 export default function App() {
+  const { t } = useI18n()
   const { user, loading: authLoading, recovering } = useAuth()
   const { loading: specialistsLoading, error: specialistsError } = useSpecialists()
 
@@ -113,9 +116,10 @@ export default function App() {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: '#080808', color: '#ff4d6d', padding: 32, textAlign: 'center', fontSize: 14,
+        background: '#080808', color: '#ff4d6d', padding: 32, textAlign: 'center', fontSize: 14, flexDirection: 'column',
       }}>
-        Couldn't load specialists: {specialistsError}
+        {t('app.loadFailed')}
+        <button onClick={() => window.location.reload()} style={{ marginTop: 16, padding: '10px 20px', borderRadius: 12, border: 'none', background: '#0ABAB5', color: '#080808', fontWeight: 800 }}>{t('app.reload')}</button>
       </div>
     )
   }
@@ -222,7 +226,7 @@ function AuthenticatedApp() {
         {/* Screen content */}
         <div
           key={currentScreen.name + (currentScreen.name === 'specialist' ? (currentScreen as any).id : '') + (currentScreen.name === 'chat' ? (currentScreen as any).conversationId : '')}
-          className="fade-in"
+          className="screen-enter"
           style={{ minHeight: '100vh' }}
         >
           {renderScreen(currentScreen)}

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { getLevelConfig, formatPrice, getSubscriptionPlans } from '../data'
+import { getLevelConfig, formatPrice, getSubscriptionPlans, categoryLabel } from '../data'
 import type { Screen, Review } from '../types'
 import { useAppStore } from '../store'
 import { useSpecialists } from '../specialistsData'
 import { fetchReviews } from '../lib/queries'
+import { useI18n, formatDate } from '../i18n'
+import Segmented from '../Segmented'
 import { LEVEL_ICONS, ArrowLeft, Heart, Share2, BadgeCheck, Star, MessageCircle, MapPin } from '../icons'
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
 type Tab = 'portfolio' | 'about' | 'reviews'
 
 export default function SpecialistScreen({ specialistId, onNavigate, onBack }: Props) {
+  const { t } = useI18n()
   const { specialists } = useSpecialists()
   const sp = specialists.find(s => s.id === specialistId)
   const { favorites, toggleFavorite, startConversation } = useAppStore()
@@ -35,7 +38,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
   async function handleShare() {
     const url = `${window.location.origin}${window.location.pathname}#specialist/${specialistId}`
-    const shareData = { title: `${sp?.name} on Whale`, text: `Check out ${sp?.name} on Whale`, url }
+    const shareData = { title: t('spec.shareTitle', { name: sp?.name ?? '' }), text: t('spec.shareText', { name: sp?.name ?? '' }), url }
     try {
       if (navigator.share) {
         await navigator.share(shareData)
@@ -55,7 +58,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
   if (!sp) return (
     <div style={{ background: '#080808', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-      Specialist not found
+      {t('spec.notFound')}
     </div>
   )
 
@@ -84,6 +87,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
         <div style={{ position: 'absolute', top: 52, left: 0, right: 0, display: 'flex', justifyContent: 'space-between', padding: '0 20px' }}>
           <button
             onClick={onBack}
+            aria-label={t('common.back')}
             style={{
               background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)',
               border: '1px solid rgba(255,255,255,0.15)',
@@ -126,7 +130,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                   background: '#0ABAB5', color: '#080808', fontSize: 11, fontWeight: 700,
                   padding: '5px 10px', borderRadius: 8,
                 }}>
-                  Link copied
+                  {t('spec.linkCopied')}
                 </span>
               )}
             </div>
@@ -167,12 +171,12 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 <LevelIcon size={17} color={level.color} strokeWidth={2} />
               </div>
               <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(255,255,255,0.6)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                {sp.category} · <MapPin size={12} strokeWidth={2} /> {sp.city}
+                {categoryLabel(sp.categoryKey)} · <MapPin size={12} strokeWidth={2} /> {sp.city}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Star size={13} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                 <span style={{ fontSize: 14, fontWeight: 700 }}>{sp.rating}</span>
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>({sp.reviews} reviews)</span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>({t('spec.reviewsCount', { n: sp.reviews })})</span>
               </div>
             </div>
           </div>
@@ -183,10 +187,10 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
       <div style={{ padding: '16px 20px' }}>
         <div className="glass" style={{ borderRadius: 16, padding: '16px 0', display: 'flex' }}>
           {[
-            { label: 'Projects', value: sp.projects },
-            { label: 'Reviews', value: sp.reviews },
-            { label: 'Experience', value: `${sp.experience}y` },
-            { label: 'Age', value: sp.age },
+            { label: t('spec.stat.projects'), value: sp.projects },
+            { label: t('spec.stat.reviews'), value: sp.reviews },
+            { label: t('spec.stat.experience'), value: t('spec.years', { n: sp.experience }) },
+            { label: t('spec.stat.age'), value: sp.age },
           ].map((stat, i) => (
             <div key={stat.label} style={{
               flex: 1, textAlign: 'center',
@@ -201,23 +205,15 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
       {/* Tabs */}
       <div style={{ padding: '0 20px 16px' }}>
-        <div className="glass" style={{ borderRadius: 14, padding: 4, display: 'flex', gap: 2 }}>
-          {(['portfolio', 'about', 'reviews'] as Tab[]).map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
-                fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
-                background: tab === t ? '#0ABAB5' : 'transparent',
-                color: tab === t ? '#080808' : 'rgba(255,255,255,0.5)',
-                transition: 'all 0.2s ease', textTransform: 'capitalize',
-              }}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+        <Segmented<Tab>
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: 'portfolio', label: t('spec.tab.portfolio') },
+            { value: 'about', label: t('spec.tab.about') },
+            { value: 'reviews', label: t('spec.tab.reviews') },
+          ]}
+        />
       </div>
 
       {/* Tab content */}
@@ -226,7 +222,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
           <div style={{ padding: '0 20px' }}>
             {sp.portfolio.length === 0 && (
               <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)', fontSize: 13 }}>
-                No portfolio items yet.
+                {t('spec.noPortfolio')}
               </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
@@ -242,7 +238,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 >
                   <img
                     src={img}
-                    alt={`Portfolio ${i + 1}`}
+                    alt={t('spec.portfolioAlt', { n: i + 1 })}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 </div>
@@ -254,12 +250,12 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
         {tab === 'about' && (
           <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
-              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>About</h3>
+              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.about')}</h3>
               <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'rgba(255,255,255,0.8)' }}>{sp.bio}</p>
             </div>
 
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
-              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Skills</h3>
+              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.skills')}</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {sp.tags.map(tag => (
                   <span key={tag} style={{
@@ -274,7 +270,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
             </div>
 
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
-              <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing</h3>
+              <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.pricing')}</h3>
               {getSubscriptionPlans(sp.price).map(item => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <div>
@@ -298,9 +294,9 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <LevelIcon size={30} color={level.color} strokeWidth={1.8} />
                 <div>
-                  <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: level.color }}>{level.label} Specialist</p>
+                  <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: level.color }}>{t('spec.levelSpecialist', { level: level.label })}</p>
                   <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', gap: 3 }}>
-                    Based on {sp.projects} projects · {sp.reviews} reviews · {sp.rating} <Star size={10} color="#FFD700" fill="#FFD700" strokeWidth={0} /> rating
+                    {t('spec.basedOn', { projects: sp.projects, reviews: sp.reviews, rating: sp.rating })} <Star size={10} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                   </p>
                 </div>
               </div>
@@ -320,10 +316,10 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                     <Star key={i} size={14} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                   ))}
                 </p>
-                <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{sp.reviews} reviews</p>
+                <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{t('spec.reviewsCount', { n: sp.reviews })}</p>
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {[['Quality', avgOf('quality')], ['Timing', avgOf('timing')], ['Communication', avgOf('communication')]].map(([label, val]) => (
+                {[[t('review.quality'), avgOf('quality')], [t('review.timing'), avgOf('timing')], [t('review.communication'), avgOf('communication')]].map(([label, val]) => (
                   <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', width: 90 }}>{label}</span>
                     <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.1)' }}>
@@ -354,7 +350,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                           <Star key={i} size={11} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                         ))}
                       </span>
-                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{r.date}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{formatDate(r.date)}</span>
                     </div>
                   </div>
                 </div>
@@ -364,7 +360,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
             {reviews.length === 0 && (
               <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(255,255,255,0.4)' }}>
-                No reviews yet
+                {t('spec.noReviews')}
               </div>
             )}
           </div>
@@ -405,7 +401,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
               cursor: sp.available ? 'pointer' : 'not-allowed',
             }}
           >
-            {sp.available ? `Book — ${formatPrice(sp.price)}` : 'Currently unavailable'}
+            {sp.available ? t('spec.book', { price: formatPrice(sp.price) }) : t('spec.unavailable')}
           </button>
         </div>
       </div>

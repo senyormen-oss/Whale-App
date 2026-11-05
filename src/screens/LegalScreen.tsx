@@ -1,23 +1,26 @@
-import { LEGAL, PRIVACY, TERMS } from '../legal'
+import { getLegalSections } from '../legal'
+import { useI18n, formatDate } from '../i18n'
+import { LEGAL } from '../legal'
 import { ArrowLeft } from '../icons'
 
 export default function LegalScreen({ doc, onBack }: { doc: 'terms' | 'privacy'; onBack: () => void }) {
-  const sections = doc === 'terms' ? TERMS : PRIVACY
-  const title = doc === 'terms' ? 'Terms of Service' : 'Privacy Policy'
+  const { t, lang } = useI18n()
+  const sections = getLegalSections(doc, lang)
+  const title = doc === 'terms' ? t('legal.terms') : t('legal.privacy')
 
   return (
     <div className="fade-in" style={{ background: '#080808', minHeight: '100vh', paddingBottom: 48 }}>
       <div style={{ padding: '52px 20px 16px', display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
         <button
           onClick={onBack}
-          aria-label="Back"
+          aria-label={t('common.back')}
           style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 40, height: 40, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <ArrowLeft size={18} strokeWidth={2} />
         </button>
         <div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>{title}</h1>
-          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>Last updated {LEGAL.lastUpdated}</p>
+          <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t('legal.updated', { date: formatDate(LEGAL.updatedIso) })}</p>
         </div>
       </div>
 

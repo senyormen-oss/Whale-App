@@ -4,24 +4,30 @@ import App from './App'
 import ErrorBoundary, { OfflineBanner } from './ErrorBoundary'
 import { AuthProvider } from './auth'
 import { ToastProvider } from './toast'
+import { I18nProvider } from './i18n'
+import { ConfirmProvider } from './confirm'
 import { SpecialistsProvider } from './specialistsData'
 import { AppStoreProvider } from './store'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <AuthProvider>
-        <ToastProvider>
-          <SpecialistsProvider>
-            <AppStoreProvider>
-              <OfflineBanner />
-              <App />
-            </AppStoreProvider>
-          </SpecialistsProvider>
-        </ToastProvider>
-      </AuthProvider>
-    </ErrorBoundary>
+    <I18nProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <ToastProvider>
+            <ConfirmProvider>
+              <SpecialistsProvider>
+                <AppStoreProvider>
+                  <OfflineBanner />
+                  <App />
+                </AppStoreProvider>
+              </SpecialistsProvider>
+            </ConfirmProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </I18nProvider>
   </React.StrictMode>,
 )
 

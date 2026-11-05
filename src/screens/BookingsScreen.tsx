@@ -4,6 +4,9 @@ import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { fetchMyReviewedOrderIds } from '../lib/queries'
+import { useI18n, formatDate, formatNumber } from '../i18n'
+import { useConfirm } from '../confirm'
+import { localizeService } from '../data'
 import ReviewModal from './ReviewModal'
 import { ClipboardList, Star } from '../icons'
 
@@ -11,11 +14,11 @@ interface Props {
   onNavigate: (screen: Screen) => void
 }
 
-const STATUS_CONFIG = {
-  pending:   { label: 'Pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
-  confirmed: { label: 'Confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
-  completed: { label: 'Done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
-  cancelled: { label: 'Cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
+const STATUS_CONFIG: Record<string, { label: Parameters<typeof import('../i18n').t>[0]; color: string; bg: string }> = {
+  pending:   { label: 'status.pending',   color: '#F5A623', bg: 'rgba(245,166,35,0.12)' },
+  confirmed: { label: 'status.confirmed', color: '#0ABAB5', bg: 'rgba(10,186,181,0.12)' },
+  completed: { label: 'status.done',      color: '#4ade80', bg: 'rgba(74,222,128,0.12)' },
+  cancelled: { label: 'status.cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
 }
 
 const actionBtn = {
@@ -24,6 +27,8 @@ const actionBtn = {
 } as const
 
 export default function BookingsScreen({ onNavigate }: Props) {
+  const { t } = useI18n()
+  const confirm = useConfirm()
   const { orders, cancelOrder } = useAppStore()
   const { user } = useAuth()
   const { specialists, reload: reloadSpecialists } = useSpecialists()
@@ -39,7 +44,8 @@ export default function BookingsScreen({ onNavigate }: Props) {
   }, [user, orders.length])
 
   async function handleCancel(orderId: string) {
-    if (!confirm('Cancel this booking? The time slot will be released.')) return
+    const ok = await confirm({ title: t('bookings.cancelTitle'), message: t('bookings.cancelText'), confirmLabel: t('bookings.cancelConfirm'), cancelLabel: t('bookings.keep'), danger: true })
+    if (!ok) return
     setBusyId(orderId)
     await cancelOrder(orderId)
     setBusyId(null)
@@ -48,13 +54,13 @@ export default function BookingsScreen({ onNavigate }: Props) {
   return (
     <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
       <div style={{ padding: '56px 20px 20px', background: 'linear-gradient(180deg, #0f1410 0%, #080808 100%)' }}>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>My Bookings</h1>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800 }}>{t('bookings.title')}</h1>
       </div>
 
       {orders.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(255,255,255,0.4)' }}>
           <ClipboardList size={44} color="rgba(255,255,255,0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
-          <p>No bookings yet.<br />Book a specialist to see it here.</p>
+          <p>{t('bookings.empty')}</p>
         </div>
       ) : (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -80,15 +86,15 @@ export default function BookingsScreen({ onNavigate }: Props) {
                   <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{order.service}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{order.date}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{localizeService(order.service)}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{formatDate(order.date)}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
-                      {new Intl.NumberFormat().format(order.amount)}
+                      {formatNumber(order.amount)}
                     </p>
                     <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: status.bg, color: status.color }}>
-                      {status.label}
+                      {t(status.label)}
                     </span>
                   </div>
                 </div>
@@ -100,7 +106,7 @@ export default function BookingsScreen({ onNavigate }: Props) {
                         onClick={() => setReviewing({ orderId: order.id, specialistId: sp.id, name: sp.name })}
                         style={{ ...actionBtn, background: '#0ABAB5', color: '#080808', display: 'flex', alignItems: 'center', gap: 5 }}
                       >
-                        <Star size={12} fill="#080808" strokeWidth={0} /> Leave a review
+                        <Star size={12} fill="#080808" strokeWidth={0} /> {t('bookings.review')}
                       </button>
                     )}
                     {canCancel && (
@@ -109,7 +115,7 @@ export default function BookingsScreen({ onNavigate }: Props) {
                         disabled={busyId === order.id}
                         style={{ ...actionBtn, background: 'rgba(255,77,109,0.12)', color: '#ff4d6d', opacity: busyId === order.id ? 0.6 : 1 }}
                       >
-                        {busyId === order.id ? 'Cancelling…' : 'Cancel booking'}
+                        {busyId === order.id ? t('bookings.cancelling') : t('bookings.cancel')}
                       </button>
                     )}
                   </div>

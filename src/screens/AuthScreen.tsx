@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { useAuth, validatePassword } from '../auth'
+import { useI18n } from '../i18n'
+import LanguageSwitcher from '../LanguageSwitcher'
+import Segmented from '../Segmented'
 import LegalScreen from './LegalScreen'
 import { Mail, Lock, User, ArrowUp, CheckCircle2, Eye, EyeOff, AlertCircle } from '../icons'
 
@@ -45,6 +48,7 @@ function PasswordField({ value, onChange, placeholder, autoComplete }: {
   placeholder: string
   autoComplete: string
 }) {
+  const { t } = useI18n()
   const [show, setShow] = useState(false)
   return (
     <div className="glass" style={fieldStyle}>
@@ -61,7 +65,7 @@ function PasswordField({ value, onChange, placeholder, autoComplete }: {
       <button
         type="button"
         onClick={() => setShow(s => !s)}
-        aria-label={show ? 'Hide password' : 'Show password'}
+        aria-label={show ? t('auth.hidePassword') : t('auth.showPassword')}
         style={{ background: 'none', border: 'none', padding: 4, color: 'rgba(255,255,255,0.5)', display: 'flex' }}
       >
         {show ? <EyeOff size={17} strokeWidth={1.8} /> : <Eye size={17} strokeWidth={1.8} />}
@@ -81,6 +85,7 @@ function ErrorLine({ message }: { message: string | null }) {
 
 /** Shown after the user opens a password-reset email link. */
 function NewPasswordForm() {
+  const { t } = useI18n()
   const { updatePassword, finishRecovery } = useAuth()
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -99,13 +104,13 @@ function NewPasswordForm() {
 
   return (
     <Shell>
-      <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800 }}>Choose a new password</h1>
-      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>At least 8 characters, with a letter and a digit.</p>
+      <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800 }}>{t('auth.newPassword')}</h1>
+      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>{t('auth.pw.hint')}</p>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <PasswordField value={password} onChange={setPassword} placeholder="New password" autoComplete="new-password" />
+        <PasswordField value={password} onChange={setPassword} placeholder={t('auth.newPasswordPlaceholder')} autoComplete="new-password" />
         <ErrorLine message={error} />
         <button type="submit" disabled={busy} style={{ ...primaryBtn, opacity: busy ? 0.7 : 1 }}>
-          {busy ? 'Saving…' : 'Save password'}
+          {busy ? t('auth.saving') : t('auth.savePassword')}
         </button>
       </form>
     </Shell>
@@ -113,6 +118,7 @@ function NewPasswordForm() {
 }
 
 export default function AuthScreen() {
+  const { t } = useI18n()
   const { signIn, signUp, resendConfirmation, resetPassword, configured, user, recovering } = useAuth()
   const [view, setView] = useState<View>('signin')
   const [email, setEmail] = useState('')
@@ -141,7 +147,7 @@ export default function AuthScreen() {
     const cleanName = fullName.trim()
 
     if (view === 'forgot') {
-      if (!cleanEmail) return setError('Enter your email.')
+      if (!cleanEmail) return setError(t('auth.enterEmail'))
       setBusy(true)
       const { error: err } = await resetPassword(cleanEmail)
       setBusy(false)
@@ -151,13 +157,13 @@ export default function AuthScreen() {
     }
 
     if (!cleanEmail || !password || (view === 'signup' && !cleanName)) {
-      return setError('Please fill in all fields.')
+      return setError(t('auth.fillAll'))
     }
     if (view === 'signup') {
       const problem = validatePassword(password)
       if (problem) return setError(problem)
-      if (cleanName.length > 100) return setError('Name is too long.')
-      if (!agreed) return setError('Please accept the Terms of Service and Privacy Policy.')
+      if (cleanName.length > 100) return setError(t('auth.nameLong'))
+      if (!agreed) return setError(t('auth.acceptTerms'))
     }
 
     setBusy(true)
@@ -190,16 +196,16 @@ export default function AuthScreen() {
         <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(10,186,181,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
           <Mail size={26} color="#0ABAB5" strokeWidth={1.8} />
         </div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>Check your email</h1>
+        <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>{t('auth.checkEmail')}</h1>
         <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, maxWidth: 320 }}>
           {isReset
-            ? <>If an account exists for <strong style={{ color: 'white' }}>{pendingEmail}</strong>, we sent a link to reset the password.</>
-            : <>We sent a confirmation link to <strong style={{ color: 'white' }}>{pendingEmail}</strong>. Open it, then come back and sign in.</>}
+            ? <>{t('auth.resetSent')} <strong style={{ color: 'white' }}>{pendingEmail}</strong></>
+            : <>{t('auth.confirmSent')} <strong style={{ color: 'white' }}>{pendingEmail}</strong>. {t('auth.confirmThen')}</>}
         </p>
 
         {!isReset && (resendState === 'sent' ? (
           <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#4ade80', margin: '0 0 20px' }}>
-            <CheckCircle2 size={15} strokeWidth={2} /> Email resent
+            <CheckCircle2 size={15} strokeWidth={2} /> {t('auth.resent')}
           </p>
         ) : (
           <button
@@ -207,7 +213,7 @@ export default function AuthScreen() {
             disabled={resendState === 'sending'}
             style={{ ...linkBtn, marginBottom: 20, cursor: resendState === 'sending' ? 'wait' : 'pointer' }}
           >
-            {resendState === 'sending' ? 'Sending…' : "Didn't get it? Resend"}
+            {resendState === 'sending' ? t('auth.sending') : t('auth.resend')}
           </button>
         ))}
 
@@ -216,72 +222,67 @@ export default function AuthScreen() {
           className="tiffany-glow"
           style={{ padding: '14px 28px', borderRadius: 16, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 14, fontWeight: 800 }}
         >
-          Back to Sign In
+          {t('auth.backToSignIn')}
         </button>
       </Shell>
     )
   }
 
-  const title = view === 'signin' ? 'Sign In' : view === 'signup' ? 'Create Account' : 'Send reset link'
+  const title = view === 'signin' ? t('auth.signIn') : view === 'signup' ? t('auth.createAccount') : t('auth.sendReset')
 
   return (
     <Shell>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <LanguageSwitcher compact />
+      </div>
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
-        <h1 className="gradient-text" style={{ margin: '0 0 6px', fontSize: 32, fontWeight: 900 }}>Whale</h1>
+        <h1 className="gradient-text floaty" style={{ margin: '0 0 6px', fontSize: 32, fontWeight: 900 }}>Whale</h1>
         <p style={{ margin: 0, fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
-          {view === 'forgot' ? 'Reset your password' : 'Book verified digital specialists'}
+          {view === 'forgot' ? t('auth.resetTitle') : t('auth.tagline')}
         </p>
       </div>
 
       {!configured && (
         <div style={{ background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: 14, padding: 14, marginBottom: 20, fontSize: 12.5, color: '#F5A623', lineHeight: 1.5 }}>
-          The service is not configured yet. Please try again later.
+          {t('auth.notConfigured')}
         </div>
       )}
 
       {view !== 'forgot' && (
-        <div className="glass" style={{ borderRadius: 14, padding: 4, display: 'flex', marginBottom: 20 }}>
-          {(['signin', 'signup'] as const).map(m => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => switchView(m)}
-              style={{
-                flex: 1, padding: '10px 0', borderRadius: 10, border: 'none', fontSize: 13, fontWeight: 700,
-                background: view === m ? '#0ABAB5' : 'transparent',
-                color: view === m ? '#080808' : 'rgba(255,255,255,0.45)',
-                transition: 'all 0.2s',
-              }}
-            >
-              {m === 'signin' ? 'Sign In' : 'Sign Up'}
-            </button>
-          ))}
-        </div>
+        <Segmented<'signin' | 'signup'>
+          value={view === 'signup' ? 'signup' : 'signin'}
+          onChange={switchView}
+          style={{ marginBottom: 20 }}
+          options={[
+            { value: 'signin', label: t('auth.signInTab') },
+            { value: 'signup', label: t('auth.signUpTab') },
+          ]}
+        />
       )}
 
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {view === 'signup' && (
           <div className="glass fade-in" style={fieldStyle}>
             <User size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
-            <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Full name" autoComplete="name" maxLength={100} style={inputStyle} />
+            <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t('auth.fullName')} autoComplete="name" maxLength={100} style={inputStyle} />
           </div>
         )}
         <div className="glass" style={fieldStyle}>
           <Mail size={16} color="rgba(255,255,255,0.5)" strokeWidth={1.8} />
-          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" type="email" autoComplete="email" inputMode="email" maxLength={254} style={inputStyle} />
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder={t('auth.email')} type="email" autoComplete="email" inputMode="email" maxLength={254} style={inputStyle} />
         </div>
         {view !== 'forgot' && (
           <PasswordField
             value={password}
             onChange={setPassword}
-            placeholder="Password"
+            placeholder={t('auth.password')}
             autoComplete={view === 'signin' ? 'current-password' : 'new-password'}
           />
         )}
 
         {view === 'signup' && (
           <>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,0.4)' }}>At least 8 characters, including a letter and a digit.</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,0.4)' }}>{t('auth.pw.hint')}</p>
             <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12.5, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5, cursor: 'pointer' }}>
               <input
                 type="checkbox"
@@ -290,10 +291,10 @@ export default function AuthScreen() {
                 style={{ width: 18, height: 18, marginTop: 1, accentColor: '#0ABAB5', flexShrink: 0 }}
               />
               <span>
-                I am 18 or older and I accept the{' '}
-                <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, fontSize: 12.5 }}>Terms of Service</button>
-                {' '}and{' '}
-                <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, fontSize: 12.5 }}>Privacy Policy</button>.
+                {t('auth.agree1')}{' '}
+                <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.terms')}</button>
+                {' '}{t('auth.and')}{' '}
+                <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.privacy')}</button>.
               </span>
             </label>
           </>
@@ -312,16 +313,16 @@ export default function AuthScreen() {
         </button>
 
         <div style={{ textAlign: 'center', marginTop: 4 }}>
-          {view === 'signin' && <button type="button" onClick={() => switchView('forgot')} style={linkBtn}>Forgot password?</button>}
-          {view === 'forgot' && <button type="button" onClick={() => switchView('signin')} style={linkBtn}>Back to Sign In</button>}
+          {view === 'signin' && <button type="button" onClick={() => switchView('forgot')} style={linkBtn}>{t('auth.forgot')}</button>}
+          {view === 'forgot' && <button type="button" onClick={() => switchView('signin')} style={linkBtn}>{t('auth.backToSignIn')}</button>}
         </div>
       </form>
 
       {view !== 'signup' && (
         <p style={{ margin: '24px 0 0', textAlign: 'center', fontSize: 11.5, color: 'rgba(255,255,255,0.3)' }}>
-          <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 500 }}>Terms</button>
+          <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.termsShort')}</button>
           {' · '}
-          <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 500 }}>Privacy</button>
+          <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, color: 'rgba(255,255,255,0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.privacyShort')}</button>
         </p>
       )}
     </Shell>

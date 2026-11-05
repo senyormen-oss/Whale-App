@@ -1,5 +1,6 @@
 import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from 'react'
 import { AlertCircle, WifiOff } from './icons'
+import { t } from './i18n'
 
 /** Catches render-time crashes so the user sees a recovery screen instead of a blank page. */
 export default class ErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
@@ -21,15 +22,15 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
         alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center',
       }}>
         <AlertCircle size={44} color="#ff4d6d" strokeWidth={1.6} style={{ marginBottom: 16 }} />
-        <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>Something went wrong</h1>
+        <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>{t('err.boundaryTitle')}</h1>
         <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(255,255,255,0.55)', maxWidth: 300, lineHeight: 1.6 }}>
-          The app hit an unexpected problem. Your data is safe. Reload to continue.
+          {t('err.boundaryText')}
         </p>
         <button
           onClick={() => window.location.reload()}
           style={{ padding: '14px 28px', borderRadius: 16, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 14, fontWeight: 800 }}
         >
-          Reload
+          {t('app.reload')}
         </button>
       </div>
     )
@@ -62,7 +63,7 @@ export function OfflineBanner() {
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
       }}
     >
-      <WifiOff size={14} strokeWidth={2.4} /> You're offline. Changes will not be saved until you reconnect.
+      <WifiOff size={14} strokeWidth={2.4} /> {t('err.offline')}
     </div>
   )
 }

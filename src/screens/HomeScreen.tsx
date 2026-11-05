@@ -1,17 +1,18 @@
 import { useState } from 'react'
-import { CATEGORIES } from '../data'
+import { CATEGORIES, categoryLabel } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
+import { useI18n, formatNumber } from '../i18n'
 import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase } from '../icons'
 
-function greeting() {
+function greetingKey() {
   const h = new Date().getHours()
-  if (h < 5) return 'Good night'
-  if (h < 12) return 'Good morning'
-  if (h < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (h < 5) return 'home.greeting.night' as const
+  if (h < 12) return 'home.greeting.morning' as const
+  if (h < 18) return 'home.greeting.afternoon' as const
+  return 'home.greeting.evening' as const
 }
 
 interface Props {
@@ -34,12 +35,13 @@ function LevelBadge({ level }: { level: string }) {
 }
 
 export default function HomeScreen({ onNavigate }: Props) {
+  const { t } = useI18n()
   const [searchValue, setSearchValue] = useState('')
   const [showNotifications, setShowNotifications] = useState(false)
   const { conversations, notificationsEnabled, markConversationRead } = useAppStore()
   const { specialists } = useSpecialists()
   const { user } = useAuth()
-  const firstName = ((user?.user_metadata?.full_name as string) || '').trim().split(' ')[0] || 'there'
+  const firstName = ((user?.user_metadata?.full_name as string) || '').trim().split(' ')[0] || t('home.there')
 
   const featured = specialists.filter(s => s.reviews > 0).sort((a, b) => b.rating - a.rating).slice(0, 5)
   const newOnes  = specialists.filter(s => s.isNew).slice(0, 4)
@@ -65,7 +67,7 @@ export default function HomeScreen({ onNavigate }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
             <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              {greeting()}
+              {t(greetingKey())}
             </p>
             <h1 className="gradient-text" style={{ margin: 0, fontSize: 26, fontWeight: 800, lineHeight: 1.2 }}>
               {firstName}
@@ -74,6 +76,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', position: 'relative' }}>
             <button
               onClick={() => setShowNotifications(v => !v)}
+              aria-label={t('home.notifications')}
               style={{
                 width: 44, height: 44, borderRadius: '50%', border: 'none',
                 background: showNotifications ? 'rgba(10,186,181,0.18)' : 'rgba(255,255,255,0.07)', color: 'white',
@@ -100,11 +103,11 @@ export default function HomeScreen({ onNavigate }: Props) {
                 }}
               >
                 <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>Notifications</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{t('home.notifications')}</p>
                 </div>
                 {unreadConversations.length === 0 ? (
                   <div style={{ padding: '24px 16px', textAlign: 'center' }}>
-                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>You're all caught up</p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t('home.caughtUp')}</p>
                   </div>
                 ) : (
                   unreadConversations.map(conv => {
@@ -158,7 +161,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             <input
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
-              placeholder="Search specialists, skills..."
+              placeholder={t('home.searchPlaceholder')}
               style={{
                 flex: 1, background: 'transparent', border: 'none', outline: 'none',
                 color: 'white', fontSize: 15, fontFamily: 'Outfit, sans-serif',
@@ -172,7 +175,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 fontFamily: 'Outfit, sans-serif',
               }}
             >
-              Find
+              {t('home.find')}
             </button>
           </div>
         </form>
@@ -193,13 +196,13 @@ export default function HomeScreen({ onNavigate }: Props) {
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
               <Sparkles size={13} color="rgba(255,255,255,0.8)" strokeWidth={2} />
-              VERIFIED SPECIALISTS
+              {t('home.promo.badge')}
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, lineHeight: 1.2 }}>
-              Book a creator<br />in a few taps
+              {t('home.promo.title')}
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 16 }}>
-              Photo, video, SMM, design and more
+              {t('home.promo.subtitle')}
             </div>
             <button
               onClick={() => onNavigate({ name: 'search' })}
@@ -209,7 +212,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 fontFamily: 'Outfit, sans-serif',
               }}
             >
-              Browse Specialists →
+              {t('home.promo.cta')} →
             </button>
           </div>
         </div>
@@ -218,12 +221,12 @@ export default function HomeScreen({ onNavigate }: Props) {
       {/* Categories */}
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', marginBottom: 14 }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Categories</h2>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>{t('home.categories')}</h2>
           <button
             onClick={() => onNavigate({ name: 'search' })}
             style={{ background: 'none', border: 'none', color: '#0ABAB5', fontSize: 13, fontWeight: 600 }}
           >
-            See all
+            {t('common.seeAll')}
           </button>
         </div>
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '0 20px' }}>
@@ -250,7 +253,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                   <Icon size={20} color={cat.color} strokeWidth={1.8} />
                 </span>
                 <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.8, textAlign: 'center', lineHeight: 1.3, maxWidth: 60 }}>
-                  {cat.label}
+                  {categoryLabel(cat.key)}
                 </span>
               </button>
             )
@@ -261,7 +264,7 @@ export default function HomeScreen({ onNavigate }: Props) {
       {specialists.length === 0 && (
         <div style={{ padding: '0 20px', marginBottom: 32 }}>
           <div className="glass" style={{ borderRadius: 18, padding: 20, textAlign: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 14, lineHeight: 1.6 }}>
-            No specialists yet. Be the first — open Profile → Specialist and create your listing.
+            {t('home.noSpecialists')}
           </div>
         </div>
       )}
@@ -271,13 +274,13 @@ export default function HomeScreen({ onNavigate }: Props) {
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', marginBottom: 14 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Star size={17} color="#FFD700" fill="#FFD700" strokeWidth={0} /> Top Specialists
+            <Star size={17} color="#FFD700" fill="#FFD700" strokeWidth={0} /> {t('home.top')}
           </h2>
           <button
             onClick={() => onNavigate({ name: 'search' })}
             style={{ background: 'none', border: 'none', color: '#0ABAB5', fontSize: 13, fontWeight: 600 }}
           >
-            See all
+            {t('common.seeAll')}
           </button>
         </div>
         <div className="hide-scrollbar" style={{ display: 'flex', gap: 14, overflowX: 'auto', padding: '0 20px' }}>
@@ -330,13 +333,13 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                    <p style={{ margin: '0 0 6px', fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{sp.category}</p>
+                    <p style={{ margin: '0 0 6px', fontSize: 11, color: 'rgba(255,255,255,0.45)' }}>{categoryLabel(sp.categoryKey)}</p>
                   </div>
                   <LevelBadge level={sp.level} />
                 </div>
                 <StarRating rating={sp.rating} />
                 <p style={{ margin: '6px 0 0', fontSize: 11, color: '#0ABAB5', fontWeight: 600 }}>
-                  from {new Intl.NumberFormat().format(sp.price)} UZS
+                  {t('common.from')} {formatNumber(sp.price)} {t('common.uzs')}
                 </p>
               </div>
             </button>
@@ -350,7 +353,7 @@ export default function HomeScreen({ onNavigate }: Props) {
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', marginBottom: 14 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Sparkles size={17} color="#0ABAB5" strokeWidth={2} /> New on Whale
+            <Sparkles size={17} color="#0ABAB5" strokeWidth={2} /> {t('home.new')}
           </h2>
         </div>
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -387,14 +390,14 @@ export default function HomeScreen({ onNavigate }: Props) {
                   <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'white' }}>{sp.name}</p>
                   {sp.verified && <BadgeCheck size={14} color="#0ABAB5" strokeWidth={2} />}
                 </div>
-                <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{sp.category} · {sp.city}</p>
+                <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{categoryLabel(sp.categoryKey)} · {sp.city}</p>
                 <StarRating rating={sp.rating} />
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#0ABAB5' }}>
-                  {new Intl.NumberFormat().format(sp.price)}
+                  {formatNumber(sp.price)}
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>UZS</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>{t('common.uzs')}</p>
               </div>
             </button>
           ))}
@@ -419,9 +422,9 @@ export default function HomeScreen({ onNavigate }: Props) {
           }}>
             <Briefcase size={22} color="#0ABAB5" strokeWidth={1.8} />
           </div>
-          <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700 }}>Offer your services</h3>
+          <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700 }}>{t('home.offer.title')}</h3>
           <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
-            Are you a photographer, videographer, designer or marketer? Create a listing and start receiving bookings.
+            {t('home.offer.text')}
           </p>
           <button
             onClick={() => onNavigate({ name: 'dashboard' })}
@@ -432,7 +435,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             }}
             className="tiffany-glow"
           >
-            Become a specialist →
+            {t('home.offer.cta')} →
           </button>
         </div>
       </div>

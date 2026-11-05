@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import type { Specialist, Review, Order } from '../types'
+import { t, formatTime } from '../i18n'
 
 function mapSpecialistRow(row: Record<string, any>): Specialist {
   return {
@@ -45,7 +46,7 @@ export async function fetchReviews(specialistId: string): Promise<Review[]> {
     author: row.author_name,
     avatar: row.author_avatar,
     rating: row.rating,
-    date: new Date(row.created_at).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' }),
+    date: row.created_at as string, // ISO, formatted in the active language at render time
     text: row.text,
     quality: row.quality,
     timing: row.timing,
@@ -162,18 +163,18 @@ export async function fetchSpecialistOrders(specialistId: string): Promise<Speci
   const namesById: Record<string, string> = {}
   if (clientIds.length > 0) {
     const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', clientIds)
-    for (const p of profiles ?? []) namesById[p.id] = p.full_name || 'Client'
+    for (const p of profiles ?? []) namesById[p.id] = p.full_name || t('common.client')
   }
 
   return rows.map(row => ({
     id: row.id,
     specialistId: row.specialist_id,
-    date: new Date(row.booking_date).toLocaleDateString('en', { day: 'numeric', month: 'short', year: 'numeric' }),
+    date: row.booking_date as string, // ISO; formatted at render time
     rawDate: row.booking_date,
     service: row.service,
     status: row.status,
     amount: row.amount,
-    clientName: namesById[row.user_id] ?? 'Client',
+    clientName: namesById[row.user_id] ?? t('common.client'),
     bookingSlot: row.booking_slot,
   }))
 }
@@ -207,14 +208,14 @@ export async function fetchSpecialistInbox(specialistId: string): Promise<InboxI
   const names: Record<string, string> = {}
   if (ids.length > 0) {
     const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', ids)
-    for (const p of profiles ?? []) names[p.id] = p.full_name || 'Client'
+    for (const p of profiles ?? []) names[p.id] = p.full_name || t('common.client')
   }
 
   return rows.map(r => ({
     id: r.id,
-    clientName: names[r.user_id] ?? 'Client',
+    clientName: names[r.user_id] ?? t('common.client'),
     lastMessage: r.last_message,
-    lastTime: new Date(r.last_time).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    lastTime: formatTime(r.last_time),
     unread: r.specialist_unread ?? 0,
   }))
 }
@@ -230,7 +231,7 @@ export async function fetchThread(conversationId: string) {
     id: row.id as string,
     from: row.sender as 'me' | 'them',
     text: row.text as string,
-    time: new Date(row.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    time: formatTime(row.created_at),
     type: row.message_type as 'text' | 'image',
     image: (row.image_url ?? undefined) as string | undefined,
   }))
@@ -290,8 +291,8 @@ export async function createReview(userId: string, input: ReviewInput): Promise<
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024
 
 export async function uploadChatImage(file: File, userId: string): Promise<string> {
-  if (!file.type.startsWith('image/')) throw new Error('Only image files are supported.')
-  if (file.size > MAX_UPLOAD_BYTES) throw new Error('Image is too large (max 4MB).')
+  if (!file.type.startsWith('image/')) throw new Error(t('err.imageOnly'))
+  if (file.size > MAX_UPLOAD_BYTES) throw new Error(t('err.imageTooLarge'))
 
   const ext = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg'
   const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
