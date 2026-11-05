@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
+import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
-import { ClipboardList } from '../icons'
+import { fetchMyReviewedOrderIds } from '../lib/queries'
+import ReviewModal from './ReviewModal'
+import { ClipboardList, Star } from '../icons'
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -14,9 +18,32 @@ const STATUS_CONFIG = {
   cancelled: { label: 'Cancelled', color: '#ff4d6d', bg: 'rgba(255,77,109,0.12)' },
 }
 
+const actionBtn = {
+  padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700, border: 'none', cursor: 'pointer',
+  fontFamily: 'Outfit, sans-serif',
+} as const
+
 export default function BookingsScreen({ onNavigate }: Props) {
-  const { orders } = useAppStore()
-  const { specialists } = useSpecialists()
+  const { orders, cancelOrder } = useAppStore()
+  const { user } = useAuth()
+  const { specialists, reload: reloadSpecialists } = useSpecialists()
+  const [reviewed, setReviewed] = useState<Set<string>>(new Set())
+  const [reviewing, setReviewing] = useState<{ orderId: string; specialistId: string; name: string } | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    fetchMyReviewedOrderIds(user.id)
+      .then(ids => setReviewed(new Set(ids)))
+      .catch(err => console.error('Failed to load reviewed orders', err))
+  }, [user, orders.length])
+
+  async function handleCancel(orderId: string) {
+    if (!confirm('Cancel this booking? The time slot will be released.')) return
+    setBusyId(orderId)
+    await cancelOrder(orderId)
+    setBusyId(null)
+  }
 
   return (
     <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
@@ -35,42 +62,76 @@ export default function BookingsScreen({ onNavigate }: Props) {
             const sp = specialists.find(s => s.id === order.specialistId)
             if (!sp) return null
             const status = STATUS_CONFIG[order.status]
+            const canReview = order.status === 'completed' && !reviewed.has(order.id)
+            const canCancel = order.status === 'pending' || order.status === 'confirmed'
             return (
-              <button
+              <div
                 key={order.id}
-                onClick={() => onNavigate({ name: 'specialist', id: sp.id })}
-                className="glass"
-                style={{
-                  borderRadius: 18, padding: '14px 16px',
-                  display: 'flex', gap: 12, alignItems: 'center',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  textAlign: 'left', cursor: 'pointer',
-                  transition: 'transform 0.15s',
-                }}
-                onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.01)')}
-                onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
+                className="glass fade-up"
+                style={{ borderRadius: 18, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.08)' }}
               >
-                <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
-                  <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{order.service}</p>
-                  <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{order.date}</p>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onNavigate({ name: 'specialist', id: sp.id })}
+                  onKeyDown={e => e.key === 'Enter' && onNavigate({ name: 'specialist', id: sp.id })}
+                  style={{ display: 'flex', gap: 12, alignItems: 'center', cursor: 'pointer' }}
+                >
+                  <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: '#111' }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'white' }}>{sp.name}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(255,255,255,0.45)' }}>{order.service}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{order.date}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
+                      {new Intl.NumberFormat().format(order.amount)}
+                    </p>
+                    <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: status.bg, color: status.color }}>
+                      {status.label}
+                    </span>
+                  </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'white' }}>
-                    {new Intl.NumberFormat().format(order.amount)}
-                  </p>
-                  <span style={{
-                    padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700,
-                    background: status.bg, color: status.color,
-                  }}>
-                    {status.label}
-                  </span>
-                </div>
-              </button>
+
+                {(canReview || canCancel) && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    {canReview && (
+                      <button
+                        onClick={() => setReviewing({ orderId: order.id, specialistId: sp.id, name: sp.name })}
+                        style={{ ...actionBtn, background: '#0ABAB5', color: '#080808', display: 'flex', alignItems: 'center', gap: 5 }}
+                      >
+                        <Star size={12} fill="#080808" strokeWidth={0} /> Leave a review
+                      </button>
+                    )}
+                    {canCancel && (
+                      <button
+                        onClick={() => handleCancel(order.id)}
+                        disabled={busyId === order.id}
+                        style={{ ...actionBtn, background: 'rgba(255,77,109,0.12)', color: '#ff4d6d', opacity: busyId === order.id ? 0.6 : 1 }}
+                      >
+                        {busyId === order.id ? 'Cancelling…' : 'Cancel booking'}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
+      )}
+
+      {reviewing && (
+        <ReviewModal
+          orderId={reviewing.orderId}
+          specialistId={reviewing.specialistId}
+          specialistName={reviewing.name}
+          onClose={() => setReviewing(null)}
+          onSubmitted={() => {
+            setReviewed(prev => new Set(prev).add(reviewing.orderId))
+            setReviewing(null)
+            reloadSpecialists() // rating/review count are recalculated by the database
+          }}
+        />
       )}
     </div>
   )

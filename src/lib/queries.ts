@@ -183,6 +183,110 @@ export async function markOrderCompleted(orderId: string): Promise<void> {
   if (error) throw error
 }
 
+// ---------- Specialist-side inbox ----------
+
+export interface InboxItem {
+  id: string
+  clientName: string
+  lastMessage: string
+  lastTime: string
+  unread: number
+}
+
+/** Conversations on the specialist's own listing, newest first, with the client's name. */
+export async function fetchSpecialistInbox(specialistId: string): Promise<InboxItem[]> {
+  const { data, error } = await supabase
+    .from('conversations')
+    .select('*')
+    .eq('specialist_id', specialistId)
+    .order('last_time', { ascending: false })
+  if (error) throw error
+  const rows = data ?? []
+
+  const ids = Array.from(new Set(rows.map(r => r.user_id)))
+  const names: Record<string, string> = {}
+  if (ids.length > 0) {
+    const { data: profiles } = await supabase.from('profiles').select('id, full_name').in('id', ids)
+    for (const p of profiles ?? []) names[p.id] = p.full_name || 'Client'
+  }
+
+  return rows.map(r => ({
+    id: r.id,
+    clientName: names[r.user_id] ?? 'Client',
+    lastMessage: r.last_message,
+    lastTime: new Date(r.last_time).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    unread: r.specialist_unread ?? 0,
+  }))
+}
+
+export async function fetchThread(conversationId: string) {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data ?? []).map(row => ({
+    id: row.id as string,
+    from: row.sender as 'me' | 'them',
+    text: row.text as string,
+    time: new Date(row.created_at).toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' }),
+    type: row.message_type as 'text' | 'image',
+    image: (row.image_url ?? undefined) as string | undefined,
+  }))
+}
+
+/** Sends a message as the specialist (sender = 'them' from the client's point of view). */
+export async function sendSpecialistMessage(conversationId: string, text: string, image?: string): Promise<void> {
+  const { error } = await supabase.from('messages').insert({
+    conversation_id: conversationId,
+    sender: 'them',
+    text,
+    message_type: image ? 'image' : 'text',
+    image_url: image ?? null,
+  })
+  if (error) throw error
+}
+
+export async function markSpecialistRead(conversationId: string): Promise<void> {
+  const { error } = await supabase.from('conversations').update({ specialist_unread: 0 }).eq('id', conversationId)
+  if (error) throw error
+}
+
+// ---------- Reviews ----------
+
+export async function fetchMyReviewedOrderIds(userId: string): Promise<string[]> {
+  const { data, error } = await supabase.from('reviews').select('order_id').eq('author_id', userId).not('order_id', 'is', null)
+  if (error) throw error
+  return (data ?? []).map(r => r.order_id as string)
+}
+
+export interface ReviewInput {
+  orderId: string
+  specialistId: string
+  rating: number
+  quality: number
+  timing: number
+  communication: number
+  text: string
+}
+
+/** The server stamps the author's name from their profile and enforces "completed orders only". */
+export async function createReview(userId: string, input: ReviewInput): Promise<void> {
+  const { error } = await supabase.from('reviews').insert({
+    order_id: input.orderId,
+    specialist_id: input.specialistId,
+    author_id: userId,
+    author_name: 'Client',
+    rating: input.rating,
+    quality: input.quality,
+    timing: input.timing,
+    communication: input.communication,
+    text: input.text,
+  })
+  if (error) throw error
+}
+
 const MAX_UPLOAD_BYTES = 4 * 1024 * 1024
 
 export async function uploadChatImage(file: File, userId: string): Promise<string> {

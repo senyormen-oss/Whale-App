@@ -12,12 +12,22 @@ export const CATEGORIES = [
   { key: 'model',   label: 'Model',           color: '#E6A44D' },
 ] as const
 
-export const SUBSCRIPTIONS = [
-  { id: 'sub1', name: 'One-time Shoot', price: 350000, description: '1 session, edited materials', level: 'single' as const },
-  { id: 'sub2', name: 'Basic', price: 900000, description: '5 videos / month', level: 'bronze' as const, popular: false },
-  { id: 'sub3', name: 'Standard', price: 1500000, description: '10 videos / month', level: 'silver' as const, popular: true },
-  { id: 'sub4', name: 'Premium', price: 2500000, description: '15–20 videos / month', level: 'gold' as const, popular: false },
+// Booking packages. Prices are derived from the specialist's own per-session
+// price (sessions x price, minus a bulk discount), so the amount charged always
+// matches what the specialist advertises.
+const PLAN_TEMPLATES = [
+  { id: 'sub1', name: 'One-time Shoot', description: '1 session, edited materials', level: 'single' as const, sessions: 1, discount: 0, popular: false },
+  { id: 'sub2', name: 'Basic', description: '5 sessions', level: 'bronze' as const, sessions: 5, discount: 0.1, popular: false },
+  { id: 'sub3', name: 'Standard', description: '10 sessions', level: 'silver' as const, sessions: 10, discount: 0.15, popular: true },
+  { id: 'sub4', name: 'Premium', description: '20 sessions', level: 'gold' as const, sessions: 20, discount: 0.2, popular: false },
 ]
+
+export function getSubscriptionPlans(basePrice: number) {
+  return PLAN_TEMPLATES.map(p => ({
+    ...p,
+    price: Math.round((p.sessions * basePrice * (1 - p.discount)) / 1000) * 1000,
+  }))
+}
 
 export const AVAILABLE_SLOTS = ['09:00', '11:00', '13:00', '15:00', '17:00']
 

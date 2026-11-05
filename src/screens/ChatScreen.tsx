@@ -5,7 +5,7 @@ import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { uploadChatImage } from '../lib/queries'
 import {
-  ArrowLeft, Phone, Paperclip, MapPin, ImageIcon, FileText, Smile, ArrowUp, MessageSquareText, AlertCircle,
+  ArrowLeft, ImageIcon, Smile, ArrowUp, MessageSquareText, AlertCircle,
 } from '../icons'
 
 interface Props {
@@ -58,7 +58,7 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
                   <span style={{
                     position: 'absolute', bottom: 1, right: 1,
                     width: 13, height: 13, borderRadius: '50%',
-                    background: '#4ade80', border: '2px solid #080808',
+                    background: sp.available ? '#4ade80' : 'rgba(255,255,255,0.25)', border: '2px solid #080808',
                   }} />
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
@@ -115,10 +115,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
   }, [conversationId])
 
   async function pushMine(partial: { text: string; type?: 'text' | 'image'; image?: string }) {
-    await sendMessage(conversationId, { from: 'me', ...partial })
-    setTimeout(() => {
-      sendMessage(conversationId, { from: 'them', text: 'Got it! I\'ll prepare everything for the session. 👌' })
-    }, 1200)
+    await sendMessage(conversationId, partial)
   }
 
   function handleSend() {
@@ -126,19 +123,6 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
     pushMine({ text: input.trim() })
     setInput('')
     setShowEmoji(false)
-  }
-
-  function handleQuickAction(label: string) {
-    if (label === 'Image') {
-      fileInputRef.current?.click()
-      return
-    }
-    const templates: Record<string, string> = {
-      File: '📎 Sent a file: brief.pdf',
-      Location: '📍 Shared a location pin',
-      Reference: '📋 Sent a reference link',
-    }
-    pushMine({ text: templates[label] ?? label })
   }
 
   async function handleFileChosen(e: React.ChangeEvent<HTMLInputElement>) {
@@ -178,15 +162,16 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           </button>
           <div style={{ position: 'relative' }}>
             <img src={sp.avatar} alt={sp.name} style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
-            <span style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: '#4ade80', border: '2px solid #111' }} />
+            {sp.available && (
+              <span style={{ position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: '50%', background: '#4ade80', border: '2px solid #111' }} />
+            )}
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 1px', fontSize: 15, fontWeight: 700 }}>{sp.name}</p>
-            <p style={{ margin: 0, fontSize: 11, color: '#4ade80', fontWeight: 500 }}>● Online</p>
+            <p style={{ margin: 0, fontSize: 11, color: sp.available ? '#4ade80' : 'rgba(255,255,255,0.4)', fontWeight: 500 }}>
+              {sp.available ? 'Accepting bookings' : 'Not accepting bookings'}
+            </p>
           </div>
-          <button style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: 36, height: 36, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Phone size={15} strokeWidth={2} />
-          </button>
         </div>
       </div>
 
@@ -253,28 +238,20 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
 
       {/* Quick actions */}
       <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, padding: '0 20px 10px', overflowX: 'auto', alignItems: 'center' }}>
-        {[
-          { label: 'File', icon: Paperclip },
-          { label: 'Location', icon: MapPin },
-          { label: 'Image', icon: ImageIcon },
-          { label: 'Reference', icon: FileText },
-        ].map(a => (
-          <button
-            key={a.label}
-            onClick={() => handleQuickAction(a.label)}
-            disabled={a.label === 'Image' && uploading}
-            style={{
-              flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
-              padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer',
-              background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)',
-              fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 500,
-              opacity: a.label === 'Image' && uploading ? 0.5 : 1,
-            }}
-          >
-            <a.icon size={13} strokeWidth={1.8} />
-            {a.label === 'Image' && uploading ? 'Uploading…' : a.label}
-          </button>
-        ))}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          style={{
+            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer',
+            background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)',
+            fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 500,
+            opacity: uploading ? 0.5 : 1,
+          }}
+        >
+          <ImageIcon size={13} strokeWidth={1.8} />
+          {uploading ? 'Uploading…' : 'Photo'}
+        </button>
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChosen} style={{ display: 'none' }} />
       </div>
 

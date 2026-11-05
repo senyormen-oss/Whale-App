@@ -60,6 +60,37 @@ body {
 .fade-in   { animation: fadeIn 0.25s ease both; }
 .slide-up  { animation: slideUp 0.4s cubic-bezier(.22,.68,0,1.2) both; }
 
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.slide-down { animation: slideDown 0.3s cubic-bezier(.22,.68,0,1) both; }
+
+/* Tactile feedback on every tappable control */
+button, [role="button"] {
+  transition: transform 0.15s ease, opacity 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+button:active:not(:disabled), [role="button"]:active {
+  transform: scale(0.97);
+}
+button:disabled { cursor: not-allowed; }
+
+:focus-visible {
+  outline: 2px solid #0ABAB5;
+  outline-offset: 2px;
+}
+input:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .glass {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(24px);

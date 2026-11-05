@@ -54,12 +54,15 @@ export interface Conversation {
   lastMessage: string
   lastTime: string
   unread: number
+  /** Unread count from the specialist's side of the thread. */
+  specialistUnread?: number
 }
 
 export interface Order {
   id: string
   specialistId: string
   date: string
+  rawDate?: string
   service: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   amount: number

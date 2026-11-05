@@ -2,8 +2,17 @@ import { useState } from 'react'
 import { CATEGORIES } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
+import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
-import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, Bot, MessageSquareText } from '../icons'
+import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase } from '../icons'
+
+function greeting() {
+  const h = new Date().getHours()
+  if (h < 5) return 'Good night'
+  if (h < 12) return 'Good morning'
+  if (h < 18) return 'Good afternoon'
+  return 'Good evening'
+}
 
 interface Props {
   onNavigate: (screen: Screen) => void
@@ -29,8 +38,10 @@ export default function HomeScreen({ onNavigate }: Props) {
   const [showNotifications, setShowNotifications] = useState(false)
   const { conversations, notificationsEnabled, markConversationRead } = useAppStore()
   const { specialists } = useSpecialists()
+  const { user } = useAuth()
+  const firstName = ((user?.user_metadata?.full_name as string) || '').trim().split(' ')[0] || 'there'
 
-  const featured = specialists.filter(s => s.level === 'gold' || s.level === 'platinum').slice(0, 5)
+  const featured = specialists.filter(s => s.reviews > 0).sort((a, b) => b.rating - a.rating).slice(0, 5)
   const newOnes  = specialists.filter(s => s.isNew).slice(0, 4)
   const unreadConversations = conversations.filter(c => c.unread > 0)
   const hasNotifications = notificationsEnabled && unreadConversations.length > 0
@@ -54,10 +65,10 @@ export default function HomeScreen({ onNavigate }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
             <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-              Good morning
+              {greeting()}
             </p>
             <h1 className="gradient-text" style={{ margin: 0, fontSize: 26, fontWeight: 800, lineHeight: 1.2 }}>
-              Sherzod
+              {firstName}
             </h1>
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', position: 'relative' }}>
@@ -123,11 +134,14 @@ export default function HomeScreen({ onNavigate }: Props) {
               </div>
             )}
 
-            <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&auto=format"
-              alt="User avatar"
-              style={{ width: 44, height: 44, borderRadius: '50%', objectFit: 'cover', border: '2px solid #0ABAB5' }}
-            />
+            <div
+              style={{
+                width: 44, height: 44, borderRadius: '50%', border: '2px solid #0ABAB5',
+                background: 'rgba(10,186,181,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <User size={20} color="#0ABAB5" strokeWidth={1.8} />
+            </div>
           </div>
         </div>
 
@@ -179,13 +193,13 @@ export default function HomeScreen({ onNavigate }: Props) {
           <div style={{ position: 'relative' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>
               <Sparkles size={13} color="rgba(255,255,255,0.8)" strokeWidth={2} />
-              LIMITED OFFER
+              VERIFIED SPECIALISTS
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, lineHeight: 1.2 }}>
-              First booking —<br />20% discount
+              Book a creator<br />in a few taps
             </div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', marginBottom: 16 }}>
-              Use code: <strong>WHALE20</strong>
+              Photo, video, SMM, design and more
             </div>
             <button
               onClick={() => onNavigate({ name: 'search' })}
@@ -244,7 +258,16 @@ export default function HomeScreen({ onNavigate }: Props) {
         </div>
       </section>
 
+      {specialists.length === 0 && (
+        <div style={{ padding: '0 20px', marginBottom: 32 }}>
+          <div className="glass" style={{ borderRadius: 18, padding: 20, textAlign: 'center', color: 'rgba(255,255,255,0.55)', fontSize: 14, lineHeight: 1.6 }}>
+            No specialists yet. Be the first — open Profile → Specialist and create your listing.
+          </div>
+        </div>
+      )}
+
       {/* Top Specialists */}
+      {featured.length > 0 && (
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', marginBottom: 14 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -320,8 +343,10 @@ export default function HomeScreen({ onNavigate }: Props) {
           ))}
         </div>
       </section>
+      )}
 
       {/* New Specialists */}
+      {newOnes.length > 0 && (
       <section style={{ marginBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', marginBottom: 14 }}>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -375,8 +400,9 @@ export default function HomeScreen({ onNavigate }: Props) {
           ))}
         </div>
       </section>
+      )}
 
-      {/* AI Match Banner */}
+      {/* Offer your services */}
       <div style={{ padding: '0 20px' }}>
         <div
           className="glass"
@@ -391,14 +417,14 @@ export default function HomeScreen({ onNavigate }: Props) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: 'rgba(10,186,181,0.15)',
           }}>
-            <Bot size={22} color="#0ABAB5" strokeWidth={1.8} />
+            <Briefcase size={22} color="#0ABAB5" strokeWidth={1.8} />
           </div>
-          <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700 }}>AI Specialist Match</h3>
+          <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700 }}>Offer your services</h3>
           <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.5 }}>
-            Answer 4 quick questions — get the perfect specialist for your brand in seconds.
+            Are you a photographer, videographer, designer or marketer? Create a listing and start receiving bookings.
           </p>
           <button
-            onClick={() => onNavigate({ name: 'search' })}
+            onClick={() => onNavigate({ name: 'dashboard' })}
             style={{
               background: '#0ABAB5', border: 'none', borderRadius: 12,
               padding: '11px 20px', color: '#080808', fontWeight: 700, fontSize: 14,
@@ -406,7 +432,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             }}
             className="tiffany-glow"
           >
-            Start AI Match →
+            Become a specialist →
           </button>
         </div>
       </div>

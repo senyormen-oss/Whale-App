@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getLevelConfig, formatPrice } from '../data'
+import { getLevelConfig, formatPrice, getSubscriptionPlans } from '../data'
 import type { Screen, Review } from '../types'
 import { useAppStore } from '../store'
 import { useSpecialists } from '../specialistsData'
@@ -17,7 +17,7 @@ type Tab = 'portfolio' | 'about' | 'reviews'
 export default function SpecialistScreen({ specialistId, onNavigate, onBack }: Props) {
   const { specialists } = useSpecialists()
   const sp = specialists.find(s => s.id === specialistId)
-  const { favorites, toggleFavorite } = useAppStore()
+  const { favorites, toggleFavorite, startConversation } = useAppStore()
   const [tab, setTab] = useState<Tab>('portfolio')
   const [copied, setCopied] = useState(false)
   const [reviews, setReviews] = useState<Review[]>([])
@@ -60,6 +60,8 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
   )
 
   const level = getLevelConfig(sp.level)
+  const avgOf = (key: 'quality' | 'timing' | 'communication') =>
+    reviews.length ? Math.round((reviews.reduce((sum, r) => sum + r[key], 0) / reviews.length) * 10) / 10 : 0
   const LevelIcon = LEVEL_ICONS[sp.level].icon
 
   return (
@@ -273,15 +275,11 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
               <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing</h3>
-              {[
-                { label: 'One-time session', price: sp.price, note: 'editing included' },
-                { label: 'Rush order (48h)', price: Math.round(sp.price * 1.5), note: '+50% to base' },
-                { label: 'Monthly retainer', price: Math.round(sp.price * 3.5), note: '5 sessions' },
-              ].map(item => (
-                <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              {getSubscriptionPlans(sp.price).map(item => (
+                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <div>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.label}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{item.note}</p>
+                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.name}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{item.description}</p>
                   </div>
                   <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#0ABAB5' }}>{formatPrice(item.price)}</p>
                 </div>
@@ -312,19 +310,20 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
         {tab === 'reviews' && (
           <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {/* Rating summary */}
+            {/* Rating summary — computed from real reviews only */}
+            {reviews.length > 0 && (
             <div className="glass" style={{ borderRadius: 16, padding: 16, display: 'flex', gap: 16, alignItems: 'center' }}>
               <div style={{ textAlign: 'center' }}>
                 <p style={{ margin: '0 0 2px', fontSize: 44, fontWeight: 900, color: 'white', lineHeight: 1 }}>{sp.rating}</p>
                 <p style={{ margin: '0 0 4px', display: 'flex', gap: 2, justifyContent: 'center' }}>
-                  {Array.from({ length: 5 }).map((_, i) => (
+                  {Array.from({ length: Math.max(1, Math.round(sp.rating)) }).map((_, i) => (
                     <Star key={i} size={14} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                   ))}
                 </p>
                 <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>{sp.reviews} reviews</p>
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {[['Quality', 4.9], ['Timing', 4.7], ['Communication', 4.8], ['Result', 4.9]].map(([label, val]) => (
+                {[['Quality', avgOf('quality')], ['Timing', avgOf('timing')], ['Communication', avgOf('communication')]].map(([label, val]) => (
                   <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', width: 90 }}>{label}</span>
                     <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.1)' }}>
@@ -335,11 +334,18 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 ))}
               </div>
             </div>
+            )}
 
             {reviews.map(r => (
               <div key={r.id} className="glass" style={{ borderRadius: 16, padding: 16 }}>
                 <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                  <img src={r.avatar} alt={r.author} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
+                  {r.avatar ? (
+                    <img src={r.avatar} alt={r.author} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', background: '#111' }} />
+                  ) : (
+                    <div aria-hidden style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(10,186,181,0.15)', color: '#0ABAB5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 15 }}>
+                      {(r.author || '?').charAt(0).toUpperCase()}
+                    </div>
+                  )}
                   <div style={{ flex: 1 }}>
                     <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700 }}>{r.author}</p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -375,7 +381,10 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
       }}>
         <div style={{ display: 'flex', gap: 12 }}>
           <button
-            onClick={() => onNavigate({ name: 'chats' })}
+            onClick={async () => {
+              const conversationId = await startConversation(specialistId)
+              if (conversationId) onNavigate({ name: 'chat', conversationId })
+            }}
             className="glass"
             style={{
               padding: '14px 18px', borderRadius: 16, border: '1px solid rgba(255,255,255,0.15)',

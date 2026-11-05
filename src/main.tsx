@@ -1,20 +1,27 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import ErrorBoundary, { OfflineBanner } from './ErrorBoundary'
 import { AuthProvider } from './auth'
+import { ToastProvider } from './toast'
 import { SpecialistsProvider } from './specialistsData'
 import { AppStoreProvider } from './store'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider>
-      <SpecialistsProvider>
-        <AppStoreProvider>
-          <App />
-        </AppStoreProvider>
-      </SpecialistsProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <SpecialistsProvider>
+            <AppStoreProvider>
+              <OfflineBanner />
+              <App />
+            </AppStoreProvider>
+          </SpecialistsProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )
 

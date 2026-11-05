@@ -19,7 +19,9 @@ export function SpecialistsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+    // `loading` starts true and is only flipped by the first load: later reloads
+    // refresh the list silently instead of unmounting the whole app behind a
+    // full-screen loader (which used to reset navigation back to Home).
     fetchSpecialists()
       .then(data => {
         if (!cancelled) {

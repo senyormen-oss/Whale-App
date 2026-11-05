@@ -103,11 +103,11 @@ function LoadingScreen() {
 }
 
 export default function App() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, recovering } = useAuth()
   const { loading: specialistsLoading, error: specialistsError } = useSpecialists()
 
   if (authLoading) return <LoadingScreen />
-  if (!user) return <AuthScreen />
+  if (!user || recovering) return <AuthScreen />
   if (specialistsLoading) return <LoadingScreen />
   if (specialistsError) {
     return (
@@ -125,7 +125,11 @@ export default function App() {
 
 function AuthenticatedApp() {
   const [activeTab, setActiveTab] = useState<TabName>('home')
-  const [screenStack, setScreenStack] = useState<Screen[]>([{ name: 'home' }])
+  const [screenStack, setScreenStack] = useState<Screen[]>(() => {
+    // Deep link from the "share profile" button: https://site/#specialist/<id>
+    const m = window.location.hash.match(/^#specialist\/([\w-]+)$/)
+    return m ? [{ name: 'home' }, { name: 'specialist', id: m[1] }] : [{ name: 'home' }]
+  })
   const { conversations } = useAppStore()
 
   const currentScreen = screenStack[screenStack.length - 1]

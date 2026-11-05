@@ -3,11 +3,14 @@ import type { Screen, Specialist } from '../types'
 import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
-import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder } from '../lib/queries'
+import { useToast } from '../toast'
+import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder, type InboxItem } from '../lib/queries'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
+import { SpecialistInbox, SpecialistChatThread } from './SpecialistInbox'
+import LegalScreen from './LegalScreen'
 import {
   Settings, User, Briefcase, ClipboardList, Wallet, CheckCircle2, Star,
-  Calendar, TrendingUp, Heart, BarChart3, Users, Bell, Trash2, LogOut, X, Loader2, type IconType,
+  Calendar, TrendingUp, Heart, BarChart3, Users, Bell, Trash2, LogOut, X, Loader2, MessageSquareText, FileText, type IconType,
 } from '../icons'
 
 interface Props {
@@ -48,10 +51,26 @@ function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; l
 export default function DashboardScreen({ onNavigate }: Props) {
   const [mode, setMode] = useState<'client' | 'specialist'>('client')
   const [showSettings, setShowSettings] = useState(false)
-  const { orders, favorites, notificationsEnabled, toggleNotifications, clearAllData } = useAppStore()
+  const { orders, favorites, notificationsEnabled, toggleNotifications, deleteAccount } = useAppStore()
   const { user, signOut } = useAuth()
+  const { notify } = useToast()
   const { specialists, reload: reloadSpecialists } = useSpecialists()
+  const [openChat, setOpenChat] = useState<InboxItem | null>(null)
+  const [inboxUnread, setInboxUnread] = useState(0)
+  const [deleting, setDeleting] = useState(false)
+  const [legalDoc, setLegalDoc] = useState<'terms' | 'privacy' | null>(null)
 
+  const spendByMonth = Array.from({ length: 5 }, (_, i) => {
+    const d = new Date()
+    d.setDate(1)
+    d.setMonth(d.getMonth() - (4 - i))
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const amount = orders
+      .filter(o => o.status !== 'cancelled' && o.rawDate?.startsWith(key))
+      .reduce((sum, o) => sum + o.amount, 0)
+    return { key, label: d.toLocaleDateString('en', { month: 'short' }), amount, current: i === 4 }
+  })
+  const maxSpend = Math.max(...spendByMonth.map(m => m.amount))
   const totalSpent = orders.reduce((sum, o) => sum + o.amount, 0)
   const completedCount = orders.filter(o => o.status === 'completed').length
   const favoriteSpecialists = specialists.filter(s => favorites.includes(s.id))
@@ -91,8 +110,10 @@ export default function DashboardScreen({ onNavigate }: Props) {
     try {
       await markOrderCompleted(orderId)
       setMyOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: 'completed' } : o)))
+      notify('Session marked as completed.', 'success')
     } catch (err) {
       console.error('Failed to mark order completed', err)
+      notify('Could not update this session. Please try again.')
     }
   }
 
@@ -106,6 +127,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
     } catch (err) {
       console.error('Failed to update availability', err)
       setMyListing({ ...myListing, available: !next })
+      notify('Could not change your availability. Please try again.')
     }
   }
 
@@ -123,6 +145,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
   const completeness = profileChecklist.length
     ? Math.round((profileChecklist.filter(i => i.done).length / profileChecklist.length) * 100)
     : 0
+
+  if (legalDoc) {
+    return <LegalScreen doc={legalDoc} onBack={() => setLegalDoc(null)} />
+  }
+
+  if (openChat) {
+    return <SpecialistChatThread conversationId={openChat.id} clientName={openChat.clientName} onBack={() => setOpenChat(null)} />
+  }
 
   return (
     <div style={{ background: '#080808', minHeight: '100%', paddingBottom: 100 }}>
@@ -189,37 +219,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
             <StatCard icon={ClipboardList} label="Total Orders" value={String(orders.length)} accent />
             <StatCard icon={Wallet} label="Total Spent" value={(totalSpent / 1_000_000).toFixed(2) + 'M'} sub="UZS" />
             <StatCard icon={CheckCircle2} label="Completed" value={String(completedCount)} />
-            <StatCard icon={Star} label="Avg Rating Given" value="4.7" />
-          </div>
-
-          {/* Active subscription */}
-          <div>
-            <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>Active Subscription</h2>
-            <div
-              style={{
-                borderRadius: 18, padding: '18px',
-                background: 'linear-gradient(135deg, #0a2a29 0%, #0d3d3c 50%, #0a2a29 100%)',
-                border: '1px solid rgba(10,186,181,0.3)', position: 'relative', overflow: 'hidden',
-              }}
-            >
-              <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, borderRadius: '50%', background: 'rgba(10,186,181,0.1)' }} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)' }}>STANDARD PLAN</p>
-                  <p style={{ margin: '0 0 8px', fontSize: 22, fontWeight: 900, color: 'white' }}>10 Videos/mo</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }}>
-                      <div style={{ width: '70%', height: '100%', borderRadius: 2, background: '#0ABAB5' }} />
-                    </div>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)' }}>7/10 used</span>
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ margin: '0 0 2px', fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Renews</p>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#0ABAB5' }}>Sep 1</p>
-                </div>
-              </div>
-            </div>
+            <StatCard icon={Heart} label="Favorites" value={String(favorites.length)} />
           </div>
 
           {/* Recent orders */}
@@ -280,24 +280,21 @@ export default function DashboardScreen({ onNavigate }: Props) {
               <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Spend by month
               </p>
+              {maxSpend === 0 && (
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>No spending yet.</p>
+              )}
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 80 }}>
-                {[
-                  { month: 'Apr', amount: 150000, max: 1380000 },
-                  { month: 'May', amount: 300000, max: 1380000 },
-                  { month: 'Jun', amount: 600000, max: 1380000 },
-                  { month: 'Jul', amount: 430000, max: 1380000 },
-                  { month: 'Aug', amount: 350000, max: 1380000 },
-                ].map(m => (
-                  <div key={m.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                {spendByMonth.map(m => (
+                  <div key={m.key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
                     <div
                       style={{
                         width: '100%', borderRadius: 6,
-                        height: `${(m.amount / m.max) * 72}px`,
-                        background: m.month === 'Aug' ? '#0ABAB5' : 'rgba(10,186,181,0.25)',
+                        height: `${Math.max(m.amount > 0 ? 6 : 2, (m.amount / (maxSpend || 1)) * 72)}px`,
+                        background: m.current ? '#0ABAB5' : 'rgba(10,186,181,0.25)',
                         transition: 'height 0.5s ease',
                       }}
                     />
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{m.month}</span>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{m.label}</span>
                   </div>
                 ))}
               </div>
@@ -390,6 +387,17 @@ export default function DashboardScreen({ onNavigate }: Props) {
                   }} />
                 </span>
               </button>
+
+              {/* Client messages */}
+              <div>
+                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MessageSquareText size={16} color="#0ABAB5" strokeWidth={2} /> Messages
+                  {inboxUnread > 0 && (
+                    <span style={{ background: '#0ABAB5', color: '#080808', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 800 }}>{inboxUnread}</span>
+                  )}
+                </h2>
+                <SpecialistInbox specialistId={myListing.id} onOpen={setOpenChat} onUnreadChange={setInboxUnread} />
+              </div>
 
               {/* Upcoming sessions */}
               <div>
@@ -527,33 +535,52 @@ export default function DashboardScreen({ onNavigate }: Props) {
               </span>
             </button>
 
-            <button
-              onClick={() => {
-                if (confirm('Delete all your bookings, chats and favorites from your account? This cannot be undone.')) {
-                  clearAllData()
-                  setShowSettings(false)
-                }
-              }}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
-                padding: '14px 4px', background: 'none', border: 'none',
-                borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
-              }}
-            >
-              <Trash2 size={17} color="#ff4d6d" strokeWidth={1.8} />
-              <span style={{ fontSize: 14, color: '#ff4d6d' }}>Delete my data</span>
-            </button>
+            {(['terms', 'privacy'] as const).map(doc => (
+              <button
+                key={doc}
+                onClick={() => { setShowSettings(false); setLegalDoc(doc) }}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '14px 4px', background: 'none', border: 'none',
+                  borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
+                }}
+              >
+                <FileText size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
+                <span style={{ fontSize: 14, color: 'white' }}>{doc === 'terms' ? 'Terms of Service' : 'Privacy Policy'}</span>
+              </button>
+            ))}
 
             <button
               onClick={() => signOut()}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 12,
                 padding: '14px 4px', background: 'none', border: 'none',
-                cursor: 'pointer', textAlign: 'left',
+                borderBottom: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', textAlign: 'left',
               }}
             >
               <LogOut size={17} color="rgba(255,255,255,0.7)" strokeWidth={1.8} />
               <span style={{ fontSize: 14, color: 'white' }}>Sign out</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                if (deleting) return
+                if (!confirm('Delete your account? Your profile, bookings, messages, favorites and any specialist listing will be permanently erased. This cannot be undone.')) return
+                if (!confirm('Last check — really delete everything and close your account?')) return
+                setDeleting(true)
+                const ok = await deleteAccount()
+                setDeleting(false)
+                if (ok) setShowSettings(false)
+              }}
+              disabled={deleting}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 4px', background: 'none', border: 'none',
+                cursor: deleting ? 'wait' : 'pointer', textAlign: 'left', opacity: deleting ? 0.6 : 1,
+              }}
+            >
+              <Trash2 size={17} color="#ff4d6d" strokeWidth={1.8} />
+              <span style={{ fontSize: 14, color: '#ff4d6d' }}>{deleting ? 'Deleting…' : 'Delete account'}</span>
             </button>
           </div>
         </div>

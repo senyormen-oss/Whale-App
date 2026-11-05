@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SUBSCRIPTIONS, AVAILABLE_SLOTS, formatPrice } from '../data'
+import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
 import { useSpecialists } from '../specialistsData'
@@ -36,7 +36,8 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   const [viewMonth, setViewMonth] = useState(today.getMonth())
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
-  const [selectedSub, setSelectedSub] = useState(SUBSCRIPTIONS[0].id)
+  const plans = getSubscriptionPlans(sp?.price ?? 0)
+  const [selectedSub, setSelectedSub] = useState('sub1')
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0].id)
   const [booked, setBooked] = useState(false)
   const [confirming, setConfirming] = useState(false)
@@ -110,7 +111,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
     setSelectedSlot(null)
   }
 
-  const sub = SUBSCRIPTIONS.find(s => s.id === selectedSub) ?? SUBSCRIPTIONS[0]
+  const sub = plans.find(s => s.id === selectedSub) ?? plans[0]
   const dateLabel = selectedDay ? `${MONTH_NAMES[viewMonth].slice(0, 3)} ${selectedDay}, ${viewYear}` : '—'
   const dateKey = selectedDay ? dayKey(selectedDay) : ''
   const takenSlotsForSelectedDay = selectedDay ? (bookedByDate[dateKey] ?? []) : []
@@ -372,7 +373,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {step === 'sub' && (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }} className="fade-in">
           <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Choose your plan</p>
-          {SUBSCRIPTIONS.map(s => {
+          {plans.map(s => {
             const SubIcon = SUBSCRIPTION_ICONS[s.level]
             return (
             <button
