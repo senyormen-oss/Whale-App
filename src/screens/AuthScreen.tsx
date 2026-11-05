@@ -54,7 +54,7 @@ function PasswordField({ value, onChange, placeholder, autoComplete }: {
   const [show, setShow] = useState(false)
   return (
     <div className="glass" style={fieldStyle}>
-      <Lock size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
+      <Lock size={16} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
@@ -68,7 +68,7 @@ function PasswordField({ value, onChange, placeholder, autoComplete }: {
         type="button"
         onClick={() => setShow(s => !s)}
         aria-label={show ? t('auth.hidePassword') : t('auth.showPassword')}
-        style={{ background: 'none', border: 'none', padding: 4, color: 'rgba(var(--fg-rgb),0.5)', display: 'flex' }}
+        style={{ background: 'none', border: 'none', padding: 4, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', display: 'flex' }}
       >
         {show ? <EyeOff size={17} strokeWidth={1.8} /> : <Eye size={17} strokeWidth={1.8} />}
       </button>
@@ -107,7 +107,7 @@ function NewPasswordForm() {
   return (
     <Shell>
       <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800 }}>{t('auth.newPassword')}</h1>
-      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'rgba(var(--fg-rgb),0.5)' }}>{t('auth.pw.hint')}</p>
+      <p style={{ margin: '0 0 20px', fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('auth.pw.hint')}</p>
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <PasswordField value={password} onChange={setPassword} placeholder={t('auth.newPasswordPlaceholder')} autoComplete="new-password" />
         <ErrorLine message={error} />
@@ -199,7 +199,7 @@ export default function AuthScreen() {
           <Mail size={26} color="var(--accent-text)" strokeWidth={1.8} />
         </div>
         <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>{t('auth.checkEmail')}</h1>
-        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(var(--fg-rgb),0.55)', lineHeight: 1.6, maxWidth: 320 }}>
+        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))', lineHeight: 1.6, maxWidth: 320 }}>
           {isReset
             ? <>{t('auth.resetSent')} <strong style={{ color: 'var(--ink)' }}>{pendingEmail}</strong></>
             : <>{t('auth.confirmSent')} <strong style={{ color: 'var(--ink)' }}>{pendingEmail}</strong>. {t('auth.confirmThen')}</>}
@@ -240,7 +240,7 @@ export default function AuthScreen() {
       </div>
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <h1 className="gradient-text floaty" style={{ margin: '0 0 6px', fontSize: 32, fontWeight: 900 }}>Whale</h1>
-        <p style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),0.5)' }}>
+        <p style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>
           {view === 'forgot' ? t('auth.resetTitle') : t('auth.tagline')}
         </p>
       </div>
@@ -266,12 +266,12 @@ export default function AuthScreen() {
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {view === 'signup' && (
           <div className="glass fade-in" style={fieldStyle}>
-            <User size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
+            <User size={16} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
             <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder={t('auth.fullName')} autoComplete="name" maxLength={100} style={inputStyle} />
           </div>
         )}
         <div className="glass" style={fieldStyle}>
-          <Mail size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
+          <Mail size={16} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
           <input value={email} onChange={e => setEmail(e.target.value)} placeholder={t('auth.email')} type="email" autoComplete="email" inputMode="email" maxLength={254} style={inputStyle} />
         </div>
         {view !== 'forgot' && (
@@ -285,7 +285,7 @@ export default function AuthScreen() {
 
         {view === 'signup' && (
           <>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('auth.pw.hint')}</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('auth.pw.hint')}</p>
             <Checkbox checked={agreed} onChange={setAgreed}>
               {t('auth.agree1')}{' '}
               <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.terms')}</button>
@@ -314,10 +314,10 @@ export default function AuthScreen() {
       </form>
 
       {view !== 'signup' && (
-        <p style={{ margin: '24px 0 0', textAlign: 'center', fontSize: 11.5, color: 'rgba(var(--fg-rgb),0.3)' }}>
-          <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, color: 'rgba(var(--fg-rgb),0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.termsShort')}</button>
+        <p style={{ margin: '24px 0 0', textAlign: 'center', fontSize: 11.5, color: 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))' }}>
+          <button type="button" onClick={() => setLegalDoc('terms')} style={{ ...linkBtn, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontSize: 11.5, fontWeight: 500 }}>{t('legal.termsShort')}</button>
           {' · '}
-          <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, color: 'rgba(var(--fg-rgb),0.4)', fontSize: 11.5, fontWeight: 500 }}>{t('legal.privacyShort')}</button>
+          <button type="button" onClick={() => setLegalDoc('privacy')} style={{ ...linkBtn, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontSize: 11.5, fontWeight: 500 }}>{t('legal.privacyShort')}</button>
         </p>
       )}
     </Shell>

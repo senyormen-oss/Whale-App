@@ -40,7 +40,7 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
     return <Loader2 className="spin" size={18} color="var(--accent-text)" strokeWidth={2} />
   }
   if (items.length === 0) {
-    return <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('inbox.empty')}</p>
+    return <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('inbox.empty')}</p>
   }
 
   return (
@@ -64,9 +64,9 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.clientName}</p>
-              <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)', flexShrink: 0 }}>{item.lastTime}</span>
+              <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', flexShrink: 0 }}>{item.lastTime}</span>
             </div>
-            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {localizeSystemMessage(item.lastMessage) || t('inbox.noMessages')}
             </p>
           </div>
@@ -164,7 +164,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
           </button>
           <div>
             <p style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>{clientName}</p>
-            <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)' }}>{t('common.client')}</p>
+            <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{t('common.client')}</p>
           </div>
         </div>
       </div>
@@ -172,8 +172,8 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
       <div className="hide-scrollbar" style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {loading && <Loader2 className="spin" size={20} color="var(--accent-text)" strokeWidth={2} style={{ alignSelf: 'center' }} />}
         {!loading && messages.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),0.35)', fontSize: 13 }}>
-            <MessageSquareText size={32} color="rgba(var(--fg-rgb),0.2)" strokeWidth={1.5} style={{ marginBottom: 8 }} />
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', fontSize: 13 }}>
+            <MessageSquareText size={32} color="rgba(var(--fg-rgb),calc(0.2 * var(--tb)))" strokeWidth={1.5} style={{ marginBottom: 8 }} />
             <p style={{ margin: 0 }}>{t('inbox.noMessages')}</p>
           </div>
         )}
@@ -189,7 +189,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
                 {msg.type === 'image' && msg.image
                   ? <img src={msg.image} alt="Attachment" style={{ width: '100%', maxWidth: 220, borderRadius: 12, display: 'block' }} />
                   : <p style={{ margin: 0, overflowWrap: 'anywhere' }}>{localizeSystemMessage(msg.text)}</p>}
-                <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : '4px 0 0', fontSize: 10, textAlign: 'right', color: mine ? 'rgba(0,0,0,0.45)' : 'rgba(var(--fg-rgb),0.35)' }}>{msg.time}</p>
+                <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : '4px 0 0', fontSize: 10, textAlign: 'right', color: mine ? 'rgba(0,0,0,0.45)' : 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))' }}>{msg.time}</p>
               </div>
             </div>
           )
@@ -201,7 +201,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
         <button
           onClick={() => fileRef.current?.click()}
           aria-label={t('chat.photo')}
-          style={{ background: 'rgba(var(--fg-rgb),0.07)', border: 'none', borderRadius: '50%', width: 44, height: 44, color: 'rgba(var(--fg-rgb),0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+          style={{ background: 'rgba(var(--fg-rgb),0.07)', border: 'none', borderRadius: '50%', width: 44, height: 44, color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
         >
           <ImageIcon size={18} strokeWidth={1.8} />
         </button>
@@ -222,7 +222,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
           aria-label={t('chat.send')}
           style={{
             width: 48, height: 48, borderRadius: '50%', border: 'none', flexShrink: 0,
-            background: input.trim() ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)', color: input.trim() ? '#080808' : 'rgba(var(--fg-rgb),0.3)',
+            background: input.trim() ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)', color: input.trim() ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
         >

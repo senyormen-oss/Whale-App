@@ -46,11 +46,11 @@ function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; l
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: accent ? 'rgba(10,186,181,0.15)' : 'rgba(var(--fg-rgb),0.06)',
       }}>
-        <Icon size={17} color={accent ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.7)'} strokeWidth={1.8} />
+        <Icon size={17} color={accent ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))'} strokeWidth={1.8} />
       </div>
       <p style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 900, color: accent ? 'var(--accent-text)' : 'var(--ink)' }}>{value}</p>
-      <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)' }}>{label}</p>
-      {sub && <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>{sub}</p>}
+      <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{label}</p>
+      {sub && <p style={{ margin: '2px 0 0', fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))' }}>{sub}</p>}
     </div>
   )
 }
@@ -177,14 +177,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
             <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {(user?.user_metadata?.full_name as string) || t('dash.user')}
             </h1>
-            <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.email}
             </p>
           </div>
           <button
             onClick={() => setShowSettings(true)}
             aria-label={t('dash.settings')}
-            style={{ background: 'rgba(var(--fg-rgb),0.07)', border: 'none', borderRadius: 12, padding: '8px 12px', color: 'rgba(var(--fg-rgb),0.7)', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'rgba(var(--fg-rgb),0.07)', border: 'none', borderRadius: 12, padding: '8px 12px', color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))', display: 'flex', alignItems: 'center' }}
           >
             <Settings size={19} strokeWidth={1.8} />
           </button>
@@ -199,7 +199,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
             { value: 'specialist', label: t('dash.specialist') },
           ]}
         />
-        <p key={mode} className="fade-in" style={{ margin: '10px 4px 0', fontSize: 12, lineHeight: 1.5, color: 'rgba(var(--fg-rgb),0.5)' }}>
+        <p key={mode} className="fade-in" style={{ margin: '10px 4px 0', fontSize: 12, lineHeight: 1.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>
           {mode === 'client' ? t('dash.clientHint') : t('dash.specialistHint')}
         </p>
       </div>
@@ -220,7 +220,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
             <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700 }}>{t('dash.recentOrders')}</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {orders.length === 0 && (
-                <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noOrders')}</p>
+                <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('dash.noOrders')}</p>
               )}
               {orders.map(order => {
                 const sp = specialists.find(s => s.id === order.specialistId)
@@ -244,8 +244,8 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: 'var(--surface)' }} />
                     <div style={{ flex: 1 }}>
                       <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
-                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>{localizeService(order.service)}</p>
-                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)' }}>{formatDate(order.date)}</p>
+                      <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{localizeService(order.service)}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))' }}>{formatDate(order.date)}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
@@ -270,11 +270,11 @@ export default function DashboardScreen({ onNavigate }: Props) {
               <BarChart3 size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.analytics')}
             </h2>
             <div className="glass" style={{ borderRadius: 18, padding: 18 }}>
-              <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <p style={{ margin: '0 0 16px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {t('dash.spendByMonth')}
               </p>
               {maxSpend === 0 && (
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noSpending')}</p>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('dash.noSpending')}</p>
               )}
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 80 }}>
                 {spendByMonth.map(m => (
@@ -287,7 +287,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                         transition: 'height 0.5s ease',
                       }}
                     />
-                    <span style={{ fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)' }}>{m.label}</span>
+                    <span style={{ fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{m.label}</span>
                   </div>
                 ))}
               </div>
@@ -300,7 +300,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               <Heart size={16} color="#ff4d6d" strokeWidth={2.2} /> {t('dash.favorites')}
             </h2>
             {favoriteSpecialists.length === 0 ? (
-              <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>
+              <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>
                 {t('dash.noFavorites')}
               </p>
             ) : (
@@ -322,7 +322,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     <p style={{ margin: 0, fontSize: 11, fontWeight: 600, color: 'var(--ink)', textAlign: 'center' }}>
                       {sp.name.split(' ')[0]}
                     </p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)' }}>{categoryLabel(sp.categoryKey).split(' ')[0]}</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{categoryLabel(sp.categoryKey).split(' ')[0]}</p>
                   </button>
                 ))}
               </div>
@@ -399,7 +399,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 </h2>
                 {ordersLoading && <Loader2 className="spin" size={18} color="var(--accent-text)" strokeWidth={2} />}
                 {!ordersLoading && upcomingOrders.length === 0 && (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noUpcoming')}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('dash.noUpcoming')}</p>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {upcomingOrders.map(order => {
@@ -412,11 +412,11 @@ export default function DashboardScreen({ onNavigate }: Props) {
                         }}>
                           <p style={{ margin: '0 0 1px', fontSize: 11, color: 'var(--accent-text)', fontWeight: 700 }}>{monthDay}</p>
                           <p style={{ margin: '0 0 1px', fontSize: 16, fontWeight: 900, color: 'var(--ink)' }}>{dayNum}</p>
-                          <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.45)' }}>{order.bookingSlot}</p>
+                          <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{order.bookingSlot}</p>
                         </div>
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)' }}>{localizeService(order.service)}</p>
+                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{localizeService(order.service)}</p>
                         </div>
                         <button
                           onClick={() => handleMarkCompleted(order.id)}
@@ -436,14 +436,14 @@ export default function DashboardScreen({ onNavigate }: Props) {
                   <TrendingUp size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.completed')}
                 </h2>
                 {myOrders.filter(o => o.status === 'completed').length === 0 ? (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('dash.noCompleted')}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('dash.noCompleted')}</p>
                 ) : (
                   <div className="glass" style={{ borderRadius: 18, padding: 4 }}>
                     {myOrders.filter(o => o.status === 'completed').map(order => (
                       <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
                         <div>
                           <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)' }}>{localizeService(order.service)} · {formatDate(order.date)}</p>
+                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{localizeService(order.service)} · {formatDate(order.date)}</p>
                         </div>
                         <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatNumber(order.amount)}</p>
                       </div>
@@ -470,7 +470,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                       <span style={{ width: 20, height: 20, borderRadius: '50%', background: item.done ? 'rgba(74,222,128,0.2)' : 'rgba(var(--fg-rgb),0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {item.done && <CheckCircle2 size={13} color="var(--ok)" strokeWidth={2.5} />}
                       </span>
-                      <span style={{ fontSize: 13, color: item.done ? 'rgba(var(--fg-rgb),0.7)' : 'rgba(var(--fg-rgb),0.4)' }}>{item.label}</span>
+                      <span style={{ fontSize: 13, color: item.done ? 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -509,9 +509,9 @@ export default function DashboardScreen({ onNavigate }: Props) {
             </div>
 
             <div style={{ padding: '4px 0 16px', borderBottom: '1px solid rgba(var(--fg-rgb),0.08)' }}>
-              <p style={{ margin: '0 0 8px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600 }}>{t('dash.language')}</p>
+              <p style={{ margin: '0 0 8px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', fontWeight: 600 }}>{t('dash.language')}</p>
               <LanguageSwitcher />
-              <p style={{ margin: '14px 0 8px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600 }}>{t('dash.theme')}</p>
+              <p style={{ margin: '14px 0 8px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', fontWeight: 600 }}>{t('dash.theme')}</p>
               <ThemeSwitcher />
             </div>
 
@@ -523,7 +523,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
               }}
             >
-              <Bell size={17} color="rgba(var(--fg-rgb),0.7)" strokeWidth={1.8} />
+              <Bell size={17} color="rgba(var(--fg-rgb),calc(0.7 * var(--tb)))" strokeWidth={1.8} />
               <span style={{ flex: 1, fontSize: 14, color: 'var(--ink)' }}>{t('home.notifications')}</span>
               <span style={{
                 width: 40, height: 24, borderRadius: 12, position: 'relative',
@@ -546,7 +546,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                   borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
                 }}
               >
-                <FileText size={17} color="rgba(var(--fg-rgb),0.7)" strokeWidth={1.8} />
+                <FileText size={17} color="rgba(var(--fg-rgb),calc(0.7 * var(--tb)))" strokeWidth={1.8} />
                 <span style={{ fontSize: 14, color: 'var(--ink)' }}>{doc === 'terms' ? t('legal.terms') : t('legal.privacy')}</span>
               </button>
             ))}
@@ -559,7 +559,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
               }}
             >
-              <LogOut size={17} color="rgba(var(--fg-rgb),0.7)" strokeWidth={1.8} />
+              <LogOut size={17} color="rgba(var(--fg-rgb),calc(0.7 * var(--tb)))" strokeWidth={1.8} />
               <span style={{ fontSize: 14, color: 'var(--ink)' }}>{t('dash.signOut')}</span>
             </button>
 

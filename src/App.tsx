@@ -28,6 +28,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
   unreadMessages: number
 }) {
   const { t } = useI18n()
+  const index = Math.max(0, TABS.findIndex(tab => tab.name === activeTab))
   return (
     <div
       style={{
@@ -36,13 +37,18 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
       }}
     >
       <div
-        className="glass-dark"
-        style={{
-          display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-          padding: '10px 0 26px', borderTop: '1px solid rgba(var(--fg-rgb),0.07)',
-          borderRadius: '24px 24px 0 0',
-        }}
+        className="glass-dark nav-bar"
+        style={{ position: 'relative', display: 'flex', padding: '8px 8px 24px', borderRadius: '24px 24px 0 0' }}
       >
+        {/* Sliding highlight: glides from tab to tab */}
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute', top: 8, bottom: 24, left: 8, width: `calc((100% - 16px) / ${TABS.length})`,
+            transform: `translateX(${index * 100}%)`, transition: 'transform 0.42s cubic-bezier(.34,1.2,.5,1)',
+            borderRadius: 16, background: 'rgba(10,186,181,0.15)',
+          }}
+        />
         {TABS.map(tab => {
           const isActive = activeTab === tab.name
           const Icon = tab.icon
@@ -50,37 +56,32 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
             <button
               key={tab.name}
               onClick={() => onTabChange(tab.name)}
+              aria-current={isActive ? 'page' : undefined}
+              className="nav-tab"
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                padding: '8px 16px', borderRadius: 16, border: 'none',
-                background: isActive ? 'rgba(10,186,181,0.12)' : 'transparent',
-                cursor: 'pointer', position: 'relative',
-                transition: 'all 0.2s ease',
+                position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                padding: '8px 0', borderRadius: 16, border: 'none', background: 'transparent', cursor: 'pointer',
               }}
             >
               <Icon
                 size={22}
                 strokeWidth={isActive ? 2.3 : 1.8}
-                color={isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.35)'}
-                style={{
-                  transform: isActive ? 'scale(1.1)' : 'scale(1)',
-                  transition: 'transform 0.2s ease',
-                }}
+                color={isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))'}
+                style={{ transform: isActive ? 'translateY(-1px) scale(1.12)' : 'scale(1)', transition: 'transform 0.3s cubic-bezier(.34,1.4,.5,1), stroke 0.25s ease' }}
               />
               <span style={{
                 fontSize: 10, fontWeight: isActive ? 700 : 500,
-                color: isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.35)',
-                transition: 'color 0.2s',
+                color: isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))',
+                transition: 'color 0.25s ease',
               }}>
                 {t(tab.label)}
               </span>
               {tab.name === 'messages' && unreadMessages > 0 && (
-                <span style={{
-                  position: 'absolute', top: 4, right: 8,
-                  background: '#0ABAB5', borderRadius: '50%',
-                  width: 16, height: 16, fontSize: 9, fontWeight: 900,
+                <span className="pop-in" style={{
+                  position: 'absolute', top: 2, left: '55%',
+                  background: '#0ABAB5', borderRadius: 10, minWidth: 16, height: 16, padding: '0 4px', fontSize: 9, fontWeight: 900,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: '#080808', border: '2px solid var(--surface)',
+                  color: '#080808', border: '2px solid var(--bg)', boxSizing: 'content-box',
                 }}>
                   {unreadMessages}
                 </span>
@@ -92,7 +93,6 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
     </div>
   )
 }
-
 function LoadingScreen() {
   return (
     <div style={{

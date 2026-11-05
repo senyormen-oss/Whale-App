@@ -19,6 +19,8 @@ export interface Specialist {
   verified: boolean
   level: Level
   bio: string
+  /** Education, courses, certificates (free text, optional). */
+  qualification: string
   avatar: string
   cover: string
   portfolio: string[]

@@ -23,7 +23,7 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
       }}>
         <AlertCircle size={44} color="#ff4d6d" strokeWidth={1.6} style={{ marginBottom: 16 }} />
         <h1 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>{t('err.boundaryTitle')}</h1>
-        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(var(--fg-rgb),0.55)', maxWidth: 300, lineHeight: 1.6 }}>
+        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))', maxWidth: 300, lineHeight: 1.6 }}>
           {t('err.boundaryText')}
         </p>
         <button

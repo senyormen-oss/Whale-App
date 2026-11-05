@@ -272,6 +272,11 @@ export const ru: Record<Key, string> = {
   'dash.deleteText2': 'Точно удалить всё и закрыть аккаунт?',
   'dash.deleteFinal': 'Удалить навсегда',
 
+  'form.years': 'лет',
+  'form.expRange': 'Опыт должен быть от 0 до 60 лет.',
+  'form.qualification': 'Квалификация (образование, курсы, сертификаты)',
+  'form.qualificationPlaceholder': 'Например: окончил киношколу, сертификат Adobe, 5 лет в рекламе…',
+  'spec.qualification': 'Квалификация',
   'form.title': 'Стать специалистом',
   'form.intro': 'Заполните один раз — будет создана публичная анкета, которую сможет забронировать любой клиент Whale.',
   'form.category': 'Категория',

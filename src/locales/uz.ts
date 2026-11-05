@@ -272,6 +272,11 @@ export const uz: Record<Key, string> = {
   'dash.deleteText2': "Hammasini o'chirib, hisobni yopishni xohlaysizmi?",
   'dash.deleteFinal': "Butunlay o'chirish",
 
+  'form.years': 'yil',
+  'form.expRange': "Tajriba 0 dan 60 yilgacha bo'lishi kerak.",
+  'form.qualification': "Malaka (ta'lim, kurslar, sertifikatlar)",
+  'form.qualificationPlaceholder': "Masalan: kino maktabini tamomlagan, Adobe sertifikati, reklamada 5 yil…",
+  'spec.qualification': 'Malaka',
   'form.title': "Mutaxassis bo'lish",
   'form.intro': "Bir marta to'ldiring — Whale'ning istalgan mijozi band qila oladigan ochiq anketa yaratiladi.",
   'form.category': 'Toifa',

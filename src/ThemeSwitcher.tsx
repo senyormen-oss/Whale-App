@@ -44,7 +44,7 @@ export default function ThemeSwitcher({ compact = false }: { compact?: boolean }
             style={{
               position: 'relative', flex: 1, padding: compact ? '6px 0' : '9px 0', border: 'none', background: 'transparent',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              fontSize: 12, fontWeight: 700, color: active ? '#080808' : 'rgba(var(--fg-rgb),0.55)', transition: 'color 0.25s ease',
+              fontSize: 12, fontWeight: 700, color: active ? '#080808' : 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))', transition: 'color 0.25s ease',
             }}
           >
             <Icon size={15} strokeWidth={2} />

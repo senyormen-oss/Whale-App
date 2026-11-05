@@ -20,7 +20,7 @@ export default function LegalScreen({ doc, onBack }: { doc: 'terms' | 'privacy';
         </button>
         <div>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800 }}>{title}</h1>
-          <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('legal.updated', { date: formatDate(LEGAL.updatedIso) })}</p>
+          <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('legal.updated', { date: formatDate(LEGAL.updatedIso) })}</p>
         </div>
       </div>
 
@@ -29,7 +29,7 @@ export default function LegalScreen({ doc, onBack }: { doc: 'terms' | 'privacy';
           <section key={section.heading}>
             <h2 style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 700, color: 'var(--accent-text)' }}>{section.heading}</h2>
             {section.body.map((paragraph, i) => (
-              <p key={i} style={{ margin: '0 0 8px', fontSize: 13.5, lineHeight: 1.65, color: 'rgba(var(--fg-rgb),0.72)' }}>{paragraph}</p>
+              <p key={i} style={{ margin: '0 0 8px', fontSize: 13.5, lineHeight: 1.65, color: 'rgba(var(--fg-rgb),calc(0.72 * var(--tb)))' }}>{paragraph}</p>
             ))}
           </section>
         ))}

@@ -67,7 +67,7 @@ export default function HomeScreen({ onNavigate }: Props) {
       <div style={{ padding: '56px 20px 24px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
           <div>
-            <p style={{ color: 'rgba(var(--fg-rgb),0.45)', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+            <p style={{ color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', fontSize: 13, margin: '0 0 4px', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
               {t(greetingKey())}
             </p>
             <h1 className="gradient-text" style={{ margin: 0, fontSize: 26, fontWeight: 800, lineHeight: 1.2 }}>
@@ -108,7 +108,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 </div>
                 {unreadConversations.length === 0 ? (
                   <div style={{ padding: '24px 16px', textAlign: 'center' }}>
-                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('home.caughtUp')}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('home.caughtUp')}</p>
                   </div>
                 ) : (
                   unreadConversations.map(conv => {
@@ -127,7 +127,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                         <MessageSquareText size={15} color="var(--accent-text)" strokeWidth={1.8} style={{ flexShrink: 0 }} />
                         <div style={{ flex: 1, overflow: 'hidden' }}>
                           <p style={{ margin: '0 0 1px', fontSize: 12, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
-                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {conv.lastMessage}
                           </p>
                         </div>
@@ -151,7 +151,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               padding: '14px 18px', borderRadius: 16,
             }}
           >
-            <Search size={17} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
+            <Search size={17} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
             <input
               value={searchValue}
               onChange={e => setSearchValue(e.target.value)}
@@ -188,14 +188,14 @@ export default function HomeScreen({ onNavigate }: Props) {
           <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(var(--fg-rgb),0.06)' }} />
           <div style={{ position: 'absolute', bottom: -20, right: 30, width: 80, height: 80, borderRadius: '50%', background: 'rgba(var(--fg-rgb),0.04)' }} />
           <div style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(var(--fg-rgb),0.7)', marginBottom: 6 }}>
-              <Sparkles size={13} color="rgba(var(--fg-rgb),0.8)" strokeWidth={2} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))', marginBottom: 6 }}>
+              <Sparkles size={13} color="rgba(var(--fg-rgb),calc(0.8 * var(--tb)))" strokeWidth={2} />
               {t('home.promo.badge')}
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, lineHeight: 1.2 }}>
               {t('home.promo.title')}
             </div>
-            <div style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),0.75)', marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.75 * var(--tb)))', marginBottom: 16 }}>
               {t('home.promo.subtitle')}
             </div>
             <button
@@ -257,7 +257,7 @@ export default function HomeScreen({ onNavigate }: Props) {
 
       {specialists.length === 0 && (
         <div style={{ padding: '0 20px', marginBottom: 32 }}>
-          <div className="glass" style={{ borderRadius: 18, padding: 20, textAlign: 'center', color: 'rgba(var(--fg-rgb),0.55)', fontSize: 14, lineHeight: 1.6 }}>
+          <div className="glass" style={{ borderRadius: 18, padding: 20, textAlign: 'center', color: 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))', fontSize: 14, lineHeight: 1.6 }}>
             {t('home.noSpecialists')}
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function HomeScreen({ onNavigate }: Props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
-                    <p style={{ margin: '0 0 6px', fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)' }}>{categoryLabel(sp.categoryKey)}</p>
+                    <p style={{ margin: '0 0 6px', fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{categoryLabel(sp.categoryKey)}</p>
                   </div>
                   <LevelBadge level={sp.level} />
                 </div>
@@ -384,14 +384,14 @@ export default function HomeScreen({ onNavigate }: Props) {
                   <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
                   {sp.verified && <BadgeCheck size={14} color="var(--accent-text)" strokeWidth={2} />}
                 </div>
-                <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>{categoryLabel(sp.categoryKey)} · {sp.city}</p>
+                <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{categoryLabel(sp.categoryKey)} · {sp.city}</p>
                 <StarRating rating={sp.rating} />
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: 'var(--accent-text)' }}>
                   {formatNumber(sp.price)}
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.35)' }}>{t('common.uzs')}</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))' }}>{t('common.uzs')}</p>
               </div>
             </button>
           ))}
@@ -417,7 +417,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             <Briefcase size={22} color="var(--accent-text)" strokeWidth={1.8} />
           </div>
           <h3 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700 }}>{t('home.offer.title')}</h3>
-          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.55)', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))', lineHeight: 1.5 }}>
             {t('home.offer.text')}
           </p>
           <button

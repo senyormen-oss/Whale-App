@@ -15,7 +15,7 @@ function StarRating({ rating }: { rating: number }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
       <Star size={12} color="#FFD700" fill="#FFD700" strokeWidth={0} />
-      <span style={{ color: 'rgba(var(--fg-rgb),0.7)', fontSize: 12 }}>{rating}</span>
+      <span style={{ color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))', fontSize: 12 }}>{rating}</span>
     </span>
   )
 }
@@ -55,7 +55,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       <div style={{ padding: '56px 20px 16px', background: 'linear-gradient(180deg, var(--bg-header) 0%, var(--bg) 100%)' }}>
         <h1 style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 800 }}>{t('search.title')}</h1>
         <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 16 }}>
-          <Search size={16} color="rgba(var(--fg-rgb),0.5)" strokeWidth={1.8} />
+          <Search size={16} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -85,7 +85,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       {showFilters && (
         <div style={{ padding: '0 20px 16px' }} className="fade-in">
           <div className="glass" style={{ borderRadius: 16, padding: '14px 16px' }}>
-            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('search.sortBy')}</p>
+            <p style={{ margin: '0 0 10px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('search.sortBy')}</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {[
                 { key: 'rating', label: t('search.sort.rating') },
@@ -100,7 +100,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                     padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
                     border: 'none', fontFamily: 'Outfit, sans-serif',
                     background: sortBy === opt.key ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
-                    color: sortBy === opt.key ? '#080808' : 'rgba(var(--fg-rgb),0.7)',
+                    color: sortBy === opt.key ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
                   }}
                 >
                   {opt.label}
@@ -119,7 +119,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
             flexShrink: 0, padding: '8px 16px', borderRadius: 20,
             border: 'none', fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
             background: !activeCategory ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
-            color: !activeCategory ? '#080808' : 'rgba(var(--fg-rgb),0.7)',
+            color: !activeCategory ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
           }}
         >
           {t('search.all')}
@@ -136,11 +136,11 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                 padding: '8px 14px', borderRadius: 20, border: 'none',
                 fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
                 background: active ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
-                color: active ? '#080808' : 'rgba(var(--fg-rgb),0.7)',
+                color: active ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
                 transition: 'all 0.15s ease',
               }}
             >
-              <Icon size={14} color={active ? '#080808' : 'rgba(var(--fg-rgb),0.7)'} strokeWidth={1.8} />
+              <Icon size={14} color={active ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))'} strokeWidth={1.8} />
               {categoryLabel(cat.key)}
             </button>
           )
@@ -149,7 +149,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
 
       {/* Results count */}
       <div style={{ padding: '0 20px 14px' }}>
-        <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>
+        <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>
           {t('search.found', { n: results.length })}
         </p>
       </div>
@@ -228,7 +228,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
                   <div>
                     <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
-                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', display: 'flex', alignItems: 'center', gap: 4 }}>
                       {categoryLabel(sp.categoryKey)} · <MapPin size={11} strokeWidth={2} /> {sp.city}
                     </p>
                   </div>
@@ -236,14 +236,14 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: 'var(--accent-text)' }}>
                       {formatNumber(sp.price)}
                     </p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.3)' }}>{t('common.uzs')}{t('common.perSession')}</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))' }}>{t('common.uzs')}{t('common.perSession')}</p>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                   <StarRating rating={sp.rating} />
-                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>{t('search.reviewsCount', { n: sp.reviews })}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)' }}>{t('search.projectsCount', { n: sp.projects })}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))' }}>{t('search.reviewsCount', { n: sp.reviews })}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))' }}>{t('search.projectsCount', { n: sp.projects })}</span>
                 </div>
 
                 {/* Tags */}
@@ -268,8 +268,8 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
 
         {results.length === 0 && (
           <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <SearchX size={44} color="rgba(var(--fg-rgb),0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
-            <p style={{ color: 'rgba(var(--fg-rgb),0.5)', fontSize: 15 }}>{t('search.empty')}</p>
+            <SearchX size={44} color="rgba(var(--fg-rgb),calc(0.25 * var(--tb)))" strokeWidth={1.5} style={{ marginBottom: 12 }} />
+            <p style={{ color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', fontSize: 15 }}>{t('search.empty')}</p>
           </div>
         )}
       </div>

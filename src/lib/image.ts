@@ -1,4 +1,4 @@
-﻿/** Centre-crops an image to a square and downsizes it, so avatars stay small and load fast. */
+/** Centre-crops an image to a square and downsizes it, so avatars stay small and load fast. */
 export async function toSquareAvatar(file: File, size = 512): Promise<File> {
   const url = URL.createObjectURL(file)
   try {

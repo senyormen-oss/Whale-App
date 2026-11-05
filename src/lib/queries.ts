@@ -19,6 +19,7 @@ function mapSpecialistRow(row: Record<string, any>): Specialist {
     verified: row.verified,
     level: row.level,
     bio: row.bio,
+    qualification: row.qualification ?? '',
     avatar: row.avatar,
     cover: row.cover,
     portfolio: row.portfolio ?? [],
@@ -90,6 +91,8 @@ export interface SpecialistListingInput {
   age: number
   price: number
   bio: string
+  qualification?: string
+  experience?: number
   tags: string[]
   avatar: string
 }
@@ -104,7 +107,8 @@ export async function createSpecialistListing(userId: string, input: SpecialistL
       category_key: input.categoryKey,
       city: input.city,
       age: input.age,
-      experience: 0,
+      experience: input.experience ?? 0,
+      ...(input.qualification ? { qualification: input.qualification } : {}),
       projects: 0,
       reviews: 0,
       rating: 0,
@@ -134,6 +138,8 @@ export async function updateSpecialistListing(specialistId: string, patch: Parti
   if (patch.age !== undefined) dbPatch.age = patch.age
   if (patch.price !== undefined) dbPatch.price = patch.price
   if (patch.bio !== undefined) dbPatch.bio = patch.bio
+  if (patch.qualification !== undefined) dbPatch.qualification = patch.qualification
+  if (patch.experience !== undefined) dbPatch.experience = patch.experience
   if (patch.tags !== undefined) dbPatch.tags = patch.tags
   if (patch.avatar !== undefined) dbPatch.avatar = patch.avatar
   if (patch.available !== undefined) dbPatch.available = patch.available

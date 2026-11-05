@@ -117,7 +117,7 @@ export function Checkbox({ checked, onChange, children }: {
   children: ReactNode
 }) {
   return (
-    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12.5, color: 'rgba(var(--fg-rgb),0.6)', lineHeight: 1.5 }}>
+    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12.5, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', lineHeight: 1.5 }}>
       <button
         type="button"
         role="checkbox"

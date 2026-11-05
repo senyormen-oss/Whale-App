@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useAuth } from './auth'
 import { useToast } from './toast'
 import { useI18n } from './i18n'

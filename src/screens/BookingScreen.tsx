@@ -184,11 +184,11 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         <h2 className="slide-up gradient-text" style={{ margin: 0, fontSize: 28, fontWeight: 900, animationDelay: '0.1s' }}>
           {t('book.confirmed')}
         </h2>
-        <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),0.6)', lineHeight: 1.6, animationDelay: '0.2s' }}>
+        <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', lineHeight: 1.6, animationDelay: '0.2s' }}>
           {t('book.sessionWith')} <strong style={{ color: 'var(--ink)' }}>{sp.name}</strong><br />
           <strong style={{ color: 'var(--accent-text)' }}>{dateLabel}, {selectedSlot}</strong>
         </p>
-        <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)', animationDelay: '0.3s' }}>
+        <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', animationDelay: '0.3s' }}>
           {t('book.openingChat')}
         </p>
       </div>
@@ -214,7 +214,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
           </button>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800 }}>{t('book.title')}</h1>
-            <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.45)' }}>{t('book.with', { name: sp.name })}</p>
+            <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{t('book.with', { name: sp.name })}</p>
           </div>
         </div>
 
@@ -245,10 +245,10 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               >
                 {i + 1}
               </div>
-              <span style={{ fontSize: 12, color: step === s ? 'var(--ink)' : 'rgba(var(--fg-rgb),0.4)', fontWeight: step === s ? 600 : 400 }}>
+              <span style={{ fontSize: 12, color: step === s ? 'var(--ink)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontWeight: step === s ? 600 : 400 }}>
                 {s === 'date' ? t('book.step.date') : s === 'sub' ? t('book.step.service') : t('book.step.payment')}
               </span>
-              {i < 2 && <span style={{ color: 'rgba(var(--fg-rgb),0.2)', fontSize: 14 }}>›</span>}
+              {i < 2 && <span style={{ color: 'rgba(var(--fg-rgb),calc(0.2 * var(--tb)))', fontSize: 14 }}>›</span>}
             </div>
           ))}
         </div>
@@ -264,7 +264,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 disabled={!canGoPrevMonth}
                 style={{
                   background: 'none', border: 'none',
-                  color: canGoPrevMonth ? 'rgba(var(--fg-rgb),0.6)' : 'rgba(var(--fg-rgb),0.15)',
+                  color: canGoPrevMonth ? 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))' : 'rgba(var(--fg-rgb),calc(0.15 * var(--tb)))',
                   cursor: canGoPrevMonth ? 'pointer' : 'not-allowed',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4,
                 }}
@@ -278,7 +278,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               <button
                 onClick={goNextMonth}
                 style={{
-                  background: 'none', border: 'none', color: 'rgba(var(--fg-rgb),0.6)', cursor: 'pointer',
+                  background: 'none', border: 'none', color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 4,
                 }}
               >
@@ -289,7 +289,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             {/* Day headers */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8 }}>
               {weekdayLabels().map(d => (
-                <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(var(--fg-rgb),0.35)', padding: '4px 0' }}>
+                <div key={d} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', padding: '4px 0' }}>
                   {d}
                 </div>
               ))}
@@ -310,7 +310,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                     style={{
                       aspectRatio: '1', borderRadius: 10, border: sel ? '2px solid #0ABAB5' : today ? '2px solid rgba(10,186,181,0.4)' : '2px solid transparent',
                       background: sel ? '#0ABAB5' : busy ? 'rgba(var(--fg-rgb),0.03)' : 'rgba(var(--fg-rgb),0.06)',
-                      color: sel ? '#080808' : busy ? 'rgba(var(--fg-rgb),0.2)' : 'var(--ink)',
+                      color: sel ? '#080808' : busy ? 'rgba(var(--fg-rgb),calc(0.2 * var(--tb)))' : 'var(--ink)',
                       fontSize: 13, fontWeight: sel ? 800 : 500,
                       cursor: busy ? 'not-allowed' : 'pointer',
                       textDecoration: busy ? 'line-through' : 'none',
@@ -327,11 +327,11 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             <div style={{ display: 'flex', gap: 14, marginTop: 14, paddingTop: 12, borderTop: '1px solid rgba(var(--fg-rgb),0.06)' }}>
               {[
                 { color: 'var(--accent-text)', label: t('book.available') },
-                { color: 'rgba(var(--fg-rgb),0.15)', label: t('book.busy') },
+                { color: 'rgba(var(--fg-rgb),calc(0.15 * var(--tb)))', label: t('book.busy') },
               ].map(item => (
                 <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 10, height: 10, borderRadius: 3, background: item.color }} />
-                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.5)' }}>{item.label}</span>
+                  <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{item.label}</span>
                 </div>
               ))}
             </div>
@@ -344,7 +344,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 {t('book.times', { date: dateLabel })}
               </h3>
               {availableSlots.length === 0 && (
-                <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.4)' }}>
+                <p style={{ margin: '0 0 12px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>
                   {t('book.allBooked')}
                 </p>
               )}
@@ -373,7 +373,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Service */}
       {step === 'sub' && (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }} className="fade-in">
-          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)' }}>{t('book.choosePlan')}</p>
+          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('book.choosePlan')}</p>
           {plans.map(s => {
             const SubIcon = SUBSCRIPTION_ICONS[s.level]
             return (
@@ -408,18 +408,18 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: selectedSub === s.id ? 'rgba(10,186,181,0.2)' : 'rgba(var(--fg-rgb),0.06)',
                 }}>
-                  <SubIcon size={20} color={selectedSub === s.id ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.6)'} strokeWidth={1.8} />
+                  <SubIcon size={20} color={selectedSub === s.id ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))'} strokeWidth={1.8} />
                 </span>
                 <div>
                   <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{s.name}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)' }}>{s.description}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{s.description}</p>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
                 <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: selectedSub === s.id ? 'var(--accent-text)' : 'var(--ink)' }}>
                   {formatNumber(s.price)}
                 </p>
-                <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('common.uzs')}</p>
+                <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('common.uzs')}</p>
               </div>
             </button>
           )})}
@@ -429,7 +429,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Payment */}
       {step === 'pay' && (
         <div style={{ padding: '0 20px' }} className="fade-in">
-          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)' }}>{t('book.paymentMethod')}</p>
+          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('book.paymentMethod')}</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
             {PAYMENT_METHODS.map(pm => {
               const PmIcon = pm.icon
@@ -451,7 +451,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                   {!live && (
                     <span style={{
                       position: 'absolute', top: 8, right: 8, fontSize: 8, fontWeight: 800,
-                      color: 'rgba(var(--fg-rgb),0.35)', letterSpacing: '0.04em', textTransform: 'uppercase',
+                      color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', letterSpacing: '0.04em', textTransform: 'uppercase',
                     }}>
                       {t('book.demo')}
                     </span>
@@ -473,7 +473,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               { label: t('book.service'), value: sub.name },
             ].map(row => (
               <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
-                <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),0.5)' }}>{row.label}</span>
+                <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{row.label}</span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--ink)' }}>{row.value}</span>
               </div>
             ))}
@@ -483,7 +483,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             </div>
           </div>
 
-          <p style={{ margin: '0 0 16px', fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)', textAlign: 'center', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 5 }}>
+          <p style={{ margin: '0 0 16px', fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', textAlign: 'center', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 5 }}>
             <Lock size={12} style={{ flexShrink: 0, marginTop: 2 }} strokeWidth={2} />
             <span>
               {useRealGateway
@@ -521,7 +521,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             style={{
               width: '100%', padding: '16px', borderRadius: 18, border: 'none',
               background: selectedDay && selectedSlot ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
-              color: selectedDay && selectedSlot ? '#080808' : 'rgba(var(--fg-rgb),0.3)',
+              color: selectedDay && selectedSlot ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))',
               fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
               cursor: selectedDay && selectedSlot ? 'pointer' : 'not-allowed',
               transition: 'all 0.2s',

@@ -58,8 +58,8 @@ export default function BookingsScreen({ onNavigate }: Props) {
       </div>
 
       {orders.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(var(--fg-rgb),0.4)' }}>
-          <ClipboardList size={44} color="rgba(var(--fg-rgb),0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>
+          <ClipboardList size={44} color="rgba(var(--fg-rgb),calc(0.25 * var(--tb)))" strokeWidth={1.5} style={{ marginBottom: 12 }} />
           <p>{t('bookings.empty')}</p>
         </div>
       ) : (
@@ -86,8 +86,8 @@ export default function BookingsScreen({ onNavigate }: Props) {
                   <img src={sp.avatar} alt={sp.name} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, background: 'var(--surface)' }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
-                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>{localizeService(order.service)}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)' }}>{formatDate(order.date)}</p>
+                    <p style={{ margin: '0 0 4px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{localizeService(order.service)}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))' }}>{formatDate(order.date)}</p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>

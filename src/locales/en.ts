@@ -284,6 +284,11 @@ export const en = {
   'dash.deleteFinal': 'Delete forever',
 
   // become-a-specialist form
+  'form.years': 'years',
+  'form.expRange': 'Experience must be between 0 and 60 years.',
+  'form.qualification': 'Qualification (education, courses, certificates)',
+  'form.qualificationPlaceholder': 'e.g. Film school graduate, Adobe certified, 5 years in advertising…',
+  'spec.qualification': 'Qualification',
   'form.title': 'Become a Specialist',
   'form.intro': 'Fill this in once — it creates your public listing, bookable by any client on Whale.',
   'form.category': 'Category',

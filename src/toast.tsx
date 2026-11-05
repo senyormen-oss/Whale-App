@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <button
               onClick={() => dismiss(t.id)}
               aria-label={translate('common.close')}
-              style={{ background: 'none', border: 'none', color: 'rgba(var(--fg-rgb),0.5)', display: 'flex', padding: 2 }}
+              style={{ background: 'none', border: 'none', color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', display: 'flex', padding: 2 }}
             >
               <X size={15} strokeWidth={2} />
             </button>

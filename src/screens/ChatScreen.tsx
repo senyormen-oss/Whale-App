@@ -29,8 +29,8 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
       </div>
 
       {conversations.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(var(--fg-rgb),0.4)' }}>
-          <MessageSquareText size={44} color="rgba(var(--fg-rgb),0.25)" strokeWidth={1.5} style={{ marginBottom: 12 }} />
+        <div style={{ textAlign: 'center', padding: '80px 32px', color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>
+          <MessageSquareText size={44} color="rgba(var(--fg-rgb),calc(0.25 * var(--tb)))" strokeWidth={1.5} style={{ marginBottom: 12 }} />
           <p>{t('chat.empty')}</p>
         </div>
       ) : (
@@ -66,10 +66,10 @@ function ConversationList({ onNavigate }: { onNavigate: (screen: Screen) => void
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
                     <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{sp.name}</p>
-                    <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.35)', flexShrink: 0 }}>{conv.lastTime}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', flexShrink: 0 }}>{conv.lastTime}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),0.45)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8 }}>
+                    <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: 8 }}>
                       {localizeSystemMessage(conv.lastMessage)}
                     </p>
                     {conv.unread > 0 && (
@@ -172,7 +172,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           </div>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 1px', fontSize: 15, fontWeight: 700 }}>{sp.name}</p>
-            <p style={{ margin: 0, fontSize: 11, color: sp.available ? 'var(--ok)' : 'rgba(var(--fg-rgb),0.4)', fontWeight: 500 }}>
+            <p style={{ margin: 0, fontSize: 11, color: sp.available ? 'var(--ok)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontWeight: 500 }}>
               {sp.available ? t('chat.accepting') : t('chat.notAccepting')}
             </p>
           </div>
@@ -186,13 +186,13 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
       >
         {/* Date separator */}
         <div style={{ textAlign: 'center', margin: '8px 0' }}>
-          <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.3)', background: 'rgba(var(--fg-rgb),0.06)', padding: '4px 12px', borderRadius: 20 }}>
+          <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))', background: 'rgba(var(--fg-rgb),0.06)', padding: '4px 12px', borderRadius: 20 }}>
             {t('chat.today')}
           </span>
         </div>
 
         {messages.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),0.35)', fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', fontSize: 13 }}>
             {t('chat.sayHello', { name: sp.name.split(' ')[0] })} 👋
           </div>
         )}
@@ -231,7 +231,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
                 />
               )}
               {msg.type !== 'image' && <p style={{ margin: '0 0 4px', overflowWrap: 'anywhere' }}>{localizeSystemMessage(msg.text)}</p>}
-              <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : 0, fontSize: 10, color: msg.from === 'me' ? 'rgba(0,0,0,0.45)' : 'rgba(var(--fg-rgb),0.35)', textAlign: 'right' }}>
+              <p style={{ margin: msg.type === 'image' ? '4px 6px 2px' : 0, fontSize: 10, color: msg.from === 'me' ? 'rgba(0,0,0,0.45)' : 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', textAlign: 'right' }}>
                 {msg.time}
               </p>
             </div>
@@ -248,7 +248,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer',
-            background: 'rgba(var(--fg-rgb),0.07)', color: 'rgba(var(--fg-rgb),0.7)',
+            background: 'rgba(var(--fg-rgb),0.07)', color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
             fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 500,
             opacity: uploading ? 0.5 : 1,
           }}
@@ -300,7 +300,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           <button
             onClick={() => setShowEmoji(v => !v)}
             aria-label={t('chat.emoji')}
-            style={{ background: 'none', border: 'none', color: showEmoji ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),0.4)', display: 'flex', alignItems: 'center' }}
+            style={{ background: 'none', border: 'none', color: showEmoji ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', display: 'flex', alignItems: 'center' }}
           >
             <Smile size={18} strokeWidth={1.8} />
           </button>
@@ -312,7 +312,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
           style={{
             width: 48, height: 48, borderRadius: '50%', border: 'none',
             background: input.trim() ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
-            color: input.trim() ? '#080808' : 'rgba(var(--fg-rgb),0.3)',
+            color: input.trim() ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s', flexShrink: 0,
           }}

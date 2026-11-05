@@ -16,7 +16,7 @@ const inputStyle: React.CSSProperties = {
   borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif',
   outline: 'none',
 }
-const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', marginBottom: 6, fontWeight: 600 }
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', marginBottom: 6, fontWeight: 600 }
 
 export default function BecomeSpecialistForm({ onCreated }: Props) {
   const { t } = useI18n()
@@ -26,6 +26,8 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
   const [age, setAge] = useState('')
   const [price, setPrice] = useState('')
   const [bio, setBio] = useState('')
+  const [experience, setExperience] = useState('')
+  const [qualification, setQualification] = useState('')
   const [tags, setTags] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -43,6 +45,11 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
     }
     if (ageNum < 16 || ageNum > 99) {
       setError(t('form.ageRange'))
+      return
+    }
+    const expNum = experience === '' ? 0 : Number(experience)
+    if (!Number.isFinite(expNum) || expNum < 0 || expNum > 60) {
+      setError(t('form.expRange'))
       return
     }
     if (priceNum < 1000 || priceNum > 100_000_000) {
@@ -64,6 +71,8 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
         age: ageNum,
         price: priceNum,
         bio: bio.trim(),
+        experience: Math.round(expNum),
+        qualification: qualification.trim(),
         tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
         avatar,
       })
@@ -81,7 +90,7 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
         <Briefcase size={18} color="var(--accent-text)" strokeWidth={2} />
         <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('form.title')}</h3>
       </div>
-      <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(var(--fg-rgb),0.5)', lineHeight: 1.5 }}>
+      <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', lineHeight: 1.5 }}>
         {t('form.intro')}
       </p>
 
@@ -113,8 +122,18 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
         </div>
 
         <div>
+          <label style={labelStyle}>{t('spec.stat.experience')} ({t('form.years')})</label>
+          <input value={experience} onChange={e => setExperience(e.target.value)} type="number" inputMode="numeric" min={0} max={60} placeholder="3" style={inputStyle} />
+        </div>
+
+        <div>
           <label style={labelStyle}>{t('form.bio')}</label>
           <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder={t('form.bioPlaceholder')} maxLength={1000} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, sans-serif' }} />
+        </div>
+
+        <div>
+          <label style={labelStyle}>{t('form.qualification')}</label>
+          <textarea value={qualification} onChange={e => setQualification(e.target.value)} rows={2} maxLength={600} placeholder={t('form.qualificationPlaceholder')} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, sans-serif' }} />
         </div>
 
         <div>

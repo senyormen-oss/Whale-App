@@ -170,13 +170,13 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 )}
                 <LevelIcon size={17} color={level.color} strokeWidth={2} />
               </div>
-              <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),0.6)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', display: 'flex', alignItems: 'center', gap: 4 }}>
                 {categoryLabel(sp.categoryKey)} · <MapPin size={12} strokeWidth={2} /> {sp.city}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Star size={13} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                 <span style={{ fontSize: 14, fontWeight: 700 }}>{sp.rating}</span>
-                <span style={{ fontSize: 12, color: 'rgba(var(--fg-rgb),0.45)' }}>({t('spec.reviewsCount', { n: sp.reviews })})</span>
+                <span style={{ fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>({t('spec.reviewsCount', { n: sp.reviews })})</span>
               </div>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
               borderRight: i < 3 ? '1px solid rgba(var(--fg-rgb),0.08)' : undefined,
             }}>
               <p style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 800, color: 'var(--ink)' }}>{stat.value}</p>
-              <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.45)' }}>{stat.label}</p>
+              <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{stat.label}</p>
             </div>
           ))}
         </div>
@@ -221,7 +221,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
         {tab === 'portfolio' && (
           <div style={{ padding: '0 20px' }}>
             {sp.portfolio.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),0.4)', fontSize: 13 }}>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontSize: 13 }}>
                 {t('spec.noPortfolio')}
               </div>
             )}
@@ -250,12 +250,19 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
         {tab === 'about' && (
           <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
-              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.about')}</h3>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'rgba(var(--fg-rgb),0.8)' }}>{sp.bio}</p>
+              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.about')}</h3>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'rgba(var(--fg-rgb),calc(0.8 * var(--tb)))' }}>{sp.bio}</p>
             </div>
 
+            {sp.qualification && (
+              <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
+                <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.qualification')}</h3>
+                <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'rgba(var(--fg-rgb),calc(0.8 * var(--tb)))', whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>{sp.qualification}</p>
+              </div>
+            )}
+
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
-              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.skills')}</h3>
+              <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.skills')}</h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {sp.tags.map(tag => (
                   <span key={tag} style={{
@@ -270,12 +277,12 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
             </div>
 
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
-              <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),0.5)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.pricing')}</h3>
+              <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.pricing')}</h3>
               {getSubscriptionPlans(sp.price).map(item => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
                   <div>
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.name}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)' }}>{item.description}</p>
+                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{item.description}</p>
                   </div>
                   <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--accent-text)' }}>{formatPrice(item.price)}</p>
                 </div>
@@ -295,7 +302,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 <LevelIcon size={30} color={level.color} strokeWidth={1.8} />
                 <div>
                   <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 800, color: level.color }}>{t('spec.levelSpecialist', { level: level.label })}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),0.5)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', display: 'flex', alignItems: 'center', gap: 3 }}>
                     {t('spec.basedOn', { projects: sp.projects, reviews: sp.reviews, rating: sp.rating })} <Star size={10} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                   </p>
                 </div>
@@ -316,12 +323,12 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                     <Star key={i} size={14} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                   ))}
                 </p>
-                <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)' }}>{t('spec.reviewsCount', { n: sp.reviews })}</p>
+                <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('spec.reviewsCount', { n: sp.reviews })}</p>
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {[[t('review.quality'), avgOf('quality')], [t('review.timing'), avgOf('timing')], [t('review.communication'), avgOf('communication')]].map(([label, val]) => (
                   <div key={label as string} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.5)', width: 90 }}>{label}</span>
+                    <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', width: 90 }}>{label}</span>
                     <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'rgba(var(--fg-rgb),0.1)' }}>
                       <div style={{ width: `${((val as number) / 5) * 100}%`, height: '100%', borderRadius: 2, background: '#0ABAB5' }} />
                     </div>
@@ -350,16 +357,16 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                           <Star key={i} size={11} color="#FFD700" fill="#FFD700" strokeWidth={0} />
                         ))}
                       </span>
-                      <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),0.4)' }}>{formatDate(r.date)}</span>
+                      <span style={{ fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{formatDate(r.date)}</span>
                     </div>
                   </div>
                 </div>
-                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'rgba(var(--fg-rgb),0.75)' }}>{r.text}</p>
+                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: 'rgba(var(--fg-rgb),calc(0.75 * var(--tb)))' }}>{r.text}</p>
               </div>
             ))}
 
             {reviews.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),0.4)' }}>
+              <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>
                 {t('spec.noReviews')}
               </div>
             )}
@@ -396,7 +403,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
             style={{
               flex: 1, padding: '14px 0', borderRadius: 16, border: 'none',
               background: sp.available ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
-              color: sp.available ? '#080808' : 'rgba(var(--fg-rgb),0.35)',
+              color: sp.available ? '#080808' : 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))',
               fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
               cursor: sp.available ? 'pointer' : 'not-allowed',
             }}

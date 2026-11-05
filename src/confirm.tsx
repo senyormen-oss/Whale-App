@@ -73,7 +73,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             </div>
             <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 800 }}>{options.title}</h2>
             {options.message && (
-              <p style={{ margin: '0 0 20px', fontSize: 13.5, lineHeight: 1.55, color: 'rgba(var(--fg-rgb),0.6)' }}>{options.message}</p>
+              <p style={{ margin: '0 0 20px', fontSize: 13.5, lineHeight: 1.55, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))' }}>{options.message}</p>
             )}
             <div style={{ display: 'flex', gap: 10, marginTop: options.message ? 0 : 18 }}>
               <button

@@ -20,9 +20,12 @@
   --ok: #4ade80;
   --glass-bg: rgba(255,255,255,0.05);
   --glass-border: rgba(255,255,255,0.08);
-  --glass-dark-bg: rgba(8,8,8,0.92);
+  --glass-dark-bg: rgba(8,8,8,0.96);
   --glass-dark-border: rgba(255,255,255,0.07);
   --shell-shadow: 0 0 80px rgba(0,0,0,0.8);
+  --card-shadow: none;
+  --nav-shadow: 0 -10px 30px rgba(0,0,0,0.45);
+  --tb: 1;
 }
 
 :root[data-theme='light'] {
@@ -30,7 +33,7 @@
   --bg: #F3F7F7;
   --bg-rgb: 243,247,247;
   --bg-outer: #E3EAEA;
-  --bg-header: #DDF1F0;
+  --bg-header: #C8EBE8;
   --surface: #FFFFFF;
   --sheet: rgba(255,255,255,0.98);
   --fg-rgb: 12,28,28;
@@ -39,9 +42,13 @@
   --ok: #15803d;
   --glass-bg: rgba(255,255,255,0.78);
   --glass-border: rgba(12,28,28,0.09);
-  --glass-dark-bg: rgba(255,255,255,0.97);
+  --glass-dark-bg: rgba(255,255,255,0.98);
   --glass-dark-border: rgba(12,28,28,0.08);
   --shell-shadow: 0 0 60px rgba(12,28,28,0.12);
+  --card-shadow: 0 4px 18px rgba(12,28,28,0.07), 0 1px 2px rgba(12,28,28,0.05);
+  --nav-shadow: 0 -8px 30px rgba(12,28,28,0.10);
+  /* secondary text alphas are multiplied by this so grey text stays readable on light backgrounds */
+  --tb: 1.75;
 }
 
 /* Elements drawn on a fixed dark/teal backdrop keep light text in both themes */
@@ -233,3 +240,22 @@ input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; marg
 
 input::placeholder, textarea::placeholder { color: rgba(var(--fg-rgb), 0.35); }
 ::selection { background: rgba(10,186,181,0.35); }
+/* ---- Polish ---- */
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+body { font-weight: 450; letter-spacing: 0.005em; }
+
+.glass { box-shadow: var(--card-shadow); }
+.nav-bar { box-shadow: var(--nav-shadow); backdrop-filter: blur(28px) saturate(1.4); -webkit-backdrop-filter: blur(28px) saturate(1.4); }
+.nav-tab:focus-visible { outline: none; }
+.nav-tab:active:not(:disabled) { transform: scale(0.94); }
+
+/* Light theme: crisp white fields with a visible border instead of flat grey boxes */
+:root[data-theme='light'] input:not([type='checkbox']):not([type='file']),
+:root[data-theme='light'] textarea {
+  background: #ffffff !important;
+  border-color: rgba(12,28,28,0.14) !important;
+}
+:root[data-theme='light'] .glass input { background: transparent !important; border-color: transparent !important; }
+:root[data-theme='light'] input::placeholder, :root[data-theme='light'] textarea::placeholder { color: rgba(12,28,28,0.42); }
+
+:focus-visible { outline: 2px solid rgba(10,186,181,0.7); outline-offset: 2px; border-radius: 10px; }

@@ -33,7 +33,7 @@ export default function Segmented<T extends string>({ options, value, onChange, 
           onClick={() => onChange(o.value)}
           style={{
             position: 'relative', flex: 1, padding: '10px 0', border: 'none', background: 'transparent',
-            fontSize, fontWeight: 700, color: o.value === value ? '#080808' : 'rgba(var(--fg-rgb),0.5)',
+            fontSize, fontWeight: 700, color: o.value === value ? '#080808' : 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))',
             transition: 'color 0.25s ease',
           }}
         >

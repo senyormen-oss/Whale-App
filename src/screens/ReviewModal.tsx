@@ -16,7 +16,7 @@ interface Props {
 function StarPicker({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0' }}>
-      <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),0.7)' }}>{label}</span>
+      <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))' }}>{label}</span>
       <div style={{ display: 'flex', gap: 4 }} role="radiogroup" aria-label={label}>
         {[1, 2, 3, 4, 5].map(n => (
           <button
