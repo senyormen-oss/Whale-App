@@ -1,4 +1,4 @@
-﻿-- Chat v2 (two-sided, realtime) + verified reviews. Idempotent: safe to re-run.
+-- Chat v2 (two-sided, realtime) + verified reviews. Idempotent: safe to re-run.
 
 -- 1) Unread counter for the specialist side
 alter table public.conversations
