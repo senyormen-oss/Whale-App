@@ -152,7 +152,11 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
   }
 
   return (
-    <div style={{ background: 'var(--bg)', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    // Full-screen layer above the bottom navigation so the reply box is never covered.
+    <div style={{
+      position: 'fixed', top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 430,
+      zIndex: 200, background: 'var(--bg)', backgroundImage: 'var(--shell-glow)', display: 'flex', flexDirection: 'column',
+    }}>
       <div className="glass-dark" style={{ padding: '52px 20px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button
