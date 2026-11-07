@@ -9,7 +9,7 @@ import type { Lang } from './i18n'
 
 export const LEGAL = {
   /** A real, monitored address. Shown to users for support and privacy requests. */
-  contactEmail: '',
+  contactEmail: 'e5270816@gmail.com',
   termsVersion: '2026-11-05',
   privacyVersion: '2026-11-05',
   updatedIso: '2026-11-05',
