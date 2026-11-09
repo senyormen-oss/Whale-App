@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
+import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatDate, formatNumber, monthName, weekdayLabels } from '../i18n'
 import { fetchBookedSlotsInRange } from '../lib/queries'
-import { isClickConfigured, isPaymeConfigured, buildClickPaymentUrl, buildPaymePaymentUrl } from '../lib/payments'
-import { ArrowLeft, ChevronLeft, ChevronRight, CreditCard, Wallet, Landmark, Lock, PartyPopper, AlertCircle, SUBSCRIPTION_ICONS } from '../icons'
+import { ArrowLeft, ChevronLeft, ChevronRight, Lock, PartyPopper, Phone, AlertCircle, SUBSCRIPTION_ICONS } from '../icons'
 
 interface Props {
   specialistId: string
@@ -14,13 +14,6 @@ interface Props {
   onBack: () => void
 }
 
-
-const PAYMENT_METHODS = [
-  { id: 'click',   label: 'Click',     icon: CreditCard, color: '#1B9CF0' },
-  { id: 'payme',   label: 'Payme',     icon: Wallet,     color: '#1877F2' },
-  { id: 'uzum',    label: 'Uzum Bank', icon: Landmark,   color: '#F5A623' },
-  { id: 'visa',    label: 'Visa',      icon: CreditCard, color: '#1A1F71' },
-]
 
 function pad2(n: number) {
   return String(n).padStart(2, '0')
@@ -30,7 +23,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   const { t } = useI18n()
   const { specialists } = useSpecialists()
   const sp = specialists.find(s => s.id === specialistId)
-  const { confirmBooking, createPendingOrder } = useAppStore()
+  const { createRequest } = useAppStore()
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
@@ -38,7 +31,9 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const plans = getSubscriptionPlans(sp?.price ?? 0)
   const [selectedSub, setSelectedSub] = useState('sub1')
-  const [selectedPayment, setSelectedPayment] = useState(PAYMENT_METHODS[0].id)
+  const { user } = useAuth()
+  const [phone, setPhone] = useState(() => (user?.user_metadata?.phone as string | undefined) ?? '')
+  const [note, setNote] = useState('')
   const [booked, setBooked] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const [confirmError, setConfirmError] = useState<string | null>(null)
@@ -117,59 +112,34 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   const takenSlotsForSelectedDay = selectedDay ? (bookedByDate[dateKey] ?? []) : []
   const availableSlots = AVAILABLE_SLOTS.filter(slot => !takenSlotsForSelectedDay.includes(slot))
 
-  const useRealGateway =
-    (selectedPayment === 'click' && isClickConfigured) ||
-    (selectedPayment === 'payme' && isPaymeConfigured)
-
   async function handleConfirm() {
     if (!selectedDay || !selectedSlot || confirming) return
+    const digits = phone.replace(/[^0-9]/g, '')
+    if (digits.length < 9 || digits.length > 15) {
+      setConfirmError(t('err.invalidPhone'))
+      return
+    }
     setConfirming(true)
     setConfirmError(null)
 
-    if (useRealGateway) {
-      const result = await createPendingOrder({
-        specialistId,
-        dateKey,
-        slot: selectedSlot,
-        serviceName: sub.canonical,
-        amount: sub.price,
-      })
-      setConfirming(false)
-
-      if ('error' in result) {
-        setConfirmError(result.error)
-        setBookedByDate(prev => ({ ...prev, [dateKey]: [...(prev[dateKey] ?? []), selectedSlot] }))
-        setSelectedSlot(null)
-        return
-      }
-
-      const returnUrl = window.location.origin
-      const paymentUrl = selectedPayment === 'click'
-        ? buildClickPaymentUrl(result.order.id, sub.price, returnUrl)
-        : buildPaymePaymentUrl(result.order.id, sub.price, returnUrl)
-      window.location.href = paymentUrl
-      return
-    }
-
-    const result = await confirmBooking({
+    const result = await createRequest({
       specialistId,
       dateKey,
       slot: selectedSlot,
       serviceName: sub.canonical,
       amount: sub.price,
+      phone: phone.trim(),
+      note: note.trim(),
     })
     setConfirming(false)
 
     if ('error' in result) {
       setConfirmError(result.error)
-      // Someone else may have just taken this slot — refresh so the calendar reflects reality.
-      setBookedByDate(prev => ({ ...prev, [dateKey]: [...(prev[dateKey] ?? []), selectedSlot] }))
-      setSelectedSlot(null)
       return
     }
 
     setBooked(true)
-    setTimeout(() => onNavigate({ name: 'chat', conversationId: result.conversationId }), 2200)
+    setTimeout(() => onNavigate({ name: 'bookings' }), 2600)
   }
 
   if (booked) {
@@ -182,14 +152,14 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
           <PartyPopper size={64} color="var(--accent-text)" strokeWidth={1.5} />
         </div>
         <h2 className="slide-up gradient-text" style={{ margin: 0, fontSize: 28, fontWeight: 900, animationDelay: '0.1s' }}>
-          {t('book.confirmed')}
+          {t('book.requestSent')}
         </h2>
         <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', lineHeight: 1.6, animationDelay: '0.2s' }}>
-          {t('book.sessionWith')} <strong style={{ color: 'var(--ink)' }}>{sp.name}</strong><br />
+          {t('book.requestFor')} <strong style={{ color: 'var(--ink)' }}>{sp.name}</strong><br />
           <strong style={{ color: 'var(--accent-text)' }}>{dateLabel}, {selectedSlot}</strong>
         </p>
         <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', animationDelay: '0.3s' }}>
-          {t('book.openingChat')}
+          {t('book.willCall')}
         </p>
       </div>
     )
@@ -246,7 +216,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 {i + 1}
               </div>
               <span style={{ fontSize: 12, color: step === s ? 'var(--ink)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontWeight: step === s ? 600 : 400 }}>
-                {s === 'date' ? t('book.step.date') : s === 'sub' ? t('book.step.service') : t('book.step.payment')}
+                {s === 'date' ? t('book.step.date') : s === 'sub' ? t('book.step.service') : t('book.step.contact')}
               </span>
               {i < 2 && <span style={{ color: 'rgba(var(--fg-rgb),calc(0.2 * var(--tb)))', fontSize: 14 }}>›</span>}
             </div>
@@ -429,39 +399,29 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       {/* Step: Payment */}
       {step === 'pay' && (
         <div style={{ padding: '0 20px' }} className="fade-in">
-          <p style={{ margin: '0 0 14px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('book.paymentMethod')}</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
-            {PAYMENT_METHODS.map(pm => {
-              const PmIcon = pm.icon
-              const live = (pm.id === 'click' && isClickConfigured) || (pm.id === 'payme' && isPaymeConfigured)
-              return (
-                <button
-                  key={pm.id}
-                  onClick={() => setSelectedPayment(pm.id)}
-                  style={{
-                    position: 'relative',
-                    padding: '16px 12px', borderRadius: 16, border: 'none',
-                    background: selectedPayment === pm.id ? 'rgba(10,186,181,0.15)' : 'rgba(var(--fg-rgb),0.05)',
-                    borderColor: selectedPayment === pm.id ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
-                    borderStyle: 'solid', borderWidth: 1,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                    cursor: 'pointer', transition: 'all 0.15s',
-                  }}
-                >
-                  {!live && (
-                    <span style={{
-                      position: 'absolute', top: 8, right: 8, fontSize: 8, fontWeight: 800,
-                      color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', letterSpacing: '0.04em', textTransform: 'uppercase',
-                    }}>
-                      {t('book.demo')}
-                    </span>
-                  )}
-                  <PmIcon size={22} color={selectedPayment === pm.id ? 'var(--accent-text)' : pm.color} strokeWidth={1.8} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: selectedPayment === pm.id ? 'var(--accent-text)' : 'var(--ink)' }}>{pm.label}</span>
-                </button>
-              )
-            })}
+          <p style={{ margin: '0 0 10px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', lineHeight: 1.5 }}>{t('book.contactIntro')}</p>
+          <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 14, marginBottom: 10 }}>
+            <Phone size={16} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
+            <input
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              maxLength={20}
+              placeholder="+998 90 123 45 67"
+              aria-label={t('book.phone')}
+              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, sans-serif' }}
+            />
           </div>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            rows={2}
+            maxLength={500}
+            placeholder={t('book.notePlaceholder')}
+            style={{ width: '100%', marginBottom: 20, background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 14, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }}
+          />
 
           {/* Order summary */}
           <div className="glass" style={{ borderRadius: 18, padding: 18, marginBottom: 16 }}>
@@ -486,9 +446,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
           <p style={{ margin: '0 0 16px', fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))', textAlign: 'center', lineHeight: 1.6, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: 5 }}>
             <Lock size={12} style={{ flexShrink: 0, marginTop: 2 }} strokeWidth={2} />
             <span>
-              {useRealGateway
-                ? t('book.redirectNote', { provider: selectedPayment === 'click' ? 'Click' : 'Payme' })
-                : t('book.demoNote')}
+              {t('book.offlineNote')}
             </span>
           </p>
 
@@ -555,11 +513,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
                 opacity: confirming ? 0.7 : 1, cursor: confirming ? 'wait' : 'pointer',
               }}
             >
-              {confirming
-                ? (useRealGateway ? t('book.redirecting') : t('book.confirming'))
-                : useRealGateway
-                  ? t('book.continueTo', { provider: selectedPayment === 'click' ? 'Click' : 'Payme' })
-                  : t('book.payDemo', { price: formatPrice(sub.price) })}
+              {confirming ? t('book.sending') : t('book.sendRequest')}
             </button>
           </div>
         )}

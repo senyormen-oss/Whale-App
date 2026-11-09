@@ -45,17 +45,17 @@ function terms(lang: Lang): LegalSection[] {
         `Whale — онлайн-маркетплейс, которым управляет ${op} («Whale», «мы»). Он помогает клиентам находить независимых креативных и цифровых специалистов (фотографов, видеографов, дизайнеров, маркетологов и других) и договариваться с ними о бронировании.`,
         'Создавая аккаунт или пользуясь сервисом, вы соглашаетесь с настоящими Условиями. Если вы не согласны, не пользуйтесь Whale.',
       ] },
-      { heading: '2. Наша роль', body: [
-        'Whale — это платформа. Специалисты — независимые профессионалы, а не сотрудники или представители Whale. Бронирование — это соглашение между клиентом и специалистом. Whale не является его стороной и не гарантирует качество, безопасность, законность или сроки оказания услуг.',
-        'Профили, портфолио, рейтинги и отзывы публикуются пользователями. Мы не проверяем каждое утверждение пользователей.',
+      { heading: "2. Наша роль", body: [
+        "Whale организует и продаёт творческие и цифровые услуги, показанные в приложении. Их выполняют специалисты, которые работают с Whale в составе команды или как подрядчики. Whale отвечает перед клиентом за организацию услуги.",
+        "Профили, портфолио, рейтинги и отзывы показываются, чтобы помочь вам выбрать. Мы стараемся поддерживать их достоверность, но не гарантируем конкретный результат.",
       ] },
       { heading: '3. Аккаунт', body: [
         'Вам должно быть не менее 18 лет, а данные должны быть достоверными. Вы отвечаете за сохранность пароля и за все действия в вашем аккаунте.',
         'Вы можете закрыть аккаунт в любой момент: Профиль → Настройки → Удалить аккаунт. При этом ваш профиль, бронирования, сообщения и избранное будут удалены без возможности восстановления.',
       ] },
-      { heading: '4. Бронирования и оплата', body: [
-        'Клиент выбирает дату, время и пакет. Слот закрепляется за клиентом, который забронировал его первым. Клиент может отменить бронирование до сеанса на экране «Мои бронирования»; отмена освобождает слот.',
-        'Оплата: приём онлайн-платежей в этой версии сервиса ещё не включён. Любой экран оплаты — демонстрация, деньги не списываются и не удерживаются. Когда оплата будет подключена, мы обновим Условия и попросим вас принять новую версию.',
+      { heading: "4. Бронирования и оплата", body: [
+        "Клиент отправляет заявку с желаемой датой, временем и пакетом. Заявка ещё не является подтверждённым бронированием: сотрудник Whale связывается с клиентом по телефону и согласует детали. Слот закрепляется только после того, как Whale подтвердит заявку. Клиент может отменить заявку или бронь на экране «Мои бронирования».",
+        "Оплата: приложение не принимает онлайн-платежи. После подтверждения клиент платит Whale напрямую (например, наличными или банковским переводом) в размере, согласованном с Whale. Цены в приложении ориентировочные, пока их не подтвердили по телефону.",
       ] },
       { heading: '5. Отзывы и контент', body: [
         'Оставить отзыв может только клиент, чьё бронирование завершено, и только один раз. Отзыв должен быть честным и основанным на вашем опыте. Вы сохраняете права на загружаемый контент и предоставляете Whale неисключительную лицензию на его хранение и показ в сервисе, пока он в нём размещён.',
@@ -83,17 +83,17 @@ function terms(lang: Lang): LegalSection[] {
         `Whale — ${op} ("Whale", "biz") tomonidan boshqariladigan onlayn marketpleys. U mijozlarga mustaqil ijodiy va raqamli mutaxassislarni (fotograflar, videograflar, dizaynerlar, marketologlar va boshqalar) topish hamda ular bilan band qilish bo'yicha kelishishga yordam beradi.`,
         "Hisob yaratish yoki xizmatdan foydalanish orqali siz ushbu Shartlarga rozilik bildirasiz. Rozi bo'lmasangiz, Whale'dan foydalanmang.",
       ] },
-      { heading: '2. Bizning rolimiz', body: [
-        "Whale — platforma. Mutaxassislar mustaqil kasb egalari bo'lib, Whale'ning xodimlari yoki vakillari emas. Band qilish — mijoz va mutaxassis o'rtasidagi kelishuv. Whale uning tomoni emas va xizmat sifati, xavfsizligi, qonuniyligi yoki muddatiga kafolat bermaydi.",
-        "Profillar, portfoliolar, reytinglar va sharhlarni foydalanuvchilar joylashtiradi. Biz foydalanuvchilarning har bir ma'lumotini tekshirmaymiz.",
+      { heading: "2. Bizning rolimiz", body: [
+        "Whale ilovada ko'rsatilgan ijodiy va raqamli xizmatlarni tashkil qiladi va sotadi. Ularni Whale bilan jamoa a'zosi yoki pudratchi sifatida ishlaydigan mutaxassislar bajaradi. Xizmatni tashkil etish uchun Whale mijoz oldida javobgar.",
+        "Profillar, portfoliolar, reytinglar va sharhlar tanlashingizga yordam berish uchun ko'rsatiladi. Ularning to'g'riligini saqlashga harakat qilamiz, lekin muayyan natijaga kafolat bermaymiz.",
       ] },
       { heading: '3. Hisob', body: [
         "Yoshingiz kamida 18 da bo'lishi va ma'lumotlaringiz to'g'ri bo'lishi kerak. Parol sir saqlanishi va hisobingizdagi barcha harakatlar uchun o'zingiz javobgarsiz.",
         "Hisobni istalgan vaqtda yopishingiz mumkin: Profil → Sozlamalar → Hisobni o'chirish. Bunda profilingiz, band qilishlaringiz, xabarlaringiz va tanlanganlaringiz butunlay o'chiriladi.",
       ] },
-      { heading: '4. Band qilish va to\'lov', body: [
-        "Mijoz sana, vaqt va paketni tanlaydi. Vaqt oralig'i uni birinchi band qilgan mijozga biriktiriladi. Mijoz seansdan oldin \"Mening bronlarim\" ekranida bronni bekor qilishi mumkin; bekor qilish vaqt oralig'ini bo'shatadi.",
-        "To'lov: xizmatning ushbu versiyasida onlayn to'lovlar hali yoqilmagan. Har qanday to'lov ekrani — namoyish, pul yechilmaydi va ushlab turilmaydi. To'lov ulanganda Shartlarni yangilaymiz va yangi versiyani qabul qilishingizni so'raymiz.",
+      { heading: "4. Band qilish va to'lov", body: [
+        "Mijoz xohlagan sana, vaqt va paket bilan so'rov yuboradi. So'rov hali tasdiqlangan bron emas: Whale xodimi mijoz bilan telefon orqali bog'lanib, tafsilotlarni kelishadi. Vaqt oralig'i faqat Whale so'rovni tasdiqlagandan keyin biriktiriladi. Mijoz so'rov yoki bronni \"Mening bronlarim\" ekranida bekor qilishi mumkin.",
+        "To'lov: ilova onlayn to'lovlarni qabul qilmaydi. Tasdiqlangandan keyin mijoz Whale bilan kelishilgan summani Whale'ga bevosita (masalan, naqd yoki bank o'tkazmasi orqali) to'laydi. Ilovadagi narxlar telefonda tasdiqlanmaguncha taxminiy.",
       ] },
       { heading: '5. Sharhlar va kontent', body: [
         "Sharhni faqat bron yakunlangan mijoz va faqat bir marta qoldirishi mumkin. Sharh halol va shaxsiy tajribangizga asoslangan bo'lishi kerak. Yuklagan kontentingizga bo'lgan huquqlar sizda qoladi, Whale'ga esa uni xizmatda joylashtirilgan davrda saqlash va ko'rsatish uchun eksklyuziv bo'lmagan litsenziya berasiz.",
@@ -120,18 +120,18 @@ function terms(lang: Lang): LegalSection[] {
       `Whale is an online marketplace operated by ${op} ("Whale", "we"). It lets clients discover independent creative and digital specialists (photographers, videographers, designers, marketers and similar) and arrange bookings with them.`,
       'By creating an account or using the service you agree to these Terms. If you do not agree, do not use Whale.',
     ] },
-    { heading: '2. Our role', body: [
-      'Whale is a platform. Specialists are independent professionals, not employees or agents of Whale. A booking is an agreement between the client and the specialist. Whale is not a party to that agreement and does not guarantee the quality, safety, legality or timing of any service.',
-      'Specialist profiles, portfolios, ratings and reviews are provided by users. We do not verify every statement made by users.',
-    ] },
+    { heading: "2. Our role", body: [
+        "Whale arranges and sells the creative and digital services shown in the app. They are performed by specialists who work with Whale as members of its team or as contractors. Whale is responsible to clients for arranging the service.",
+        "Specialist profiles, portfolios, ratings and reviews are shown to help you choose. We do our best to keep them accurate, but we do not guarantee any particular result.",
+      ] },
     { heading: '3. Accounts', body: [
       'You must be at least 18 years old and provide accurate information. You are responsible for keeping your password confidential and for all activity under your account.',
       'You may close your account at any time from Profile → Settings → Delete account. Closing it permanently erases your profile, bookings, messages and favorites.',
     ] },
-    { heading: '4. Bookings and payments', body: [
-      'Clients choose a date, time and package. A time slot is reserved for the client who books it first. Bookings can be cancelled by the client from the My Bookings screen before the session; cancelling releases the slot.',
-      'Payments: online payment processing is not yet active in this version of the service. Any payment screen shown is a demonstration and no money is charged or held. When payment processing is introduced, these Terms will be updated and you will be asked to accept the new version before using it.',
-    ] },
+    { heading: "4. Bookings and payments", body: [
+        "Clients send a booking request with a preferred date, time and package. A request is not yet a confirmed booking: a member of the Whale team contacts the client by phone to agree the details. A time slot is reserved only after Whale confirms the request. Clients can cancel a request or booking from the My Bookings screen.",
+        "Payment: the app does not process online payments. After confirmation the client pays Whale directly (for example in cash or by bank transfer) in the amount agreed with Whale. Prices shown in the app are indicative until confirmed by phone.",
+      ] },
     { heading: '5. Reviews and content', body: [
       'Only a client who completed a booking may review it, once. Reviews must be honest and based on your own experience. You keep ownership of the content you upload, and you grant Whale a non-exclusive licence to host and display it in the service for as long as it is on the service.',
       'You must have the rights to anything you upload (including photos and portfolio items).',

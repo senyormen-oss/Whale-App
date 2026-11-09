@@ -99,6 +99,12 @@ export default function BookingsScreen({ onNavigate }: Props) {
                   </div>
                 </div>
 
+                {order.status === 'pending' && (
+                  <p style={{ margin: '10px 0 0', fontSize: 12, lineHeight: 1.5, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))' }}>
+                    {t('bookings.pendingNote')}
+                  </p>
+                )}
+
                 {(canReview || canCancel) && (
                   <div style={{ display: 'flex', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(var(--fg-rgb),0.06)' }}>
                     {canReview && (

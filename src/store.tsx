@@ -48,6 +48,8 @@ interface BookingInput {
   slot: string
   serviceName: string
   amount: number
+  phone: string
+  note: string
 }
 
 interface AppStore {
@@ -69,13 +71,8 @@ interface AppStore {
   cancelOrder: (orderId: string) => Promise<boolean>
   /** Permanently deletes the account and its data (right to erasure). */
   deleteAccount: () => Promise<boolean>
-  /** Demo-mode booking: slot + order are created atomically and confirmed immediately. */
-  confirmBooking: (input: BookingInput) => Promise<{ order: Order; conversationId: string } | { error: string }>
-  /**
-   * Real-gateway booking: slot + order are created atomically as 'pending';
-   * the payment webhook flips the order to 'confirmed' once the money arrives.
-   */
-  createPendingOrder: (input: BookingInput) => Promise<{ order: Order } | { error: string }>
+  /** Sends a booking request. An administrator confirms it by phone; no slot is blocked until then. */
+  createRequest: (input: BookingInput) => Promise<{ order: Order } | { error: string }>
 }
 
 const AppStoreContext = createContext<AppStore | null>(null)
@@ -84,6 +81,8 @@ const AppStoreContext = createContext<AppStore | null>(null)
 function bookingServerMessage(message: string): string | null {
   const map: [string, Parameters<typeof t>[0]][] = [
     ['Invalid time slot', 'err.invalidSlot'],
+    ['Invalid phone', 'err.invalidPhone'],
+    ['Too many open requests', 'err.tooManyRequests'],
     ['Invalid amount', 'err.invalidAmount'],
     ['You cannot book your own listing', 'err.ownListing'],
     ['not accepting bookings', 'err.notAvailable'],
@@ -178,15 +177,16 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     })
   }, [user, refreshData, fetchThread])
 
-  const book = useCallback(async (input: BookingInput, status: 'pending' | 'confirmed'): Promise<{ order: Order } | { error: string }> => {
+  const book = useCallback(async (input: BookingInput): Promise<{ order: Order } | { error: string }> => {
     if (!user) return { error: t('err.signInAgain') }
-    const { data, error } = await supabase.rpc('create_booking', {
+    const { data, error } = await supabase.rpc('create_request', {
       p_specialist_id: input.specialistId,
       p_date: input.dateKey,
       p_slot: input.slot,
       p_service: input.serviceName,
       p_amount: input.amount,
-      p_status: status,
+      p_phone: input.phone,
+      p_note: input.note,
     })
     if (error || !data) return { error: bookingErrorMessage(error ?? { message: '' }) }
     const order = mapOrderRow(data as Record<string, any>)
@@ -317,26 +317,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       return true
     },
 
-    async confirmBooking(input) {
-      const result = await book(input, 'confirmed')
-      if ('error' in result) return result
-
-      // The database trigger has already opened the conversation and posted the
-      // confirmation message; fetch it so we can take the user straight to the chat.
-      const { data: conv, error } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('user_id', user!.id)
-        .eq('specialist_id', input.specialistId)
-        .maybeSingle()
-      if (error || !conv) return { error: t('err.chatAfterBooking') }
-
-      setConversations(prev => [mapConversationRow(conv), ...prev.filter(c => c.id !== conv.id)])
-      return { order: result.order, conversationId: conv.id }
-    },
-
-    async createPendingOrder(input) {
-      return book(input, 'pending')
+    async createRequest(input) {
+      return book(input)
     },
   }), [ready, orders, conversations, messagesByConversation, favorites, notificationsEnabled, user, fetchThread, book, notify, signOut])
 

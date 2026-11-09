@@ -26,6 +26,8 @@ export interface Specialist {
   portfolio: string[]
   tags: string[]
   available: boolean
+  /** Listings are visible to clients only after a Whale administrator approves them. */
+  approved: boolean
   isNew?: boolean
 }
 

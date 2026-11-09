@@ -25,6 +25,7 @@ function mapSpecialistRow(row: Record<string, any>): Specialist {
     portfolio: row.portfolio ?? [],
     tags: row.tags ?? [],
     available: row.available,
+    approved: row.approved ?? true,
     isNew: row.is_new,
   }
 }

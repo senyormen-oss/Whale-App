@@ -11,6 +11,8 @@ import LanguageSwitcher from '../LanguageSwitcher'
 import ThemeSwitcher from '../ThemeSwitcher'
 import UserAvatar from '../UserAvatar'
 import ListingTools from './ListingTools'
+import AdminPanel from './AdminPanel'
+import { fetchIsAdmin } from '../lib/admin'
 import EditProfileModal from './EditProfileModal'
 import Segmented from '../Segmented'
 import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder, type InboxItem } from '../lib/queries'
@@ -60,7 +62,8 @@ function StatCard({ icon: Icon, label, value, sub, accent }: { icon: IconType; l
 export default function DashboardScreen({ onNavigate }: Props) {
   const { t } = useI18n()
   const confirm = useConfirm()
-  const [mode, setMode] = useState<'client' | 'specialist'>('client')
+  const [mode, setMode] = useState<'client' | 'specialist' | 'admin'>('client')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const { orders, favorites, notificationsEnabled, toggleNotifications, deleteAccount } = useAppStore()
   const { user, signOut } = useAuth()
@@ -90,6 +93,10 @@ export default function DashboardScreen({ onNavigate }: Props) {
   const [myListing, setMyListing] = useState<Specialist | null | undefined>(undefined) // undefined = loading
   const [myOrders, setMyOrders] = useState<SpecialistOrder[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
+
+  useEffect(() => {
+    if (user) fetchIsAdmin(user.id).then(setIsAdmin)
+  }, [user])
 
   const loadListing = useCallback(() => {
     if (!user) return
@@ -194,18 +201,23 @@ export default function DashboardScreen({ onNavigate }: Props) {
         </div>
 
         {/* Mode toggle */}
-        <Segmented<'client' | 'specialist'>
+        <Segmented<'client' | 'specialist' | 'admin'>
           value={mode}
           onChange={setMode}
           options={[
             { value: 'client', label: t('dash.client') },
             { value: 'specialist', label: t('dash.specialist') },
+            ...(isAdmin ? [{ value: 'admin' as const, label: t('dash.admin') }] : []),
           ]}
         />
         <p key={mode} className="fade-in" style={{ margin: '10px 4px 0', fontSize: 12, lineHeight: 1.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>
-          {mode === 'client' ? t('dash.clientHint') : t('dash.specialistHint')}
+          {mode === 'client' ? t('dash.clientHint') : mode === 'specialist' ? t('dash.specialistHint') : t('dash.adminHint')}
         </p>
       </div>
+
+      {mode === 'admin' && isAdmin && (
+        <div style={{ padding: '0 20px' }}><AdminPanel /></div>
+      )}
 
       {mode === 'client' && (
         <div className="fade-in" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -356,6 +368,12 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 <StatCard icon={Star} label={t('dash.myRating')} value={myListing.reviews > 0 ? myListing.rating.toFixed(1) : '—'} />
                 <StatCard icon={Users} label={t('dash.clients')} value={String(clientCount)} />
               </div>
+
+              {!myListing.approved && (
+                <div className="fade-in" style={{ padding: '12px 14px', borderRadius: 14, background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.35)', fontSize: 13, lineHeight: 1.5, color: 'var(--ink)' }}>
+                  {t('dash.awaitingApproval')}
+                </div>
+              )}
 
               {/* Availability toggle */}
               <button
