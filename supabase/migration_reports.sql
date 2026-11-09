@@ -2,7 +2,7 @@
 create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
   reporter_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  specialist_id uuid not null references public.specialists(id) on delete cascade,
+  specialist_id text not null references public.specialists(id) on delete cascade,
   reason text not null check (reason in ('spam', 'fraud', 'inappropriate', 'fake', 'other')),
   details text not null default '' check (char_length(details) <= 1000),
   status text not null default 'new' check (status in ('new', 'reviewing', 'resolved', 'dismissed')),
