@@ -3,12 +3,17 @@ import { CATEGORIES, categoryLabel } from '../data'
 import { useI18n } from '../i18n'
 import { Select } from '../Controls'
 import { useAuth } from '../auth'
-import { createSpecialistListing } from '../lib/queries'
+import { createSpecialistListing, updateSpecialistListing } from '../lib/queries'
 import type { Specialist, CategoryKey } from '../types'
 import { Briefcase, AlertCircle } from '../icons'
 
 interface Props {
-  onCreated: (specialist: Specialist) => void
+  /** Called after a new listing is created. */
+  onCreated?: (specialist: Specialist) => void
+  /** When set, the form edits this listing instead of creating a new one. */
+  existing?: Specialist
+  onSaved?: (specialist: Specialist) => void
+  onCancel?: () => void
 }
 
 const inputStyle: React.CSSProperties = {
@@ -18,17 +23,18 @@ const inputStyle: React.CSSProperties = {
 }
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', marginBottom: 6, fontWeight: 600 }
 
-export default function BecomeSpecialistForm({ onCreated }: Props) {
+export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onCancel }: Props) {
   const { t } = useI18n()
   const { user } = useAuth()
-  const [categoryKey, setCategoryKey] = useState<CategoryKey>(CATEGORIES[0].key)
-  const [city, setCity] = useState('')
-  const [age, setAge] = useState('')
-  const [price, setPrice] = useState('')
-  const [bio, setBio] = useState('')
-  const [experience, setExperience] = useState('')
-  const [qualification, setQualification] = useState('')
-  const [tags, setTags] = useState('')
+  const editing = !!existing
+  const [categoryKey, setCategoryKey] = useState<CategoryKey>(existing?.categoryKey ?? CATEGORIES[0].key)
+  const [city, setCity] = useState(existing?.city ?? '')
+  const [age, setAge] = useState(existing ? String(existing.age) : '')
+  const [price, setPrice] = useState(existing ? String(existing.price) : '')
+  const [bio, setBio] = useState(existing?.bio ?? '')
+  const [experience, setExperience] = useState(existing ? String(existing.experience) : '')
+  const [qualification, setQualification] = useState(existing?.qualification ?? '')
+  const [tags, setTags] = useState(existing ? existing.tags.join(', ') : '')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -58,26 +64,32 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
     }
 
     const category = CATEGORIES.find(c => c.key === categoryKey)!
-    const fullName = (user.user_metadata?.full_name as string) || user.email || t('dash.specialist')
-    const avatar = `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}&backgroundColor=0ABAB5`
+    const fields = {
+      category: category.label,
+      categoryKey: category.key,
+      city: city.trim(),
+      age: ageNum,
+      price: priceNum,
+      bio: bio.trim(),
+      experience: Math.round(expNum),
+      qualification: qualification.trim(),
+      tags: tags.split(',').map(tag => tag.trim()).filter(Boolean).slice(0, 12),
+    }
 
     setBusy(true)
     try {
-      const specialist = await createSpecialistListing(user.id, {
-        name: fullName,
-        category: category.label,
-        categoryKey: category.key,
-        city: city.trim(),
-        age: ageNum,
-        price: priceNum,
-        bio: bio.trim(),
-        experience: Math.round(expNum),
-        qualification: qualification.trim(),
-        tags: tags.split(',').map(tag => tag.trim()).filter(Boolean),
-        avatar,
-      })
-      onCreated(specialist)
+      if (existing) {
+        const saved = await updateSpecialistListing(existing.id, fields)
+        onSaved?.(saved)
+      } else {
+        const fullName = (user.user_metadata?.full_name as string) || user.email || t('dash.specialist')
+        const avatar = (user.user_metadata?.avatar_url as string | undefined)
+          || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}&backgroundColor=0ABAB5`
+        const specialist = await createSpecialistListing(user.id, { name: fullName, avatar, ...fields })
+        onCreated?.(specialist)
+      }
     } catch (err) {
+      console.error('Failed to save listing', err)
       setError(t('form.failed'))
     } finally {
       setBusy(false)
@@ -88,13 +100,15 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
     <div className="glass fade-in" style={{ borderRadius: 20, padding: 20, border: '1px solid rgba(10,186,181,0.2)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
         <Briefcase size={18} color="var(--accent-text)" strokeWidth={2} />
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{t('form.title')}</h3>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800 }}>{editing ? t('form.editTitle') : t('form.title')}</h3>
       </div>
-      <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', lineHeight: 1.5 }}>
-        {t('form.intro')}
-      </p>
+      {!editing && (
+        <p style={{ margin: '0 0 18px', fontSize: 12.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', lineHeight: 1.5 }}>
+          {t('form.intro')}
+        </p>
+      )}
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: editing ? 14 : 0 }}>
         <div>
           <label style={labelStyle}>{t('form.category')}</label>
           <Select<CategoryKey>
@@ -108,7 +122,7 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div>
             <label style={labelStyle}>{t('form.city')}</label>
-            <input value={city} onChange={e => setCity(e.target.value)} placeholder={t('form.cityPlaceholder')} style={inputStyle} />
+            <input value={city} onChange={e => setCity(e.target.value)} placeholder={t('form.cityPlaceholder')} maxLength={60} style={inputStyle} />
           </div>
           <div>
             <label style={labelStyle}>{t('spec.stat.age')}</label>
@@ -138,27 +152,34 @@ export default function BecomeSpecialistForm({ onCreated }: Props) {
 
         <div>
           <label style={labelStyle}>{t('form.tags')}</label>
-          <input value={tags} onChange={e => setTags(e.target.value)} placeholder={t('form.tagsPlaceholder')} style={inputStyle} />
+          <input value={tags} onChange={e => setTags(e.target.value)} placeholder={t('form.tagsPlaceholder')} maxLength={200} style={inputStyle} />
         </div>
 
         {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff4d6d', fontSize: 12.5 }}>
+          <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#ff4d6d', fontSize: 12.5 }}>
             <AlertCircle size={14} strokeWidth={2} /> {error}
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className={busy ? '' : 'tiffany-glow'}
-          style={{
-            marginTop: 4, padding: '14px 0', borderRadius: 14, border: 'none',
-            background: '#0ABAB5', color: '#080808', fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
-            opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
-          }}
-        >
-          {busy ? t('form.creating') : t('form.create')}
-        </button>
+        <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+          {editing && onCancel && (
+            <button type="button" onClick={onCancel} disabled={busy} style={{ flex: 1, padding: '14px 0', borderRadius: 14, border: 'none', background: 'rgba(var(--fg-rgb),0.08)', color: 'var(--ink)', fontSize: 15, fontWeight: 700 }}>
+              {t('common.cancel')}
+            </button>
+          )}
+          <button
+            type="submit"
+            disabled={busy}
+            className={busy ? '' : 'tiffany-glow'}
+            style={{
+              flex: 2, padding: '14px 0', borderRadius: 14, border: 'none',
+              background: '#0ABAB5', color: '#080808', fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+              opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
+            }}
+          >
+            {busy ? t('form.creating') : editing ? t('form.save') : t('form.create')}
+          </button>
+        </div>
       </form>
     </div>
   )

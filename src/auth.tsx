@@ -16,6 +16,8 @@ interface AuthState {
   updatePassword: (password: string) => Promise<{ error: string | null }>
   /** Saves (or clears, with null) the profile photo URL in the user's metadata. */
   updateAvatar: (url: string | null) => Promise<{ error: string | null }>
+  /** Saves the display name in the user's metadata. */
+  updateName: (fullName: string) => Promise<{ error: string | null }>
   /** True after the user opened a password-reset link; they must choose a new password before using the app. */
   recovering: boolean
   finishRecovery: () => void
@@ -103,6 +105,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error ? friendlyAuthError(error.message) : null }
   }
 
+  async function updateName(fullName: string) {
+    const { error } = await supabase.auth.updateUser({ data: { full_name: fullName } })
+    return { error: error ? friendlyAuthError(error.message) : null }
+  }
+
   function finishRecovery() {
     setRecovering(false)
   }
@@ -120,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user: session?.user ?? null, loading, configured: isSupabaseConfigured,
-        signUp, signIn, signOut, resendConfirmation, resetPassword, updatePassword, updateAvatar, recovering, finishRecovery,
+        signUp, signIn, signOut, resendConfirmation, resetPassword, updatePassword, updateAvatar, updateName, recovering, finishRecovery,
       }}
     >
       {children}

@@ -129,7 +129,7 @@ export async function createSpecialistListing(userId: string, input: SpecialistL
   return mapSpecialistRow(data)
 }
 
-export async function updateSpecialistListing(specialistId: string, patch: Partial<SpecialistListingInput> & { available?: boolean }): Promise<Specialist> {
+export async function updateSpecialistListing(specialistId: string, patch: Partial<SpecialistListingInput> & { available?: boolean; portfolio?: string[]; cover?: string }): Promise<Specialist> {
   const dbPatch: Record<string, any> = {}
   if (patch.name !== undefined) dbPatch.name = patch.name
   if (patch.category !== undefined) dbPatch.category = patch.category
@@ -143,6 +143,8 @@ export async function updateSpecialistListing(specialistId: string, patch: Parti
   if (patch.tags !== undefined) dbPatch.tags = patch.tags
   if (patch.avatar !== undefined) dbPatch.avatar = patch.avatar
   if (patch.available !== undefined) dbPatch.available = patch.available
+  if (patch.portfolio !== undefined) dbPatch.portfolio = patch.portfolio
+  if (patch.cover !== undefined) dbPatch.cover = patch.cover
 
   const { data, error } = await supabase.from('specialists').update(dbPatch).eq('id', specialistId).select().single()
   if (error) throw error
@@ -313,5 +315,35 @@ export async function uploadChatImage(file: File, userId: string): Promise<strin
 /** If this user has a specialist listing, keep its public photo in sync with their profile photo. */
 export async function updateSpecialistAvatarIfAny(userId: string, avatarUrl: string): Promise<void> {
   const { error } = await supabase.from('specialists').update({ avatar: avatarUrl }).eq('owner_id', userId)
+  if (error) throw error
+}
+/** Best-effort removal of previously uploaded files (public URLs of our chat-images bucket). */
+export async function removeUploadedFiles(urls: string[]): Promise<void> {
+  const marker = '/chat-images/'
+  const paths = urls
+    .map(u => (u.includes(marker) ? decodeURIComponent(u.split(marker)[1].split('?')[0]) : null))
+    .filter((p): p is string => !!p)
+  if (paths.length === 0) return
+  const { error } = await supabase.storage.from('chat-images').remove(paths)
+  if (error) console.error('Failed to remove files', error)
+}
+
+export type ReportReason = 'spam' | 'fraud' | 'inappropriate' | 'fake' | 'other'
+
+/** Sends a report about a specialist listing to the moderators. */
+export async function createReport(specialistId: string, reason: ReportReason, details: string): Promise<void> {
+  const { error } = await supabase.from('reports').insert({ specialist_id: specialistId, reason, details })
+  if (error) throw error
+}
+
+/** Updates the display name in the profile row (used for reviews and the specialist inbox). */
+export async function updateProfileName(userId: string, fullName: string): Promise<void> {
+  const { error } = await supabase.from('profiles').update({ full_name: fullName }).eq('id', userId)
+  if (error) throw error
+}
+
+/** Keeps the public listing's name in sync with the account name. */
+export async function updateSpecialistName(userId: string, name: string): Promise<void> {
+  const { error } = await supabase.from('specialists').update({ name }).eq('owner_id', userId)
   if (error) throw error
 }

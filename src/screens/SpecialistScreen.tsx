@@ -5,8 +5,10 @@ import { useAppStore } from '../store'
 import { useSpecialists } from '../specialistsData'
 import { fetchReviews } from '../lib/queries'
 import { useI18n, formatDate } from '../i18n'
+import { useAuth } from '../auth'
+import ReportModal from './ReportModal'
 import Segmented from '../Segmented'
-import { LEVEL_ICONS, ArrowLeft, Heart, Share2, BadgeCheck, Star, MessageCircle, MapPin } from '../icons'
+import { LEVEL_ICONS, ArrowLeft, Heart, Share2, BadgeCheck, Star, MessageCircle, MapPin, Flag } from '../icons'
 
 interface Props {
   specialistId: string
@@ -23,6 +25,8 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
   const { favorites, toggleFavorite, startConversation } = useAppStore()
   const [tab, setTab] = useState<Tab>('portfolio')
   const [copied, setCopied] = useState(false)
+  const [reporting, setReporting] = useState(false)
+  const { user } = useAuth()
   const [reviews, setReviews] = useState<Review[]>([])
   const liked = favorites.includes(specialistId)
 
@@ -134,6 +138,19 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 </span>
               )}
             </div>
+            {sp.ownerId !== user?.id && (
+              <button
+                onClick={() => setReporting(true)}
+                aria-label={t('report.button')}
+                title={t('report.button')}
+                style={{
+                  background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(var(--fg-rgb),0.15)',
+                  borderRadius: '50%', width: 40, height: 40, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <Flag size={16} strokeWidth={2} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -413,6 +430,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
         </div>
       </div>
 
+      {reporting && <ReportModal specialistId={sp.id} specialistName={sp.name} onClose={() => setReporting(false)} />}
     </div>
   )
 }

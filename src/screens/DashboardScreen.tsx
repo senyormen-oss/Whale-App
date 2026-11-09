@@ -10,6 +10,8 @@ import { categoryLabel, localizeService } from '../data'
 import LanguageSwitcher from '../LanguageSwitcher'
 import ThemeSwitcher from '../ThemeSwitcher'
 import UserAvatar from '../UserAvatar'
+import ListingTools from './ListingTools'
+import EditProfileModal from './EditProfileModal'
 import Segmented from '../Segmented'
 import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder, type InboxItem } from '../lib/queries'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
@@ -67,6 +69,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
   const [openChat, setOpenChat] = useState<InboxItem | null>(null)
   const [inboxUnread, setInboxUnread] = useState(0)
   const [deleting, setDeleting] = useState(false)
+  const [editProfile, setEditProfile] = useState(false)
   const [legalDoc, setLegalDoc] = useState<'terms' | 'privacy' | null>(null)
 
   const spendByMonth = Array.from({ length: 5 }, (_, i) => {
@@ -381,6 +384,8 @@ export default function DashboardScreen({ onNavigate }: Props) {
                 </span>
               </button>
 
+              <ListingTools listing={myListing} onChange={sp => { setMyListing(sp); reloadSpecialists() }} />
+
               {/* Client messages */}
               <div>
                 <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -516,6 +521,18 @@ export default function DashboardScreen({ onNavigate }: Props) {
             </div>
 
             <button
+              onClick={() => { setShowSettings(false); setEditProfile(true) }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 12,
+                padding: '14px 4px', background: 'none', border: 'none',
+                borderBottom: '1px solid rgba(var(--fg-rgb),0.08)', cursor: 'pointer', textAlign: 'left',
+              }}
+            >
+              <User size={17} color="rgba(var(--fg-rgb),calc(0.7 * var(--tb)))" strokeWidth={1.8} />
+              <span style={{ fontSize: 14, color: 'var(--ink)' }}>{t('dash.editProfile')}</span>
+            </button>
+
+            <button
               onClick={toggleNotifications}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center', gap: 12,
@@ -586,6 +603,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
           </div>
         </div>
       )}
+      {editProfile && <EditProfileModal onClose={() => setEditProfile(false)} />}
     </div>
   )
 }
