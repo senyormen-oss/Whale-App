@@ -46,16 +46,16 @@ function terms(lang: Lang): LegalSection[] {
         'Создавая аккаунт или пользуясь сервисом, вы соглашаетесь с настоящими Условиями. Если вы не согласны, не пользуйтесь Whale.',
       ] },
       { heading: "2. Наша роль", body: [
-        "Whale организует и продаёт творческие и цифровые услуги, показанные в приложении. Их выполняют специалисты, которые работают с Whale в составе команды или как подрядчики. Whale отвечает перед клиентом за организацию услуги.",
-        "Профили, портфолио, рейтинги и отзывы показываются, чтобы помочь вам выбрать. Мы стараемся поддерживать их достоверность, но не гарантируем конкретный результат.",
+        "Whale — платформа, которая соединяет клиентов с независимыми специалистами. Специалисты — независимые профессионалы, а не сотрудники или представители Whale. Сама услуга — это соглашение между клиентом и специалистом. Whale не является его стороной и не гарантирует качество, безопасность, законность или сроки оказания услуг.",
+        "Команда Whale может помогать сторонам связаться и согласовать детали, например по телефону. Профили, портфолио, рейтинги и отзывы публикуют пользователи и команда; мы не проверяем каждое утверждение.",
       ] },
       { heading: '3. Аккаунт', body: [
         'Вам должно быть не менее 18 лет, а данные должны быть достоверными. Вы отвечаете за сохранность пароля и за все действия в вашем аккаунте.',
         'Вы можете закрыть аккаунт в любой момент: Профиль → Настройки → Удалить аккаунт. При этом ваш профиль, бронирования, сообщения и избранное будут удалены без возможности восстановления.',
       ] },
       { heading: "4. Бронирования и оплата", body: [
-        "Клиент отправляет заявку с желаемой датой, временем и пакетом. Заявка ещё не является подтверждённым бронированием: сотрудник Whale связывается с клиентом по телефону и согласует детали. Слот закрепляется только после того, как Whale подтвердит заявку. Клиент может отменить заявку или бронь на экране «Мои бронирования».",
-        "Оплата: приложение не принимает онлайн-платежи. После подтверждения клиент платит Whale напрямую (например, наличными или банковским переводом) в размере, согласованном с Whale. Цены в приложении ориентировочные, пока их не подтвердили по телефону.",
+        "Клиент отправляет заявку с желаемой датой, временем и пакетом. Заявка ещё не является подтверждённым бронированием: сотрудник Whale связывается с клиентом по телефону и согласует детали, а слот закрепляется только после подтверждения. Клиент может отменить заявку или бронь на экране «Мои бронирования».",
+        "Оплата: Whale не принимает, не удерживает и не переводит платежи. Цену и способ оплаты клиент и специалист согласуют между собой напрямую. Цены в приложении ориентировочные. Whale не отвечает за расчёты между ними.",
       ] },
       { heading: '5. Отзывы и контент', body: [
         'Оставить отзыв может только клиент, чьё бронирование завершено, и только один раз. Отзыв должен быть честным и основанным на вашем опыте. Вы сохраняете права на загружаемый контент и предоставляете Whale неисключительную лицензию на его хранение и показ в сервисе, пока он в нём размещён.',
@@ -84,16 +84,16 @@ function terms(lang: Lang): LegalSection[] {
         "Hisob yaratish yoki xizmatdan foydalanish orqali siz ushbu Shartlarga rozilik bildirasiz. Rozi bo'lmasangiz, Whale'dan foydalanmang.",
       ] },
       { heading: "2. Bizning rolimiz", body: [
-        "Whale ilovada ko'rsatilgan ijodiy va raqamli xizmatlarni tashkil qiladi va sotadi. Ularni Whale bilan jamoa a'zosi yoki pudratchi sifatida ishlaydigan mutaxassislar bajaradi. Xizmatni tashkil etish uchun Whale mijoz oldida javobgar.",
-        "Profillar, portfoliolar, reytinglar va sharhlar tanlashingizga yordam berish uchun ko'rsatiladi. Ularning to'g'riligini saqlashga harakat qilamiz, lekin muayyan natijaga kafolat bermaymiz.",
+        "Whale — mijozlarni mustaqil mutaxassislar bilan bog'laydigan platforma. Mutaxassislar mustaqil kasb egalari bo'lib, Whale'ning xodimlari yoki vakillari emas. Xizmatning o'zi mijoz va mutaxassis o'rtasidagi kelishuvdir. Whale uning tomoni emas va xizmat sifati, xavfsizligi, qonuniyligi yoki muddatiga kafolat bermaydi.",
+        "Whale jamoasi tomonlarga bog'lanish va tafsilotlarni kelishishda, masalan, telefon orqali yordam berishi mumkin. Profillar, portfoliolar, reytinglar va sharhlarni foydalanuvchilar va jamoa joylashtiradi; biz har bir ma'lumotni tekshirmaymiz.",
       ] },
       { heading: '3. Hisob', body: [
         "Yoshingiz kamida 18 da bo'lishi va ma'lumotlaringiz to'g'ri bo'lishi kerak. Parol sir saqlanishi va hisobingizdagi barcha harakatlar uchun o'zingiz javobgarsiz.",
         "Hisobni istalgan vaqtda yopishingiz mumkin: Profil → Sozlamalar → Hisobni o'chirish. Bunda profilingiz, band qilishlaringiz, xabarlaringiz va tanlanganlaringiz butunlay o'chiriladi.",
       ] },
       { heading: "4. Band qilish va to'lov", body: [
-        "Mijoz xohlagan sana, vaqt va paket bilan so'rov yuboradi. So'rov hali tasdiqlangan bron emas: Whale xodimi mijoz bilan telefon orqali bog'lanib, tafsilotlarni kelishadi. Vaqt oralig'i faqat Whale so'rovni tasdiqlagandan keyin biriktiriladi. Mijoz so'rov yoki bronni \"Mening bronlarim\" ekranida bekor qilishi mumkin.",
-        "To'lov: ilova onlayn to'lovlarni qabul qilmaydi. Tasdiqlangandan keyin mijoz Whale bilan kelishilgan summani Whale'ga bevosita (masalan, naqd yoki bank o'tkazmasi orqali) to'laydi. Ilovadagi narxlar telefonda tasdiqlanmaguncha taxminiy.",
+        "Mijoz xohlagan sana, vaqt va paket bilan so'rov yuboradi. So'rov hali tasdiqlangan bron emas: Whale xodimi mijoz bilan telefon orqali bog'lanib, tafsilotlarni kelishadi, vaqt oralig'i esa faqat tasdiqlangandan keyin biriktiriladi. Mijoz so'rov yoki bronni \"Mening bronlarim\" ekranida bekor qilishi mumkin.",
+        "To'lov: Whale to'lovlarni qabul qilmaydi, ushlab turmaydi va o'tkazmaydi. Narx va to'lov usulini mijoz bilan mutaxassis o'zaro bevosita kelishadi. Ilovadagi narxlar taxminiy. Whale ular o'rtasidagi hisob-kitoblar uchun javobgar emas.",
       ] },
       { heading: '5. Sharhlar va kontent', body: [
         "Sharhni faqat bron yakunlangan mijoz va faqat bir marta qoldirishi mumkin. Sharh halol va shaxsiy tajribangizga asoslangan bo'lishi kerak. Yuklagan kontentingizga bo'lgan huquqlar sizda qoladi, Whale'ga esa uni xizmatda joylashtirilgan davrda saqlash va ko'rsatish uchun eksklyuziv bo'lmagan litsenziya berasiz.",
@@ -121,16 +121,16 @@ function terms(lang: Lang): LegalSection[] {
       'By creating an account or using the service you agree to these Terms. If you do not agree, do not use Whale.',
     ] },
     { heading: "2. Our role", body: [
-        "Whale arranges and sells the creative and digital services shown in the app. They are performed by specialists who work with Whale as members of its team or as contractors. Whale is responsible to clients for arranging the service.",
-        "Specialist profiles, portfolios, ratings and reviews are shown to help you choose. We do our best to keep them accurate, but we do not guarantee any particular result.",
+        "Whale is a platform that connects clients with independent specialists. Specialists are independent professionals, not employees or agents of Whale. The service itself is an agreement between the client and the specialist. Whale is not a party to that agreement and does not guarantee the quality, safety, legality or timing of any service.",
+        "The Whale team may help the two sides to get in touch and agree the details, for example by phone. Specialist profiles, portfolios, ratings and reviews are provided by users and the team; we do not verify every statement.",
       ] },
     { heading: '3. Accounts', body: [
       'You must be at least 18 years old and provide accurate information. You are responsible for keeping your password confidential and for all activity under your account.',
       'You may close your account at any time from Profile → Settings → Delete account. Closing it permanently erases your profile, bookings, messages and favorites.',
     ] },
     { heading: "4. Bookings and payments", body: [
-        "Clients send a booking request with a preferred date, time and package. A request is not yet a confirmed booking: a member of the Whale team contacts the client by phone to agree the details. A time slot is reserved only after Whale confirms the request. Clients can cancel a request or booking from the My Bookings screen.",
-        "Payment: the app does not process online payments. After confirmation the client pays Whale directly (for example in cash or by bank transfer) in the amount agreed with Whale. Prices shown in the app are indicative until confirmed by phone.",
+        "Clients send a booking request with a preferred date, time and package. A request is not yet a confirmed booking: a member of the Whale team contacts the client by phone to agree the details, and a time slot is reserved only after the request is confirmed. Clients can cancel a request or booking from the My Bookings screen.",
+        "Payment: Whale does not accept, hold or transfer payments. The client and the specialist agree the price and the way of payment between themselves, directly. Prices shown in the app are indicative. Whale is not responsible for settlements between them.",
       ] },
     { heading: '5. Reviews and content', body: [
       'Only a client who completed a booking may review it, once. Reviews must be honest and based on your own experience. You keep ownership of the content you upload, and you grant Whale a non-exclusive licence to host and display it in the service for as long as it is on the service.',
@@ -165,9 +165,9 @@ function privacy(lang: Lang): LegalSection[] {
       { heading: '2. Зачем мы это используем', body: [
         'Чтобы создавать и защищать аккаунт, позволять бронировать и общаться, показывать публичные профили и отзывы, предотвращать злоупотребления и мошенничество и соблюдать закон.',
       ] },
-      { heading: '3. Кто видит ваши данные', body: [
-        'Ваши сообщения и бронирования видны только вам и второй стороне этого бронирования или диалога. Анкеты специалистов и отзывы общедоступны. Специалист видит имя клиентов, которые у него забронировали или написали ему.',
-        'Мы никогда не продаём ваши данные.',
+      { heading: "3. Кто видит ваши данные", body: [
+        "Ваши сообщения и бронирования видны только вам и второй стороне этого бронирования или диалога. Анкеты специалистов и отзывы общедоступны. Номер телефона и комментарий из заявки видны команде Whale и могут быть переданы специалисту, у которого вы бронируете, чтобы организовать сеанс.",
+        "Мы никогда не продаём ваши данные.",
       ] },
       { heading: '4. Поставщики услуг и место хранения', body: [
         'Мы используем Supabase для базы данных, аутентификации и хранения файлов и Vercel для работы сайта. Сейчас данные хранятся в дата-центре за пределами Узбекистана, поэтому использование Whale предполагает трансграничную передачу данных. Мы перенесём хранение, если этого потребуют местные правила о размещении данных.',
@@ -198,7 +198,7 @@ function privacy(lang: Lang): LegalSection[] {
         "Hisobni yaratish va himoyalash, band qilish va muloqot qilish imkonini berish, ochiq profillar va sharhlarni ko'rsatish, suiiste'mol va firibgarlikning oldini olish hamda qonunga rioya qilish uchun.",
       ] },
       { heading: "3. Ma'lumotlaringizni kim ko'radi", body: [
-        "Xabarlaringiz va bronlaringizni faqat siz va shu bron yoki suhbatning ikkinchi tomoni ko'radi. Mutaxassis anketalari va sharhlar hammaga ochiq. Mutaxassis o'zida band qilgan yoki yozgan mijozlarning ismini ko'radi.",
+        "Xabarlaringiz va bronlaringizni faqat siz va shu bron yoki suhbatning ikkinchi tomoni ko'radi. Mutaxassis anketalari va sharhlar hammaga ochiq. So'rovdagi telefon raqami va izohni Whale jamoasi ko'radi va seansni tashkil qilish uchun siz band qilgan mutaxassisga berilishi mumkin.",
         "Ma'lumotlaringizni hech qachon sotmaymiz.",
       ] },
       { heading: "4. Xizmat ko'rsatuvchilar va saqlash joyi", body: [
@@ -228,10 +228,10 @@ function privacy(lang: Lang): LegalSection[] {
     { heading: '2. Why we use it', body: [
       'To create and secure your account, to let you book and communicate, to show public specialist profiles and reviews, to prevent abuse and fraud, and to comply with the law.',
     ] },
-    { heading: '3. Who can see your data', body: [
-      'Your messages and bookings are visible only to you and the other party to that booking or conversation. Specialist listings and reviews are public. A specialist can see the name of clients who booked or wrote to them.',
-      'We never sell your data.',
-    ] },
+    { heading: "3. Who can see your data", body: [
+        "Your messages and bookings are visible only to you and the other party to that booking or conversation. Specialist listings and reviews are public. The phone number and comment from a booking request are visible to the Whale team and may be passed to the specialist you booked, so that the session can be arranged.",
+        "We never sell your data.",
+      ] },
     { heading: '4. Service providers and where data is stored', body: [
       'We use Supabase to host the database, authentication and file storage, and Vercel to serve the website. Data is currently stored in a data-centre region outside Uzbekistan, so using Whale involves transferring your data abroad. We will move storage if local data-residency rules require it.',
     ] },
