@@ -176,7 +176,7 @@ function AuthenticatedApp() {
       case 'specialist':
         return <SpecialistScreen specialistId={screen.id} onNavigate={navigate} onBack={goBack} />
       case 'booking':
-        return <BookingScreen specialistId={screen.specialistId} onNavigate={navigate} onBack={goBack} />
+        return <BookingScreen specialistId={screen.specialistId} packageId={screen.packageId} onNavigate={navigate} onBack={goBack} />
       case 'bookings':
         return <BookingsScreen onNavigate={navigate} />
       case 'chats':

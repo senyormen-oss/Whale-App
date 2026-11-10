@@ -50,6 +50,16 @@ interface BookingInput {
   amount: number
   phone: string
   note: string
+  /** 1 for a single session; 5, 10 or 20 for a package. */
+  sessions?: number
+}
+
+interface PackageSessionInput {
+  packageId: string
+  dateKey: string
+  slot: string
+  phone: string
+  note: string
 }
 
 interface AppStore {
@@ -73,6 +83,8 @@ interface AppStore {
   deleteAccount: () => Promise<boolean>
   /** Sends a booking request. An administrator confirms it by phone; no slot is blocked until then. */
   createRequest: (input: BookingInput) => Promise<{ order: Order } | { error: string }>
+  /** Requests a further session of an active package. */
+  createPackageSession: (input: PackageSessionInput) => Promise<{ order: Order } | { error: string }>
 }
 
 const AppStoreContext = createContext<AppStore | null>(null)
@@ -82,6 +94,10 @@ function bookingServerMessage(message: string): string | null {
   const map: [string, Parameters<typeof t>[0]][] = [
     ['Invalid time slot', 'err.invalidSlot'],
     ['Invalid phone', 'err.invalidPhone'],
+    ['No sessions left', 'err.noSessions'],
+    ['Package is not active', 'err.packageInactive'],
+    ['Package not found', 'err.bookingFailed'],
+    ['Invalid package', 'err.bookingFailed'],
     ['Too many open requests', 'err.tooManyRequests'],
     ['Invalid amount', 'err.invalidAmount'],
     ['You cannot book your own listing', 'err.ownListing'],
@@ -187,6 +203,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       p_amount: input.amount,
       p_phone: input.phone,
       p_note: input.note,
+      p_sessions: input.sessions ?? 1,
     })
     if (error || !data) return { error: bookingErrorMessage(error ?? { message: '' }) }
     const order = mapOrderRow(data as Record<string, any>)
@@ -319,6 +336,21 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
 
     async createRequest(input) {
       return book(input)
+    },
+
+    async createPackageSession(input) {
+      if (!user) return { error: t('err.signInAgain') }
+      const { data, error } = await supabase.rpc('create_package_session', {
+        p_package_id: input.packageId,
+        p_date: input.dateKey,
+        p_slot: input.slot,
+        p_phone: input.phone,
+        p_note: input.note,
+      })
+      if (error || !data) return { error: bookingErrorMessage(error ?? { message: '' }) }
+      const order = mapOrderRow(data as Record<string, any>)
+      setOrders(prev => [order, ...prev])
+      return { order }
     },
   }), [ready, orders, conversations, messagesByConversation, favorites, notificationsEnabled, user, fetchThread, book, notify, signOut])
 

@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient'
 import type { Specialist, Review, Order } from '../types'
 import { t, formatTime } from '../i18n'
 
-function mapSpecialistRow(row: Record<string, any>): Specialist {
+export function mapSpecialistRow(row: Record<string, any>): Specialist {
   return {
     id: row.id,
     ownerId: row.owner_id ?? undefined,

@@ -3,6 +3,9 @@ import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice } from '../data'
 import type { Screen } from '../types'
 import { useAppStore } from '../store'
 import { useAuth } from '../auth'
+import { fetchMyPackages } from '../lib/packages'
+import type { PackageInfo } from '../lib/admin'
+import { localizeService } from '../data'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatDate, formatNumber, monthName, weekdayLabels } from '../i18n'
 import { fetchBookedSlotsInRange } from '../lib/queries'
@@ -10,6 +13,8 @@ import { ArrowLeft, ChevronLeft, ChevronRight, Lock, PartyPopper, Phone, AlertCi
 
 interface Props {
   specialistId: string
+  /** When set, the client books a further session of this package instead of buying a plan. */
+  packageId?: string
   onNavigate: (screen: Screen) => void
   onBack: () => void
 }
@@ -19,11 +24,12 @@ function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
 
-export default function BookingScreen({ specialistId, onNavigate, onBack }: Props) {
+export default function BookingScreen({ specialistId, packageId, onNavigate, onBack }: Props) {
   const { t } = useI18n()
   const { specialists } = useSpecialists()
   const sp = specialists.find(s => s.id === specialistId)
-  const { createRequest } = useAppStore()
+  const { createRequest, createPackageSession } = useAppStore()
+  const [pkg, setPkg] = useState<PackageInfo | null>(null)
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
@@ -62,6 +68,11 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sp?.id, viewYear, viewMonth])
+
+  useEffect(() => {
+    if (!packageId || !user) return
+    fetchMyPackages(user.id).then(list => setPkg(list.find(p => p.id === packageId) ?? null)).catch(err => console.error(err))
+  }, [packageId, user])
 
   if (!sp) return null
 
@@ -112,6 +123,9 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
   const takenSlotsForSelectedDay = selectedDay ? (bookedByDate[dateKey] ?? []) : []
   const availableSlots = AVAILABLE_SLOTS.filter(slot => !takenSlotsForSelectedDay.includes(slot))
 
+  const summaryService = pkg ? localizeService(pkg.plan) : sub.name
+  const summaryPrice = pkg ? Math.max(1, Math.round(pkg.price / pkg.planTotal)) : sub.price
+
   async function handleConfirm() {
     if (!selectedDay || !selectedSlot || confirming) return
     const digits = phone.replace(/[^0-9]/g, '')
@@ -122,15 +136,18 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
     setConfirming(true)
     setConfirmError(null)
 
-    const result = await createRequest({
-      specialistId,
-      dateKey,
-      slot: selectedSlot,
-      serviceName: sub.canonical,
-      amount: sub.price,
-      phone: phone.trim(),
-      note: note.trim(),
-    })
+    const result = packageId
+      ? await createPackageSession({ packageId, dateKey, slot: selectedSlot, phone: phone.trim(), note: note.trim() })
+      : await createRequest({
+          specialistId,
+          dateKey,
+          slot: selectedSlot,
+          serviceName: sub.canonical,
+          amount: sub.price,
+          phone: phone.trim(),
+          note: note.trim(),
+          sessions: sub.sessions,
+        })
     setConfirming(false)
 
     if ('error' in result) {
@@ -190,7 +207,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
 
         {/* Step indicator */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {(['date', 'sub', 'pay'] as const).map((s, i) => (
+          {(['date', 'sub', 'pay'] as const).filter(st => !(packageId && st === 'sub')).map((s, i) => (
             <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <div
                 onClick={() => {
@@ -430,7 +447,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
               { label: t('book.specialist'), value: sp.name },
               { label: t('book.date'), value: dateLabel },
               { label: t('book.time'), value: selectedSlot ?? '—' },
-              { label: t('book.service'), value: sub.name },
+              { label: t('book.service'), value: summaryService },
             ].map(row => (
               <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
                 <span style={{ fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{row.label}</span>
@@ -439,7 +456,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 0', marginTop: 4 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{t('book.total')}</span>
-              <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-text)' }}>{formatPrice(sub.price)}</span>
+              <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-text)' }}>{formatPrice(summaryPrice)}</span>
             </div>
           </div>
 
@@ -473,7 +490,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
       }}>
         {step === 'date' && (
           <button
-            onClick={() => setStep('sub')}
+            onClick={() => setStep(packageId ? 'pay' : 'sub')}
             disabled={!selectedDay || !selectedSlot}
             className={selectedDay && selectedSlot ? 'tiffany-glow' : ''}
             style={{
@@ -502,7 +519,7 @@ export default function BookingScreen({ specialistId, onNavigate, onBack }: Prop
         )}
         {step === 'pay' && (
           <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => setStep('sub')} disabled={confirming} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(var(--fg-rgb),0.15)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
+            <button onClick={() => setStep(packageId ? 'date' : 'sub')} disabled={confirming} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(var(--fg-rgb),0.15)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
             <button
               onClick={handleConfirm}
               disabled={confirming}

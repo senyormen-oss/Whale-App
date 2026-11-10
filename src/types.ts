@@ -76,7 +76,7 @@ export type Screen =
   | { name: 'home' }
   | { name: 'search'; category?: CategoryKey; query?: string }
   | { name: 'specialist'; id: string }
-  | { name: 'booking'; specialistId: string }
+  | { name: 'booking'; specialistId: string; packageId?: string }
   | { name: 'chats' }
   | { name: 'chat'; conversationId: string }
   | { name: 'dashboard' }

@@ -141,3 +141,21 @@ export function Checkbox({ checked, onChange, children }: {
     </div>
   )
 }
+
+/** Sliding on/off switch with a label. */
+export function Switch({ checked, onChange, children }: { checked: boolean; onChange: (checked: boolean) => void; children: ReactNode }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', padding: '4px 0', background: 'none', border: 'none', color: 'var(--ink)', fontSize: 14, textAlign: 'left' }}
+    >
+      <span>{children}</span>
+      <span style={{ width: 42, height: 24, borderRadius: 12, position: 'relative', flexShrink: 0, background: checked ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.2)', transition: 'background-color 0.25s ease' }}>
+        <span style={{ position: 'absolute', top: 3, left: checked ? 21 : 3, width: 18, height: 18, borderRadius: '50%', background: '#fff', transition: 'left 0.25s cubic-bezier(.4,0,.2,1)', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+      </span>
+    </button>
+  )
+}
