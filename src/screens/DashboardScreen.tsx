@@ -188,7 +188,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
               {(user?.user_metadata?.full_name as string) || t('dash.user')}
             </h1>
             <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {user?.email}
+              {user?.email || (user?.phone ? `+${user.phone}` : '')}
             </p>
           </div>
           <button

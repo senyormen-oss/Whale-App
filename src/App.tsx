@@ -7,6 +7,7 @@ import BookingsScreen from './screens/BookingsScreen'
 import ChatScreen from './screens/ChatScreen'
 import DashboardScreen from './screens/DashboardScreen'
 import AuthScreen from './screens/AuthScreen'
+import NamePrompt from './screens/NamePrompt'
 import type { Screen, TabName } from './types'
 import { useAppStore } from './store'
 import { useI18n } from './i18n'
@@ -111,6 +112,8 @@ export default function App() {
 
   if (authLoading) return <LoadingScreen />
   if (!user || recovering) return <AuthScreen />
+  // Phone sign-ups have no name yet: ask once before showing the app.
+  if (user.phone && !user.email && !(user.user_metadata?.full_name as string | undefined)?.trim()) return <NamePrompt />
   if (specialistsLoading) return <LoadingScreen />
   if (specialistsError) {
     return (

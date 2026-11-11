@@ -38,7 +38,7 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
   const plans = getSubscriptionPlans(sp?.price ?? 0)
   const [selectedSub, setSelectedSub] = useState('sub1')
   const { user } = useAuth()
-  const [phone, setPhone] = useState(() => (user?.user_metadata?.phone as string | undefined) ?? '')
+  const [phone, setPhone] = useState(() => (user?.phone ? `+${user.phone}` : (user?.user_metadata?.phone as string | undefined) ?? ''))
   const [note, setNote] = useState('')
   const [booked, setBooked] = useState(false)
   const [confirming, setConfirming] = useState(false)

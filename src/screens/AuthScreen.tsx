@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useAuth, validatePassword } from '../auth'
 import { useI18n } from '../i18n'
 import LanguageSwitcher from '../LanguageSwitcher'
 import Segmented from '../Segmented'
 import ThemeSwitcher from '../ThemeSwitcher'
 import { Checkbox } from '../Controls'
+import { PHONE_AUTH_ENABLED, normalizeUzPhone, formatUzPhone } from '../lib/phone'
 import LegalScreen from './LegalScreen'
 import { Mail, Lock, User, ArrowUp, CheckCircle2, Eye, EyeOff, AlertCircle } from '../icons'
 
-type View = 'signin' | 'signup' | 'forgot' | 'confirm' | 'reset-sent'
+type View = 'signin' | 'signup' | 'forgot' | 'confirm' | 'reset-sent' | 'phone'
 
 const inputStyle = {
   flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)',
@@ -119,6 +120,127 @@ function NewPasswordForm() {
   )
 }
 
+/** Sign in (or sign up) with a one-time code sent by SMS. */
+function PhoneLogin({ onBack, openLegal }: { onBack: () => void; openLegal: (doc: 'terms' | 'privacy') => void }) {
+  const { t } = useI18n()
+  const { sendPhoneCode, verifyPhoneCode } = useAuth()
+  const [step, setStep] = useState<'phone' | 'code'>('phone')
+  const [phoneInput, setPhoneInput] = useState('')
+  const [e164, setE164] = useState('')
+  const [code, setCode] = useState('')
+  const [agreed, setAgreed] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [cooldown, setCooldown] = useState(0)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const id = window.setTimeout(() => setCooldown(c => c - 1), 1000)
+    return () => window.clearTimeout(id)
+  }, [cooldown])
+
+  async function send(e?: React.FormEvent) {
+    e?.preventDefault()
+    setError(null)
+    const normalized = normalizeUzPhone(phoneInput)
+    if (!normalized) return setError(t('auth.err.phone'))
+    if (step === 'phone' && !agreed) return setError(t('auth.acceptTerms'))
+    setBusy(true)
+    const { error: err } = await sendPhoneCode(normalized)
+    setBusy(false)
+    if (err) return setError(err)
+    setE164(normalized)
+    setStep('code')
+    setCode('')
+    setCooldown(60)
+  }
+
+  async function verify(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    if (!/^\d{6}$/.test(code)) return setError(t('auth.err.code'))
+    setBusy(true)
+    const { error: err } = await verifyPhoneCode(e164, code)
+    setBusy(false)
+    if (err) setError(err)
+    // On success the auth state changes and the app takes over.
+  }
+
+  return (
+    <Shell>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+        <ThemeSwitcher compact />
+        <LanguageSwitcher compact />
+      </div>
+      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+        <h1 className="gradient-text" style={{ margin: '0 0 6px', fontSize: 32, fontWeight: 900 }}>Whale</h1>
+        <p style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('auth.phoneTitle')}</p>
+      </div>
+
+      {step === 'phone' ? (
+        <form onSubmit={send} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="glass" style={fieldStyle}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))' }}>+998</span>
+            <input
+              value={phoneInput}
+              onChange={e => setPhoneInput(e.target.value)}
+              type="tel"
+              inputMode="numeric"
+              autoComplete="tel-national"
+              placeholder="90 123 45 67"
+              maxLength={18}
+              aria-label={t('auth.phone')}
+              style={inputStyle}
+            />
+          </div>
+          <Checkbox checked={agreed} onChange={setAgreed}>
+            {t('auth.agree1')}{' '}
+            <button type="button" onClick={() => openLegal('terms')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.terms')}</button>
+            {' '}{t('auth.and')}{' '}
+            <button type="button" onClick={() => openLegal('privacy')} style={{ ...linkBtn, fontSize: 12.5 }}>{t('legal.privacy')}</button>.
+          </Checkbox>
+          <ErrorLine message={error} />
+          <button type="submit" disabled={busy} className={busy ? '' : 'tiffany-glow'} style={{ ...primaryBtn, opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer' }}>
+            {busy ? t('auth.sendingCode') : t('auth.sendCode')}
+          </button>
+          <div style={{ textAlign: 'center', marginTop: 4 }}>
+            <button type="button" onClick={onBack} style={linkBtn}>{t('auth.useEmail')}</button>
+          </div>
+        </form>
+      ) : (
+        <form onSubmit={verify} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.5, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', textAlign: 'center' }}>
+            {t('auth.codeSentTo')} <strong style={{ color: 'var(--ink)' }}>{formatUzPhone(e164)}</strong>
+          </p>
+          <div className="glass" style={{ ...fieldStyle, justifyContent: 'center' }}>
+            <input
+              autoFocus
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="······"
+              maxLength={6}
+              aria-label={t('auth.code')}
+              style={{ ...inputStyle, flex: 'none', width: '100%', textAlign: 'center', fontSize: 26, fontWeight: 800, letterSpacing: '0.4em' }}
+            />
+          </div>
+          <ErrorLine message={error} />
+          <button type="submit" disabled={busy || code.length !== 6} className={busy ? '' : 'tiffany-glow'} style={{ ...primaryBtn, opacity: busy || code.length !== 6 ? 0.6 : 1, cursor: busy ? 'wait' : 'pointer' }}>
+            {busy ? t('auth.verifying') : t('auth.verify')}
+          </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+            <button type="button" onClick={() => { setStep('phone'); setError(null) }} style={linkBtn}>{t('auth.changeNumber')}</button>
+            <button type="button" disabled={cooldown > 0 || busy} onClick={() => send()} style={{ ...linkBtn, opacity: cooldown > 0 ? 0.5 : 1 }}>
+              {cooldown > 0 ? t('auth.resendIn', { s: cooldown }) : t('auth.resendCode')}
+            </button>
+          </div>
+        </form>
+      )}
+    </Shell>
+  )
+}
+
 export default function AuthScreen() {
   const { t } = useI18n()
   const { signIn, signUp, resendConfirmation, resetPassword, configured, user, recovering } = useAuth()
@@ -190,6 +312,8 @@ export default function AuthScreen() {
     await resendConfirmation(pendingEmail)
     setResendState('sent')
   }
+
+  if (view === 'phone') return <PhoneLogin onBack={() => switchView('signin')} openLegal={setLegalDoc} />
 
   if (view === 'confirm' || view === 'reset-sent') {
     const isReset = view === 'reset-sent'
@@ -310,6 +434,11 @@ export default function AuthScreen() {
         <div style={{ textAlign: 'center', marginTop: 4 }}>
           {view === 'signin' && <button type="button" onClick={() => switchView('forgot')} style={linkBtn}>{t('auth.forgot')}</button>}
           {view === 'forgot' && <button type="button" onClick={() => switchView('signin')} style={linkBtn}>{t('auth.backToSignIn')}</button>}
+          {view === 'signin' && PHONE_AUTH_ENABLED && (
+            <div style={{ marginTop: 14 }}>
+              <button type="button" onClick={() => switchView('phone')} style={linkBtn}>{t('auth.usePhone')}</button>
+            </div>
+          )}
         </div>
       </form>
 

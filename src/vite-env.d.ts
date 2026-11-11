@@ -6,6 +6,7 @@ interface ImportMetaEnv {
   readonly VITE_CLICK_MERCHANT_ID?: string
   readonly VITE_CLICK_SERVICE_ID?: string
   readonly VITE_PAYME_MERCHANT_ID?: string
+  readonly VITE_PHONE_AUTH?: string
 }
 
 interface ImportMeta {

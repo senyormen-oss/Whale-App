@@ -12,6 +12,9 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
   resendConfirmation: (email: string) => Promise<{ error: string | null }>
+  /** Sends a one-time code by SMS (creates the account on first use). */
+  sendPhoneCode: (phone: string) => Promise<{ error: string | null }>
+  verifyPhoneCode: (phone: string, code: string) => Promise<{ error: string | null }>
   resetPassword: (email: string) => Promise<{ error: string | null }>
   updatePassword: (password: string) => Promise<{ error: string | null }>
   /** Saves (or clears, with null) the profile photo URL in the user's metadata. */
@@ -38,6 +41,8 @@ function friendlyAuthError(message: string): string {
   if (/rate limit|too many/i.test(message)) return t('auth.err.rate')
   if (/network|failed to fetch/i.test(message)) return t('auth.err.network')
   if (/same.*password/i.test(message)) return t('auth.err.samePassword')
+  if (/otp|token has expired|invalid token|code/i.test(message) && !/email/i.test(message)) return t('auth.err.code')
+  if (/sms|hook|phone|provider/i.test(message)) return t('auth.err.sms')
   if (/invalid.*email|email.*invalid/i.test(message)) return t('auth.err.email')
   return message
 }
@@ -118,6 +123,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
   }
 
+  async function sendPhoneCode(phone: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      phone,
+      options: {
+        // Only used when the account is created: records which legal documents were accepted.
+        data: { terms_accepted_at: new Date().toISOString(), terms_version: LEGAL.termsVersion, privacy_version: LEGAL.privacyVersion },
+      },
+    })
+    return { error: error ? friendlyAuthError(error.message) : null }
+  }
+
+  async function verifyPhoneCode(phone: string, code: string) {
+    const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: 'sms' })
+    return { error: error ? friendlyAuthError(error.message) : null }
+  }
+
   async function resendConfirmation(email: string) {
     const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: window.location.origin } })
     return { error: error?.message ?? null }
@@ -127,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user: session?.user ?? null, loading, configured: isSupabaseConfigured,
-        signUp, signIn, signOut, resendConfirmation, resetPassword, updatePassword, updateAvatar, updateName, recovering, finishRecovery,
+        signUp, signIn, signOut, resendConfirmation, sendPhoneCode, verifyPhoneCode, resetPassword, updatePassword, updateAvatar, updateName, recovering, finishRecovery,
       }}
     >
       {children}
