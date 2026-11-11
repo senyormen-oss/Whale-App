@@ -6,7 +6,7 @@ The code is already in the app but hidden until you switch it on. Nothing here c
 1. Register at https://eskiz.uz and open the SMS cabinet.
 2. Ask Eskiz support: *Which documents are needed for an individual / IP? Is the SMS text template moderated, and which sender name can I use for one-time codes?*
 3. Get this text approved (or use the one Eskiz allows):
-   `Whale: ваш код подтверждения {code}. Никому не сообщайте его.`
+   `Код подтверждения для входа в Whale: 123456. Никому не сообщайте его.` (submit with a real example code; the function replaces it with the actual code)
 4. Top up the balance. Every login or sign-up code is one SMS.
 
 ## 2. Supabase Edge Function

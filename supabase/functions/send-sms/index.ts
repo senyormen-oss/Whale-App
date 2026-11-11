@@ -90,7 +90,7 @@ Deno.serve(async req => {
   if (!/^998\d{9}$/.test(phone)) return fail(400, 'Only Uzbekistan phone numbers are supported')
   if (!/^\d{4,8}$/.test(code)) return fail(400, 'Invalid code')
 
-  const template = Deno.env.get('SMS_TEMPLATE') ?? 'Whale: ваш код подтверждения {code}. Никому не сообщайте его.'
+  const template = Deno.env.get('SMS_TEMPLATE') ?? 'Код подтверждения для входа в Whale: {code}. Никому не сообщайте его.'
   try {
     await sendThroughEskiz(phone, template.replace('{code}', code))
   } catch (err) {
