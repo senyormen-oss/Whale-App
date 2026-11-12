@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import HomeScreen from './screens/HomeScreen'
 import SearchScreen from './screens/SearchScreen'
 import SpecialistScreen from './screens/SpecialistScreen'
@@ -11,6 +11,7 @@ import NamePrompt from './screens/NamePrompt'
 import type { Screen, TabName } from './types'
 import { useAppStore } from './store'
 import { useI18n } from './i18n'
+import { useToast } from './toast'
 import { useAuth } from './auth'
 import { useSpecialists } from './specialistsData'
 import { Home, Search, ClipboardList, MessageCircle, User, Loader2, type IconType } from './icons'
@@ -131,6 +132,13 @@ export default function App() {
 }
 
 function AuthenticatedApp() {
+  const { emailJustConfirmed } = useAuth()
+  const { notify } = useToast()
+  const { t } = useI18n()
+  useEffect(() => {
+    if (emailJustConfirmed) notify(t('auth.emailConfirmed'), 'success')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [activeTab, setActiveTab] = useState<TabName>('home')
   const [screenStack, setScreenStack] = useState<Screen[]>(() => {
     // Deep link from the "share profile" button: https://site/#specialist/<id>

@@ -3,6 +3,7 @@ import type { Session, User } from '@supabase/supabase-js'
 import { supabase, isSupabaseConfigured } from './lib/supabaseClient'
 import { LEGAL } from './legal'
 import { t } from './i18n'
+import { authLinkInfo, clearAuthLinkHash } from './lib/authLink'
 
 interface AuthState {
   user: User | null
@@ -23,6 +24,11 @@ interface AuthState {
   updateName: (fullName: string) => Promise<{ error: string | null }>
   /** True after the user opened a password-reset link; they must choose a new password before using the app. */
   recovering: boolean
+  /** Set when the e-mail link was expired or already used (translated message). */
+  linkNotice: string | null
+  clearLinkNotice: () => void
+  /** True right after the e-mail address was confirmed through the link. */
+  emailJustConfirmed: boolean
   finishRecovery: () => void
 }
 
@@ -53,6 +59,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [recovering, setRecovering] = useState(false)
+  const [linkNotice, setLinkNotice] = useState<string | null>(() =>
+    authLinkInfo.error ? (authLinkInfo.error === 'otp_expired' ? t('auth.err.linkExpired') : t('auth.err.linkInvalid')) : null)
+  const [emailJustConfirmed] = useState(authLinkInfo.confirmed)
+
+  useEffect(() => {
+    if (authLinkInfo.error) clearAuthLinkHash()
+  }, [])
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -148,7 +161,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user: session?.user ?? null, loading, configured: isSupabaseConfigured,
-        signUp, signIn, signOut, resendConfirmation, sendPhoneCode, verifyPhoneCode, resetPassword, updatePassword, updateAvatar, updateName, recovering, finishRecovery,
+        signUp, signIn, signOut, resendConfirmation, sendPhoneCode, verifyPhoneCode, resetPassword, updatePassword, updateAvatar, updateName, recovering, finishRecovery, linkNotice, clearLinkNotice: () => setLinkNotice(null), emailJustConfirmed,
       }}
     >
       {children}

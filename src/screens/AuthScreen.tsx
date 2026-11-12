@@ -243,7 +243,7 @@ function PhoneLogin({ onBack, openLegal }: { onBack: () => void; openLegal: (doc
 
 export default function AuthScreen() {
   const { t } = useI18n()
-  const { signIn, signUp, resendConfirmation, resetPassword, configured, user, recovering } = useAuth()
+  const { signIn, signUp, resendConfirmation, resetPassword, configured, user, recovering, linkNotice, clearLinkNotice } = useAuth()
   const [view, setView] = useState<View>('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -252,16 +252,27 @@ export default function AuthScreen() {
   const [error, setError] = useState<string | null>(null)
   const [pendingEmail, setPendingEmail] = useState('')
   const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
+  const [resendError, setResendError] = useState<string | null>(null)
+  const [cooldown, setCooldown] = useState(0)
   const [busy, setBusy] = useState(false)
   const [legalDoc, setLegalDoc] = useState<'terms' | 'privacy' | null>(null)
 
   if (user && recovering) return <NewPasswordForm />
   if (legalDoc) return <LegalScreen doc={legalDoc} onBack={() => setLegalDoc(null)} />
 
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const id = window.setTimeout(() => setCooldown(c => c - 1), 1000)
+    return () => window.clearTimeout(id)
+  }, [cooldown])
+
   function switchView(next: View) {
     setView(next)
     setError(null)
     setResendState('idle')
+    setResendError(null)
+    // The e-mail was just sent: asking Supabase to send another one straight away only hits its rate limit.
+    if (next === 'confirm') setCooldown(60)
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -308,9 +319,17 @@ export default function AuthScreen() {
   }
 
   async function handleResend() {
+    if (cooldown > 0) return
     setResendState('sending')
-    await resendConfirmation(pendingEmail)
+    setResendError(null)
+    const { error: err } = await resendConfirmation(pendingEmail)
+    if (err) {
+      setResendState('idle')
+      setResendError(err)
+      return
+    }
     setResendState('sent')
+    setCooldown(60)
   }
 
   if (view === 'phone') return <PhoneLogin onBack={() => switchView('signin')} openLegal={setLegalDoc} />
@@ -329,19 +348,24 @@ export default function AuthScreen() {
             : <>{t('auth.confirmSent')} <strong style={{ color: 'var(--ink)' }}>{pendingEmail}</strong>. {t('auth.confirmThen')}</>}
         </p>
 
-        {!isReset && (resendState === 'sent' ? (
-          <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ok)', margin: '0 0 20px' }}>
-            <CheckCircle2 size={15} strokeWidth={2} /> {t('auth.resent')}
-          </p>
-        ) : (
-          <button
-            onClick={handleResend}
-            disabled={resendState === 'sending'}
-            style={{ ...linkBtn, marginBottom: 20, cursor: resendState === 'sending' ? 'wait' : 'pointer' }}
-          >
-            {resendState === 'sending' ? t('auth.sending') : t('auth.resend')}
-          </button>
-        ))}
+        {!isReset && (
+          <>
+            {resendState === 'sent' && (
+              <p className="fade-in" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--ok)', margin: '0 0 8px' }}>
+                <CheckCircle2 size={15} strokeWidth={2} /> {t('auth.resent')}
+              </p>
+            )}
+            {resendError && <p role="alert" style={{ margin: '0 0 8px', fontSize: 12.5, color: '#ff4d6d', maxWidth: 320 }}>{resendError}</p>}
+            <button
+              onClick={handleResend}
+              disabled={resendState === 'sending' || cooldown > 0}
+              style={{ ...linkBtn, marginBottom: 8, opacity: cooldown > 0 ? 0.5 : 1, cursor: resendState === 'sending' ? 'wait' : cooldown > 0 ? 'not-allowed' : 'pointer' }}
+            >
+              {resendState === 'sending' ? t('auth.sending') : cooldown > 0 ? t('auth.resendIn', { s: cooldown }) : t('auth.resend')}
+            </button>
+            <p style={{ margin: '0 0 20px', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', maxWidth: 300, lineHeight: 1.5 }}>{t('auth.checkSpam')}</p>
+          </>
+        )}
 
         <button
           onClick={() => switchView('signin')}
@@ -368,6 +392,14 @@ export default function AuthScreen() {
           {view === 'forgot' ? t('auth.resetTitle') : t('auth.tagline')}
         </p>
       </div>
+
+      {linkNotice && (
+        <div role="alert" className="fade-in" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 16, padding: '12px 14px', borderRadius: 14, background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.35)', fontSize: 12.5, lineHeight: 1.5 }}>
+          <AlertCircle size={16} color="#F5A623" strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span style={{ flex: 1 }}>{linkNotice} {t('auth.linkHelp')}</span>
+          <button type="button" onClick={clearLinkNotice} aria-label={t('common.close')} style={{ background: 'none', border: 'none', color: 'inherit', padding: 0, fontSize: 16, lineHeight: 1 }}>×</button>
+        </div>
+      )}
 
       {!configured && (
         <div style={{ background: 'rgba(245,166,35,0.1)', border: '1px solid rgba(245,166,35,0.3)', borderRadius: 14, padding: 14, marginBottom: 20, fontSize: 12.5, color: '#F5A623', lineHeight: 1.5 }}>
