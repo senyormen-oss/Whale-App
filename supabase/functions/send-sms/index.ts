@@ -70,7 +70,7 @@ async function sendThroughEskiz(phone: string, message: string, retry = true): P
 async function sendThroughDevSms(phone: string, message: string): Promise<void> {
   const token = Deno.env.get('DEVSMS_TOKEN')
   if (!token) throw new Error('DevSMS token is not configured')
-  const url = Deno.env.get('DEVSMS_URL') ?? 'https://devsms.uz/api/send_sms.php'
+  const url = Deno.env.get('DEVSMS_URL') ?? 'https://devsms.uz/api/sms/send'
   const res = await fetch(url, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
