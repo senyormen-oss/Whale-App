@@ -1,10 +1,13 @@
-// Supabase Auth "Send SMS" hook: delivers one-time login codes through Eskiz (eskiz.uz).
+// Supabase Auth "Send SMS" hook: delivers one-time login codes through an Uzbek SMS gateway.
+// Pick the gateway with the SMS_PROVIDER secret: "eskiz" (default) or "devsms".
 //
 // Setup (Supabase dashboard):
 //   1. Edge Functions -> create a function named `send-sms`, paste this file, and turn OFF
 //      "Verify JWT" (Auth calls it with a signed webhook, not a user token).
-//   2. Edge Functions -> Secrets: ESKIZ_EMAIL, ESKIZ_PASSWORD, SEND_SMS_HOOK_SECRET.
-//      Optional: ESKIZ_FROM (sender, default 4546), SMS_TEMPLATE (must contain {code}).
+//   2. Edge Functions -> Secrets: SEND_SMS_HOOK_SECRET plus the gateway credentials:
+//        Eskiz  : ESKIZ_EMAIL, ESKIZ_PASSWORD, optional ESKIZ_FROM (default 4546)
+//        DevSMS : SMS_PROVIDER=devsms, DEVSMS_TOKEN, optional DEVSMS_FROM, DEVSMS_URL
+//      Optional for both: SMS_TEMPLATE (must contain {code}).
 //   3. Authentication -> Hooks -> Send SMS -> choose this function, generate the secret and put
 //      it into SEND_SMS_HOOK_SECRET.
 //   4. Authentication -> Providers -> Phone -> enable.
@@ -62,6 +65,29 @@ async function sendThroughEskiz(phone: string, message: string, retry = true): P
   }
 }
 
+// DevSMS (devsms.uz). NOTE: the request format below follows the commonly used pattern
+// (POST JSON + Bearer token) and must be checked against the DevSMS documentation in your cabinet.
+async function sendThroughDevSms(phone: string, message: string): Promise<void> {
+  const token = Deno.env.get('DEVSMS_TOKEN')
+  if (!token) throw new Error('DevSMS token is not configured')
+  const url = Deno.env.get('DEVSMS_URL') ?? 'https://devsms.uz/api/send_sms.php'
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone, message, from: Deno.env.get('DEVSMS_FROM') ?? '4546' }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    throw new Error(`DevSMS send failed (${res.status}) ${text.slice(0, 200)}`)
+  }
+}
+
+async function sendSms(phone: string, message: string): Promise<void> {
+  const provider = (Deno.env.get('SMS_PROVIDER') ?? 'eskiz').toLowerCase()
+  if (provider === 'devsms') return sendThroughDevSms(phone, message)
+  return sendThroughEskiz(phone, message)
+}
+
 function fail(status: number, message: string): Response {
   return new Response(JSON.stringify({ error: { http_code: status, message } }), {
     status,
@@ -92,7 +118,7 @@ Deno.serve(async req => {
 
   const template = Deno.env.get('SMS_TEMPLATE') ?? 'Код подтверждения для входа в Whale: {code}. Никому не сообщайте его.'
   try {
-    await sendThroughEskiz(phone, template.replace('{code}', code))
+    await sendSms(phone, template.replace('{code}', code))
   } catch (err) {
     console.error(err instanceof Error ? err.message : err)
     return fail(502, 'Could not send the SMS')
