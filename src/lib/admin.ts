@@ -144,6 +144,15 @@ export async function adminUpsertSpecialist(payload: SpecialistPayload): Promise
   return data as string
 }
 
+export async function adminModerateListing(
+  specialistId: string,
+  status: 'pending' | 'approved' | 'rejected' | 'needs_changes',
+  comment = '',
+): Promise<void> {
+  const { error } = await supabase.rpc('admin_moderate_listing', { p_specialist_id: specialistId, p_status: status, p_comment: comment })
+  if (error) throw error
+}
+
 export async function adminSetListingApproved(specialistId: string, approved: boolean): Promise<void> {
   const { error } = await supabase.rpc('admin_set_listing_approved', { p_specialist_id: specialistId, p_approved: approved })
   if (error) throw error
@@ -175,4 +184,14 @@ export async function fetchTeam(): Promise<TeamMember[]> {
 export async function setTeamRole(email: string, admin: boolean): Promise<void> {
   const { error } = await supabase.rpc('admin_set_role', { p_email: email, p_admin: admin })
   if (error) throw error
+}
+
+export interface UserContact { email: string; phone: string; fullName: string }
+
+/** E-mail, phone and name of an account (for moderators verifying a listing). */
+export async function fetchUserContact(userId: string): Promise<UserContact | null> {
+  const { data, error } = await supabase.rpc('admin_user_contact', { p_user_id: userId })
+  if (error) throw error
+  const row = ((data as any[]) ?? [])[0]
+  return row ? { email: row.email ?? '', phone: row.phone ?? '', fullName: row.full_name ?? '' } : null
 }

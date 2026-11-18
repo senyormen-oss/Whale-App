@@ -40,7 +40,7 @@ export default function HomeScreen({ onNavigate }: Props) {
   const [searchValue, setSearchValue] = useState('')
   const [showNotifications, setShowNotifications] = useState(false)
   const { conversations, notificationsEnabled, markConversationRead } = useAppStore()
-  const { specialists } = useSpecialists()
+  const { catalog: specialists } = useSpecialists()
   const { user } = useAuth()
   const firstName = ((user?.user_metadata?.full_name as string) || '').trim().split(' ')[0] || t('home.there')
 

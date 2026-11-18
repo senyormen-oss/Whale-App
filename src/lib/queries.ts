@@ -26,6 +26,9 @@ export function mapSpecialistRow(row: Record<string, any>): Specialist {
     tags: row.tags ?? [],
     available: row.available,
     approved: row.approved ?? true,
+    moderationStatus: (row.moderation_status ?? (row.approved === false ? 'pending' : 'approved')) as Specialist['moderationStatus'],
+    moderationComment: row.moderation_comment ?? '',
+    published: row.published ?? true,
     isNew: row.is_new,
   }
 }
@@ -78,10 +81,28 @@ export async function fetchBookedSlotsInRange(
   return byDate
 }
 
-export async function fetchMySpecialistListing(userId: string): Promise<Specialist | null> {
-  const { data, error } = await supabase.from('specialists').select('*').eq('owner_id', userId).maybeSingle()
+/** All listings owned by this account (one account can have several). */
+export async function fetchMyListings(userId: string): Promise<Specialist[]> {
+  const { data, error } = await supabase.from('specialists').select('*').eq('owner_id', userId).order('name')
   if (error) throw error
-  return data ? mapSpecialistRow(data) : null
+  return (data ?? []).map(mapSpecialistRow)
+}
+
+/** Owner shows or hides a listing. Hiding also stops new requests. */
+export async function setListingPublished(specialistId: string, published: boolean): Promise<Specialist> {
+  const { data, error } = await supabase.from('specialists').update({ published, available: published }).eq('id', specialistId).select().single()
+  if (error) throw error
+  return mapSpecialistRow(data)
+}
+
+export async function submitListingForReview(specialistId: string): Promise<void> {
+  const { error } = await supabase.rpc('submit_listing_for_review', { p_specialist_id: specialistId })
+  if (error) throw error
+}
+
+export async function deleteMyListing(specialistId: string): Promise<void> {
+  const { error } = await supabase.rpc('delete_my_listing', { p_specialist_id: specialistId })
+  if (error) throw error
 }
 
 export interface SpecialistListingInput {
@@ -156,14 +177,18 @@ export interface SpecialistOrder extends Order {
   clientName: string
   bookingSlot: string
   rawDate: string
+  phone: string
+  note: string
+  specialistName: string
 }
 
 /** Orders booked against a specialist's own listing, with the client's display name resolved. */
-export async function fetchSpecialistOrders(specialistId: string): Promise<SpecialistOrder[]> {
+export async function fetchSpecialistOrders(specialistIds: string[], names: Record<string, string> = {}): Promise<SpecialistOrder[]> {
+  if (specialistIds.length === 0) return []
   const { data, error } = await supabase
     .from('orders')
     .select('*')
-    .eq('specialist_id', specialistId)
+    .in('specialist_id', specialistIds)
     .order('booking_date', { ascending: true })
   if (error) throw error
   const rows = data ?? []
@@ -185,6 +210,9 @@ export async function fetchSpecialistOrders(specialistId: string): Promise<Speci
     amount: row.amount,
     clientName: namesById[row.user_id] ?? t('common.client'),
     bookingSlot: row.booking_slot,
+    phone: row.phone ?? '',
+    note: row.note ?? '',
+    specialistName: names[row.specialist_id] ?? '',
   }))
 }
 
@@ -204,11 +232,12 @@ export interface InboxItem {
 }
 
 /** Conversations on the specialist's own listing, newest first, with the client's name. */
-export async function fetchSpecialistInbox(specialistId: string): Promise<InboxItem[]> {
+export async function fetchSpecialistInbox(specialistIds: string[]): Promise<InboxItem[]> {
+  if (specialistIds.length === 0) return []
   const { data, error } = await supabase
     .from('conversations')
     .select('*')
-    .eq('specialist_id', specialistId)
+    .in('specialist_id', specialistIds)
     .order('last_time', { ascending: false })
   if (error) throw error
   const rows = data ?? []

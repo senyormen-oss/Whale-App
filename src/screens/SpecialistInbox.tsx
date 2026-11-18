@@ -11,8 +11,8 @@ import { useI18n, localizeSystemMessage } from '../i18n'
 import { ArrowLeft, ArrowUp, ImageIcon, MessageSquareText, Loader2 } from '../icons'
 
 /** List of client conversations on the specialist's own listing. */
-export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
-  specialistId: string
+export function SpecialistInbox({ specialistIds, onOpen, onUnreadChange }: {
+  specialistIds: string[]
   onOpen: (item: InboxItem) => void
   onUnreadChange?: (count: number) => void
 }) {
@@ -20,7 +20,7 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
   const [items, setItems] = useState<InboxItem[] | null>(null)
 
   const load = useCallback(() => {
-    fetchSpecialistInbox(specialistId)
+    fetchSpecialistInbox(specialistIds)
       .then(data => {
         setItems(data)
         onUnreadChange?.(data.reduce((sum, i) => sum + i.unread, 0))
@@ -29,7 +29,7 @@ export function SpecialistInbox({ specialistId, onOpen, onUnreadChange }: {
         console.error('Failed to load inbox', err)
         setItems(prev => prev ?? [])
       })
-  }, [specialistId, onUnreadChange])
+  }, [specialistIds, onUnreadChange])
 
   useEffect(() => {
     load()

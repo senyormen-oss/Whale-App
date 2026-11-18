@@ -3,7 +3,10 @@ import type { Specialist } from './types'
 import { fetchSpecialists } from './lib/queries'
 
 interface SpecialistsState {
+  /** Everything this user may read (own pending listings included): used to resolve orders and chats. */
   specialists: Specialist[]
+  /** Only approved, published listings: what clients browse. */
+  catalog: Specialist[]
   loading: boolean
   error: string | null
   reload: () => void
@@ -42,7 +45,7 @@ export function SpecialistsProvider({ children }: { children: ReactNode }) {
 
   return (
     <SpecialistsContext.Provider
-      value={{ specialists, loading, error, reload: () => setReloadTick(t => t + 1) }}
+      value={{ specialists, catalog: specialists.filter(sp => sp.approved && sp.published), loading, error, reload: () => setReloadTick(t => t + 1) }}
     >
       {children}
     </SpecialistsContext.Provider>

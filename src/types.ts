@@ -1,3 +1,4 @@
+export type ModerationStatus = 'pending' | 'approved' | 'rejected' | 'needs_changes'
 export type Level = 'bronze' | 'silver' | 'gold' | 'platinum'
 export type CategoryKey =
   | 'video' | 'mobile' | 'smm' | 'target' | 'content'
@@ -29,6 +30,11 @@ export interface Specialist {
   available: boolean
   /** Listings are visible to clients only after a Whale administrator approves them. */
   approved: boolean
+  moderationStatus: ModerationStatus
+  /** Why the moderators rejected the listing or asked for changes. */
+  moderationComment: string
+  /** Owner switch: an approved listing can be hidden from the catalog without deleting it. */
+  published: boolean
   isNew?: boolean
 }
 

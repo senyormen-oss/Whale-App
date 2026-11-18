@@ -4,7 +4,6 @@ import { useI18n } from '../i18n'
 import { Select } from '../Controls'
 import { useAuth } from '../auth'
 import { createSpecialistListing, updateSpecialistListing } from '../lib/queries'
-import { fetchIsAdmin, adminSetListingApproved } from '../lib/admin'
 import { useToast } from '../toast'
 import type { Specialist, CategoryKey } from '../types'
 import { Briefcase, AlertCircle } from '../icons'
@@ -30,6 +29,7 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
   const { user } = useAuth()
   const { notify } = useToast()
   const editing = !!existing
+  const [name, setName] = useState(existing?.name ?? ((user?.user_metadata?.full_name as string) || ''))
   const [categoryKey, setCategoryKey] = useState<CategoryKey>(existing?.categoryKey ?? CATEGORIES[0].key)
   const [city, setCity] = useState(existing?.city ?? '')
   const [age, setAge] = useState(existing ? String(existing.age) : '')
@@ -48,7 +48,7 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
 
     const ageNum = Number(age)
     const priceNum = Number(price)
-    if (!city.trim() || !bio.trim() || !ageNum || !priceNum) {
+    if (name.trim().length < 2 || !city.trim() || !bio.trim() || !ageNum || !priceNum) {
       setError(t('auth.fillAll'))
       return
     }
@@ -68,6 +68,7 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
 
     const category = CATEGORIES.find(c => c.key === categoryKey)!
     const fields = {
+      name: name.trim(),
       category: category.label,
       categoryKey: category.key,
       city: city.trim(),
@@ -85,18 +86,10 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
         const saved = await updateSpecialistListing(existing.id, fields)
         onSaved?.(saved)
       } else {
-        const fullName = (user.user_metadata?.full_name as string) || user.email || t('dash.specialist')
         const avatar = (user.user_metadata?.avatar_url as string | undefined)
-          || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}&backgroundColor=0ABAB5`
-        let specialist = await createSpecialistListing(user.id, { name: fullName, avatar, ...fields })
-        // Team members publish immediately; everyone else waits for approval.
-        if (await fetchIsAdmin(user.id)) {
-          await adminSetListingApproved(specialist.id, true)
-          specialist = { ...specialist, approved: true }
-          notify(t('form.published'), 'success')
-        } else {
-          notify(t('form.submitted'), 'success')
-        }
+          || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(name.trim())}&backgroundColor=0ABAB5`
+        const specialist = await createSpecialistListing(user.id, { avatar, ...fields })
+        notify(t('form.submitted'), 'success')
         onCreated?.(specialist)
       }
     } catch (err) {
@@ -126,6 +119,11 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
       )}
 
       <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: editing ? 14 : 0 }}>
+        <div>
+          <label style={labelStyle}>{t('form.listingName')}</label>
+          <input value={name} onChange={e => setName(e.target.value)} maxLength={100} placeholder={t('form.listingNamePlaceholder')} style={inputStyle} />
+        </div>
+
         <div>
           <label style={labelStyle}>{t('form.category')}</label>
           <Select<CategoryKey>

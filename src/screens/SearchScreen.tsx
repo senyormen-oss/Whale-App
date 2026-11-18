@@ -26,7 +26,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
   const [activeCategory, setActiveCategory] = useState<CategoryKey | null>(initialCategory ?? null)
   const [sortBy, setSortBy] = useState<'rating' | 'price_low' | 'price_high' | 'projects'>('rating')
   const [showFilters, setShowFilters] = useState(false)
-  const { specialists } = useSpecialists()
+  const { catalog: specialists } = useSpecialists()
 
   const results = useMemo(() => {
     let list = [...specialists]

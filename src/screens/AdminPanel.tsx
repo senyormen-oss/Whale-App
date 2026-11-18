@@ -29,7 +29,7 @@ export default function AdminPanel() {
   }, [load])
 
   const pending = (requests ?? []).filter(r => r.status === 'pending').length
-  const unapproved = (specialists ?? []).filter(s => !s.approved).length
+  const unapproved = (specialists ?? []).filter(s => s.moderationStatus === 'pending').length
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

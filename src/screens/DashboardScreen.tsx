@@ -10,12 +10,12 @@ import { categoryLabel, localizeService } from '../data'
 import LanguageSwitcher from '../LanguageSwitcher'
 import ThemeSwitcher from '../ThemeSwitcher'
 import UserAvatar from '../UserAvatar'
-import ListingTools from './ListingTools'
+import SpecialistWorkspace from './SpecialistWorkspace'
 import AdminPanel from './AdminPanel'
 import { fetchIsAdmin } from '../lib/admin'
 import EditProfileModal from './EditProfileModal'
 import Segmented from '../Segmented'
-import { fetchMySpecialistListing, fetchSpecialistOrders, markOrderCompleted, updateSpecialistListing, type SpecialistOrder, type InboxItem } from '../lib/queries'
+import type { InboxItem } from '../lib/queries'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
 import { SpecialistInbox, SpecialistChatThread } from './SpecialistInbox'
 import LegalScreen from './LegalScreen'
@@ -70,7 +70,6 @@ export default function DashboardScreen({ onNavigate }: Props) {
   const { notify } = useToast()
   const { specialists, reload: reloadSpecialists } = useSpecialists()
   const [openChat, setOpenChat] = useState<InboxItem | null>(null)
-  const [inboxUnread, setInboxUnread] = useState(0)
   const [deleting, setDeleting] = useState(false)
   const [editProfile, setEditProfile] = useState(false)
   const [legalDoc, setLegalDoc] = useState<'terms' | 'privacy' | null>(null)
@@ -90,80 +89,9 @@ export default function DashboardScreen({ onNavigate }: Props) {
   const completedCount = orders.filter(o => o.status === 'completed').length
   const favoriteSpecialists = specialists.filter(s => favorites.includes(s.id))
 
-  const [myListing, setMyListing] = useState<Specialist | null | undefined>(undefined) // undefined = loading
-  const [myOrders, setMyOrders] = useState<SpecialistOrder[]>([])
-  const [ordersLoading, setOrdersLoading] = useState(false)
-
   useEffect(() => {
     if (user) fetchIsAdmin(user.id).then(setIsAdmin)
   }, [user])
-
-  const loadListing = useCallback(() => {
-    if (!user) return
-    setMyListing(undefined)
-    fetchMySpecialistListing(user.id)
-      .then(setMyListing)
-      .catch(err => {
-        console.error('Failed to load specialist listing', err)
-        setMyListing(null)
-      })
-  }, [user])
-
-  useEffect(() => {
-    if (mode === 'specialist') loadListing()
-  }, [mode, loadListing])
-
-  useEffect(() => {
-    if (!myListing) {
-      setMyOrders([])
-      return
-    }
-    setOrdersLoading(true)
-    fetchSpecialistOrders(myListing.id)
-      .then(setMyOrders)
-      .catch(err => console.error('Failed to load specialist orders', err))
-      .finally(() => setOrdersLoading(false))
-  }, [myListing])
-
-  async function handleMarkCompleted(orderId: string) {
-    try {
-      await markOrderCompleted(orderId)
-      setMyOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status: 'completed' } : o)))
-      notify(t('toast.sessionDone'), 'success')
-    } catch (err) {
-      console.error('Failed to mark order completed', err)
-      notify(t('err.updateSession'))
-    }
-  }
-
-  async function toggleAvailability() {
-    if (!myListing) return
-    const next = !myListing.available
-    setMyListing({ ...myListing, available: next })
-    try {
-      await updateSpecialistListing(myListing.id, { available: next })
-      reloadSpecialists()
-    } catch (err) {
-      console.error('Failed to update availability', err)
-      setMyListing({ ...myListing, available: !next })
-      notify(t('err.availability'))
-    }
-  }
-
-  const upcomingOrders = myOrders.filter(o => o.status === 'confirmed')
-  const totalIncome = myOrders.filter(o => o.status === 'completed').reduce((sum, o) => sum + o.amount, 0)
-  const clientCount = new Set(myOrders.map(o => o.clientName)).size
-  const profileChecklist = myListing
-    ? [
-        { label: t('dash.check.bio'), done: myListing.bio.trim().length > 0 },
-        { label: t('dash.check.price'), done: myListing.price > 0 },
-        { label: t('dash.check.skills'), done: myListing.tags.length > 0 },
-        { label: t('dash.check.city'), done: myListing.city.trim().length > 0 },
-      ]
-    : []
-  const completeness = profileChecklist.length
-    ? Math.round((profileChecklist.filter(i => i.done).length / profileChecklist.length) * 100)
-    : 0
 
   if (legalDoc) {
     return <LegalScreen doc={legalDoc} onBack={() => setLegalDoc(null)} />
@@ -348,158 +276,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
 
       {mode === 'specialist' && (
         <div className="fade-in" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-          {myListing === undefined && (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-              <Loader2 className="spin" size={26} color="var(--accent-text)" strokeWidth={2} />
-            </div>
-          )}
-
-          {myListing === null && (
-            <BecomeSpecialistForm onCreated={sp => { setMyListing(sp); reloadSpecialists() }} />
-          )}
-
-          {myListing && (
-            <>
-              {/* Stats */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                <StatCard icon={Wallet} label={t('dash.totalIncome')} value={(totalIncome / 1_000_000).toFixed(2) + 'M'} sub={t('dash.incomeSub')} accent />
-                <StatCard icon={ClipboardList} label={t('dash.activeOrders')} value={String(upcomingOrders.length)} />
-                <StatCard icon={Star} label={t('dash.myRating')} value={myListing.reviews > 0 ? myListing.rating.toFixed(1) : '—'} />
-                <StatCard icon={Users} label={t('dash.clients')} value={String(clientCount)} />
-              </div>
-
-              {!myListing.approved && (
-                <div className="fade-in" style={{ padding: '12px 14px', borderRadius: 14, background: 'rgba(245,166,35,0.12)', border: '1px solid rgba(245,166,35,0.35)', fontSize: 13, lineHeight: 1.5, color: 'var(--ink)' }}>
-                  {t('dash.awaitingApproval')}
-                </div>
-              )}
-
-              {/* Availability toggle */}
-              <button
-                onClick={toggleAvailability}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 12, width: '100%',
-                  padding: '14px 16px', borderRadius: 16, border: '1px solid rgba(var(--fg-rgb),0.08)',
-                  background: 'rgba(var(--fg-rgb),0.04)', cursor: 'pointer', textAlign: 'left',
-                }}
-              >
-                <span style={{
-                  width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                  background: myListing.available ? 'var(--ok)' : 'rgba(var(--fg-rgb),0.3)',
-                }} />
-                <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>
-                  {myListing.available ? t('chat.accepting') : t('chat.notAccepting')}
-                </span>
-                <span style={{
-                  width: 40, height: 24, borderRadius: 12, position: 'relative',
-                  background: myListing.available ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.15)', transition: 'background 0.2s',
-                }}>
-                  <span style={{
-                    position: 'absolute', top: 3, left: myListing.available ? 19 : 3,
-                    width: 18, height: 18, borderRadius: '50%', background: 'white', transition: 'left 0.2s',
-                  }} />
-                </span>
-              </button>
-
-              <ListingTools listing={myListing} onChange={sp => { setMyListing(sp); reloadSpecialists() }} />
-
-              {/* Client messages */}
-              <div>
-                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <MessageSquareText size={16} color="var(--accent-text)" strokeWidth={2} /> {t('chat.title')}
-                  {inboxUnread > 0 && (
-                    <span style={{ background: '#0ABAB5', color: '#080808', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 800 }}>{inboxUnread}</span>
-                  )}
-                </h2>
-                <SpecialistInbox specialistId={myListing.id} onOpen={setOpenChat} onUnreadChange={setInboxUnread} />
-              </div>
-
-              {/* Upcoming sessions */}
-              <div>
-                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Calendar size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.upcoming')}
-                </h2>
-                {ordersLoading && <Loader2 className="spin" size={18} color="var(--accent-text)" strokeWidth={2} />}
-                {!ordersLoading && upcomingOrders.length === 0 && (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('dash.noUpcoming')}</p>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {upcomingOrders.map(order => {
-                    const [dayNum, monthDay] = formatDate(order.date).split(' ')
-                    return (
-                      <div key={order.id} className="glass" style={{ borderRadius: 18, padding: '14px 16px', display: 'flex', gap: 14, alignItems: 'center', border: '1px solid rgba(var(--fg-rgb),0.08)' }}>
-                        <div style={{
-                          flexShrink: 0, textAlign: 'center', padding: '8px 10px', borderRadius: 12,
-                          background: 'rgba(10,186,181,0.1)', border: '1px solid rgba(10,186,181,0.2)', minWidth: 52,
-                        }}>
-                          <p style={{ margin: '0 0 1px', fontSize: 11, color: 'var(--accent-text)', fontWeight: 700 }}>{monthDay}</p>
-                          <p style={{ margin: '0 0 1px', fontSize: 16, fontWeight: 900, color: 'var(--ink)' }}>{dayNum}</p>
-                          <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{order.bookingSlot}</p>
-                        </div>
-                        <div style={{ flex: 1, overflow: 'hidden' }}>
-                          <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{localizeService(order.service)}</p>
-                        </div>
-                        <button
-                          onClick={() => handleMarkCompleted(order.id)}
-                          style={{ padding: '6px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(10,186,181,0.15)', color: 'var(--accent-text)', border: 'none', cursor: 'pointer', flexShrink: 0 }}
-                        >
-                          {t('dash.markDone')}
-                        </button>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Recent completed orders */}
-              <div>
-                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <TrendingUp size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.completed')}
-                </h2>
-                {myOrders.filter(o => o.status === 'completed').length === 0 ? (
-                  <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('dash.noCompleted')}</p>
-                ) : (
-                  <div className="glass" style={{ borderRadius: 18, padding: 4 }}>
-                    {myOrders.filter(o => o.status === 'completed').map(order => (
-                      <div key={order.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
-                        <div>
-                          <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{order.clientName}</p>
-                          <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{localizeService(order.service)} · {formatDate(order.date)}</p>
-                        </div>
-                        <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatNumber(order.amount)}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Profile completeness */}
-              <div style={{ paddingBottom: 20 }}>
-                <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <User size={16} color="var(--accent-text)" strokeWidth={2} /> {t('dash.profile')}
-                </h2>
-                <div className="glass" style={{ borderRadius: 18, padding: 18, border: '1px solid rgba(var(--fg-rgb),0.08)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 700 }}>{t('dash.completeness')}</p>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: 'var(--accent-text)' }}>{completeness}%</p>
-                  </div>
-                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(var(--fg-rgb),0.1)', marginBottom: 14 }}>
-                    <div style={{ width: `${completeness}%`, height: '100%', borderRadius: 3, background: 'linear-gradient(90deg, #0ABAB5, #08918d)' }} />
-                  </div>
-                  {profileChecklist.map(item => (
-                    <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
-                      <span style={{ width: 20, height: 20, borderRadius: '50%', background: item.done ? 'rgba(74,222,128,0.2)' : 'rgba(var(--fg-rgb),0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {item.done && <CheckCircle2 size={13} color="var(--ok)" strokeWidth={2.5} />}
-                      </span>
-                      <span style={{ fontSize: 13, color: item.done ? 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+          <SpecialistWorkspace onOpenChat={setOpenChat} />
         </div>
       )}
 

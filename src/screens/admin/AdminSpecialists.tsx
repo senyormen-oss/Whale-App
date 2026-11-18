@@ -8,10 +8,11 @@ import { Select, Switch } from '../../Controls'
 import Sheet from '../../Sheet'
 import NoteEditor from './NoteEditor'
 import { smallBtn } from './AdminRequests'
-import { adminUpsertSpecialist, adminSetListingApproved } from '../../lib/admin'
+import { adminUpsertSpecialist, adminModerateListing, fetchUserContact, type UserContact } from '../../lib/admin'
 import { uploadChatImage, removeUploadedFiles } from '../../lib/queries'
 import { toSquareAvatar, resizeImage } from '../../lib/image'
-import { Loader2, Star, X, BadgeCheck } from '../../icons'
+import { Loader2, Star, X, BadgeCheck, Phone, Mail } from '../../icons'
+import { useEffect } from 'react'
 
 const LEVELS = ['bronze', 'silver', 'gold', 'platinum'] as const
 const input = {
@@ -206,25 +207,114 @@ function Editor({ existing, onClose, onSaved }: { existing?: Specialist; onClose
   )
 }
 
-export default function AdminSpecialists({ specialists, onChanged }: { specialists: Specialist[] | null; onChanged: () => void }) {
+const MOD_COLORS: Record<Specialist['moderationStatus'], string> = {
+  pending: '#F5A623', approved: 'var(--ok)', rejected: '#ff4d6d', needs_changes: '#4DB5E6',
+}
+
+/** Full information about a listing plus the four moderation decisions. */
+function ModerationSheet({ listing, onClose, onDone }: { listing: Specialist; onClose: () => void; onDone: () => void }) {
   const { t } = useI18n()
   const { notify } = useToast()
-  const [editing, setEditing] = useState<Specialist | 'new' | null>(null)
-  const [busyId, setBusyId] = useState<string | null>(null)
+  const [comment, setComment] = useState(listing.moderationComment)
+  const [busy, setBusy] = useState(false)
+  const [contact, setContact] = useState<UserContact | null>(null)
 
-  async function toggleApproved(s: Specialist) {
-    setBusyId(s.id)
+  useEffect(() => {
+    if (!listing.ownerId) return
+    fetchUserContact(listing.ownerId).then(setContact).catch(err => console.error(err))
+  }, [listing.ownerId])
+
+  async function decide(status: 'approved' | 'rejected' | 'needs_changes' | 'pending') {
+    if ((status === 'rejected' || status === 'needs_changes') && comment.trim().length < 3) {
+      return notify(t('admin.commentRequired'))
+    }
+    setBusy(true)
     try {
-      await adminSetListingApproved(s.id, !s.approved)
+      await adminModerateListing(listing.id, status, comment.trim())
       notify(t('admin.updated'), 'success')
-      onChanged()
+      onDone()
+      onClose()
     } catch (err) {
       console.error(err)
       notify(t('err.updateSession'))
     } finally {
-      setBusyId(null)
+      setBusy(false)
     }
   }
+
+  const row = { margin: '0 0 6px', fontSize: 13, lineHeight: 1.5, overflowWrap: 'anywhere' } as const
+  const heading = { margin: '12px 0 4px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' } as const
+
+  return (
+    <Sheet title={listing.name} onClose={onClose}>
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 6 }}>
+        <img src={listing.avatar} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)' }} />
+        <div>
+          <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.65 * var(--tb)))' }}>{categoryLabel(listing.categoryKey)} · {listing.city}</p>
+          <p style={{ margin: '2px 0 0', fontSize: 12, fontWeight: 700, color: MOD_COLORS[listing.moderationStatus] }}>{t(`mod.${listing.moderationStatus}` as 'mod.pending')}</p>
+        </div>
+      </div>
+
+      <p style={heading}>{t('admin.owner')}</p>
+      {contact ? (
+        <div>
+          <p style={row}>{contact.fullName || '—'}</p>
+          {contact.phone && <a href={`tel:+${contact.phone}`} style={{ ...row, display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--accent-text)', textDecoration: 'none', fontWeight: 700 }}><Phone size={13} strokeWidth={2.2} /> +{contact.phone}</a>}
+          {contact.email && <p style={{ ...row, display: 'flex', alignItems: 'center', gap: 6 }}><Mail size={13} strokeWidth={2} /> {contact.email}</p>}
+        </div>
+      ) : <p style={row}>{listing.ownerId ? '…' : '—'}</p>}
+
+      <p style={heading}>{t('form.bio')}</p>
+      <p style={row}>{listing.bio || '—'}</p>
+      {listing.qualification && (<><p style={heading}>{t('spec.qualification')}</p><p style={row}>{listing.qualification}</p></>)}
+      <p style={heading}>{t('spec.pricing')}</p>
+      <p style={row}>{formatNumber(listing.price)} {t('common.uzs')} · {t('spec.stat.experience')}: {listing.experience} · {t('spec.stat.age')}: {listing.age}</p>
+      {listing.tags.length > 0 && (<><p style={heading}>{t('spec.skills')}</p><p style={row}>{listing.tags.join(', ')}</p></>)}
+
+      <p style={heading}>{t('admin.portfolio')} · {listing.portfolio.length}</p>
+      {listing.portfolio.length === 0 ? <p style={row}>—</p> : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+          {listing.portfolio.map(url => (
+            <a key={url} href={url} target="_blank" rel="noreferrer" style={{ aspectRatio: '1', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)', display: 'block' }}>
+              <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </a>
+          ))}
+        </div>
+      )}
+
+      <p style={heading}>{t('mod.reason')}</p>
+      <textarea
+        value={comment}
+        onChange={e => setComment(e.target.value)}
+        rows={3}
+        maxLength={1000}
+        placeholder={t('admin.commentPlaceholder')}
+        style={{ width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 12, padding: '10px 12px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }}
+      />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>
+        <button disabled={busy} onClick={() => decide('approved')} className="tiffany-glow" style={{ padding: '13px 0', borderRadius: 14, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 14, fontWeight: 800, opacity: busy ? 0.6 : 1 }}>{t('admin.approveAction')}</button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button disabled={busy} onClick={() => decide('needs_changes')} style={{ flex: 1, padding: '12px 0', borderRadius: 14, border: 'none', background: 'rgba(77,181,230,0.18)', color: '#4DB5E6', fontSize: 13, fontWeight: 800 }}>{t('admin.requestChanges')}</button>
+          <button disabled={busy} onClick={() => decide('rejected')} style={{ flex: 1, padding: '12px 0', borderRadius: 14, border: 'none', background: 'rgba(255,77,109,0.14)', color: '#ff4d6d', fontSize: 13, fontWeight: 800 }}>{t('admin.rejectAction')}</button>
+        </div>
+        {listing.moderationStatus !== 'pending' && (
+          <button disabled={busy} onClick={() => decide('pending')} style={{ padding: '10px 0', borderRadius: 14, border: 'none', background: 'rgba(var(--fg-rgb),0.08)', color: 'var(--ink)', fontSize: 13, fontWeight: 700 }}>{t('admin.backToReview')}</button>
+        )}
+      </div>
+    </Sheet>
+  )
+}
+
+export default function AdminSpecialists({ specialists, onChanged }: { specialists: Specialist[] | null; onChanged: () => void }) {
+  const { t } = useI18n()
+  const { notify } = useToast()
+  const [editing, setEditing] = useState<Specialist | 'new' | null>(null)
+  const [moderating, setModerating] = useState<Specialist | null>(null)
+  const [onlyReview, setOnlyReview] = useState(true)
+  const [busyId, setBusyId] = useState<string | null>(null)
+
+  void busyId; void setBusyId; void notify
 
   return (
     <>
@@ -237,7 +327,19 @@ export default function AdminSpecialists({ specialists, onChanged }: { specialis
         <p style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{t('admin.noListings')}</p>
       )}
 
-      {(specialists ?? []).map(s => (
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[true, false].map(flag => (
+          <button
+            key={String(flag)}
+            onClick={() => setOnlyReview(flag)}
+            style={{ ...smallBtn, background: onlyReview === flag ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)', color: onlyReview === flag ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))', transition: 'all 0.2s ease' }}
+          >
+            {flag ? `${t('admin.onReview')} ${(specialists ?? []).filter(x => x.moderationStatus === 'pending').length}` : t('admin.allListings')}
+          </button>
+        ))}
+      </div>
+
+      {(specialists ?? []).filter(s => !onlyReview || s.moderationStatus === 'pending' || s.moderationStatus === 'needs_changes').map(s => (
         <div key={s.id} className="glass pop-in" style={{ borderRadius: 18, padding: 14 }}>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <img src={s.avatar} alt="" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', background: 'var(--surface)', flexShrink: 0 }} />
@@ -249,8 +351,8 @@ export default function AdminSpecialists({ specialists, onChanged }: { specialis
               <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))' }}>
                 {categoryLabel(s.categoryKey)} · {s.city} · {formatNumber(s.price)} {t('common.uzs')}
               </p>
-              <p style={{ margin: '2px 0 0', fontSize: 11, color: s.approved ? 'var(--ok)' : '#F5A623', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
-                {s.approved ? t('admin.approved') : t('admin.awaiting')}
+              <p style={{ margin: '2px 0 0', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ color: MOD_COLORS[s.moderationStatus] }}>{t(`mod.${s.moderationStatus}` as 'mod.pending')}</span>{!s.published && s.approved ? ` · ${t('admin.hide')}` : ''}
                 {s.reviews > 0 && <span style={{ color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 3 }}><Star size={10} fill="#FFD700" color="#FFD700" strokeWidth={0} /> {s.rating}</span>}
                 {s.ownerId ? <span style={{ fontWeight: 500, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>· {t('admin.selfRegistered')}</span> : null}
               </p>
@@ -258,12 +360,14 @@ export default function AdminSpecialists({ specialists, onChanged }: { specialis
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
             <button onClick={() => setEditing(s)} style={{ ...smallBtn, background: 'rgba(var(--fg-rgb),0.08)', color: 'var(--ink)' }}>{t('admin.edit')}</button>
-            <button disabled={busyId === s.id} onClick={() => toggleApproved(s)} style={{ ...smallBtn, background: s.approved ? 'rgba(255,77,109,0.12)' : '#0ABAB5', color: s.approved ? '#ff4d6d' : '#080808' }}>
-              {s.approved ? t('admin.hide') : t('admin.approve')}
+            <button onClick={() => setModerating(s)} style={{ ...smallBtn, background: s.moderationStatus === 'pending' ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)', color: s.moderationStatus === 'pending' ? '#080808' : 'var(--ink)' }}>
+              {t('admin.moderate')}
             </button>
           </div>
         </div>
       ))}
+
+      {moderating && <ModerationSheet listing={moderating} onClose={() => setModerating(null)} onDone={onChanged} />}
 
       {editing && (
         <Editor

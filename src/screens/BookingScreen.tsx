@@ -133,6 +133,10 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
       setConfirmError(t('err.invalidPhone'))
       return
     }
+    if (!packageId && note.trim().length < 3) {
+      setConfirmError(t('book.needService'))
+      return
+    }
     setConfirming(true)
     setConfirmError(null)
 
