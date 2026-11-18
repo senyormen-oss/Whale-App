@@ -301,7 +301,7 @@ export const en = {
   'report.sent': 'Thank you. We will review your report.',
   'report.failed': 'Could not send the report. You may have already reported this listing today.',
   'err.invalidPhone': 'Enter a valid phone number so we can call you.',
-  'err.tooManyRequests': 'You already have several open requests. Please wait until we confirm them.',
+  'err.tooManyRequests': 'You have too many open requests (20). Cancel old ones in My Bookings or wait until we confirm them.',
   'book.step.contact': 'Contact',
   'book.contactIntro': 'Leave your phone number: we will call you to confirm the date, time and details.',
   'book.phone': 'Phone number',

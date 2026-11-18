@@ -290,7 +290,7 @@ export const uz: Record<Key, string> = {
   'report.sent': "Rahmat. Shikoyatingizni ko'rib chiqamiz.",
   'report.failed': "Shikoyatni yuborib bo'lmadi. Bu anketa ustidan bugun allaqachon shikoyat qilgan bo'lishingiz mumkin.",
   'err.invalidPhone': "Qo'ng'iroq qila olishimiz uchun to'g'ri telefon raqamini kiriting.",
-  'err.tooManyRequests': "Sizda bir nechta ochiq so'rov bor. Ularni tasdiqlashimizni kuting.",
+  'err.tooManyRequests': "Ochiq so'rovlar juda ko'p (20). Eskilarini \"Mening bronlarim\"da bekor qiling yoki tasdiqlashni kuting.",
   'book.step.contact': 'Aloqa',
   'book.contactIntro': "Telefon raqamingizni qoldiring: sana, vaqt va tafsilotlarni tasdiqlash uchun qo'ng'iroq qilamiz.",
   'book.phone': 'Telefon raqami',
