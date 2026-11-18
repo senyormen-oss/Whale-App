@@ -14,6 +14,8 @@ export const CATEGORIES = [
   { key: 'web',     label: 'Web Developer',   color: '#0ABAB5' },
   { key: 'design',  label: 'Designer',        color: '#C94DE6' },
   { key: 'model',   label: 'Model',           color: '#E6A44D' },
+  { key: 'marketer', label: 'Marketer',       color: '#F0647D' },
+  { key: 'brand',   label: 'Personal Brand',  color: '#7C8CFF' },
 ] as const
 
 export function categoryLabel(key: string): string {

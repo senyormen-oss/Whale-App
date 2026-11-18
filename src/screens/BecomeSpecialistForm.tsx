@@ -4,6 +4,8 @@ import { useI18n } from '../i18n'
 import { Select } from '../Controls'
 import { useAuth } from '../auth'
 import { createSpecialistListing, updateSpecialistListing } from '../lib/queries'
+import { fetchIsAdmin, adminSetListingApproved } from '../lib/admin'
+import { useToast } from '../toast'
 import type { Specialist, CategoryKey } from '../types'
 import { Briefcase, AlertCircle } from '../icons'
 
@@ -26,6 +28,7 @@ const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color:
 export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onCancel }: Props) {
   const { t } = useI18n()
   const { user } = useAuth()
+  const { notify } = useToast()
   const editing = !!existing
   const [categoryKey, setCategoryKey] = useState<CategoryKey>(existing?.categoryKey ?? CATEGORIES[0].key)
   const [city, setCity] = useState(existing?.city ?? '')
@@ -85,12 +88,26 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
         const fullName = (user.user_metadata?.full_name as string) || user.email || t('dash.specialist')
         const avatar = (user.user_metadata?.avatar_url as string | undefined)
           || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(fullName)}&backgroundColor=0ABAB5`
-        const specialist = await createSpecialistListing(user.id, { name: fullName, avatar, ...fields })
+        let specialist = await createSpecialistListing(user.id, { name: fullName, avatar, ...fields })
+        // Team members publish immediately; everyone else waits for approval.
+        if (await fetchIsAdmin(user.id)) {
+          await adminSetListingApproved(specialist.id, true)
+          specialist = { ...specialist, approved: true }
+          notify(t('form.published'), 'success')
+        } else {
+          notify(t('form.submitted'), 'success')
+        }
         onCreated?.(specialist)
       }
     } catch (err) {
       console.error('Failed to save listing', err)
-      setError(t('form.failed'))
+      const code = (err as { code?: string }).code
+      setError(
+        code === '23505' ? t('form.errExists')
+        : code === '23514' || code === '22003' || code === '22P02' ? t('form.errValues')
+        : code === '42501' ? t('form.errPermission')
+        : t('form.failed'),
+      )
     } finally {
       setBusy(false)
     }

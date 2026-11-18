@@ -7,7 +7,7 @@ import {
   Phone, Paperclip, MapPin, Image as ImageIcon, FileText, Smile, ArrowUp, ArrowLeft,
   Settings, Briefcase, Users, TrendingUp, CheckCircle2, Calendar, Bot, Folder,
   MessageSquareText, Circle, X, LogOut, Trash2, Bookmark, SlidersHorizontal, SearchX,
-  Mail, Loader2, AlertCircle, Eye, EyeOff, WifiOff, Sun, Moon, Monitor, Check, ChevronDown, Flag,
+  Megaphone, Crown, Mail, Loader2, AlertCircle, Eye, EyeOff, WifiOff, Sun, Moon, Monitor, Check, ChevronDown, Flag,
 } from 'lucide-react'
 import type { CategoryKey, Level } from './types'
 
@@ -25,6 +25,8 @@ export const CATEGORY_ICONS: Record<CategoryKey, IconType> = {
   web: Globe,
   design: Palette,
   model: Shirt,
+  marketer: Megaphone,
+  brand: Crown,
 }
 
 export const LEVEL_ICONS: Record<Level, { icon: IconType; color: string }> = {

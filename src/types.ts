@@ -2,6 +2,7 @@ export type Level = 'bronze' | 'silver' | 'gold' | 'platinum'
 export type CategoryKey =
   | 'video' | 'mobile' | 'smm' | 'target' | 'content'
   | 'blogger' | 'photo' | 'prog' | 'web' | 'design' | 'model'
+  | 'marketer' | 'brand'
 
 export interface Specialist {
   id: string
