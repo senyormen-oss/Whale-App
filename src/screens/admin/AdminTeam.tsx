@@ -6,6 +6,13 @@ import { useConfirm } from '../../confirm'
 import { fetchTeam, setTeamRole, type TeamMember } from '../../lib/admin'
 import { smallBtn } from './AdminRequests'
 import { Loader2, Mail } from '../../icons'
+import { formatUzPhone } from '../../lib/phone'
+
+/** What identifies a team member: e-mail, or phone for SMS accounts. */
+function contactOf(m: TeamMember): string {
+  if (m.email) return m.email
+  return m.phone ? formatUzPhone(m.phone.startsWith('+') ? m.phone : `+${m.phone}`) : ''
+}
 
 /** Team members (administrators) can confirm requests, add specialists and see clients. */
 export default function AdminTeam() {
@@ -41,10 +48,10 @@ export default function AdminTeam() {
   }
 
   async function remove(m: TeamMember) {
-    const ok = await confirm({ title: t('admin.removeTitle', { email: m.email }), confirmLabel: t('portfolio.remove'), danger: true })
+    const ok = await confirm({ title: t('admin.removeTitle', { email: contactOf(m) }), confirmLabel: t('portfolio.remove'), danger: true })
     if (!ok) return
     try {
-      await setTeamRole(m.email, false)
+      await setTeamRole(m.email || m.phone, false)
       notify(t('admin.updated'), 'success')
       load()
     } catch (err) {
@@ -60,7 +67,7 @@ export default function AdminTeam() {
       <form onSubmit={add} style={{ display: 'flex', gap: 8 }}>
         <div className="glass" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 14 }}>
           <Mail size={15} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
-          <input value={email} onChange={e => setEmail(e.target.value)} type="email" inputMode="email" placeholder={t('admin.memberEmail')} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif' }} />
+          <input value={email} onChange={e => setEmail(e.target.value)} type="text" autoComplete="off" placeholder={t('admin.memberEmail')} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif' }} />
         </div>
         <button type="submit" disabled={busy} style={{ ...smallBtn, background: '#0ABAB5', color: '#080808', padding: '0 18px', opacity: busy ? 0.6 : 1 }}>{t('admin.add')}</button>
       </form>
@@ -69,8 +76,8 @@ export default function AdminTeam() {
       {(team ?? []).map(m => (
         <div key={m.userId} className="glass pop-in" style={{ borderRadius: 14, padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
           <div style={{ minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.fullName || m.email}{m.userId === user?.id ? ` (${t('admin.you')})` : ''}</p>
-            <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.email}</p>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.fullName || contactOf(m)}{m.userId === user?.id ? ` (${t('admin.you')})` : ''}</p>
+            <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', overflow: 'hidden', textOverflow: 'ellipsis' }}>{contactOf(m)}</p>
           </div>
           {m.userId !== user?.id && (
             <button onClick={() => remove(m)} style={{ ...smallBtn, background: 'rgba(255,77,109,0.12)', color: '#ff4d6d', flexShrink: 0 }}>{t('portfolio.remove')}</button>

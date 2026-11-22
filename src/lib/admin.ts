@@ -173,16 +173,17 @@ export async function saveNote(kind: 'client' | 'order' | 'specialist', key: str
 
 // ---------- Team ----------
 
-export interface TeamMember { userId: string; email: string; fullName: string }
+export interface TeamMember { userId: string; email: string; phone: string; fullName: string }
 
 export async function fetchTeam(): Promise<TeamMember[]> {
   const { data, error } = await supabase.rpc('admin_list_admins')
   if (error) throw error
-  return ((data as any[]) ?? []).map(r => ({ userId: r.user_id, email: r.email, fullName: r.full_name }))
+  return ((data as any[]) ?? []).map(r => ({ userId: r.user_id, email: r.email ?? '', phone: r.phone ?? '', fullName: r.full_name ?? '' }))
 }
 
-export async function setTeamRole(email: string, admin: boolean): Promise<void> {
-  const { error } = await supabase.rpc('admin_set_role', { p_email: email, p_admin: admin })
+/** `contact` is the e-mail or phone number the person signed up with. */
+export async function setTeamRole(contact: string, admin: boolean): Promise<void> {
+  const { error } = await supabase.rpc('admin_set_role', { p_email: contact, p_admin: admin })
   if (error) throw error
 }
 
