@@ -99,7 +99,7 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
         code === '23505' ? t('form.errExists')
         : code === '23514' || code === '22003' || code === '22P02' ? t('form.errValues')
         : code === '42501' ? t('form.errPermission')
-        : t('form.failed'),
+        : `${t('form.failed')}${code ? ` (${code})` : ''}`,
       )
     } finally {
       setBusy(false)
