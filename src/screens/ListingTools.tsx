@@ -3,6 +3,7 @@ import type { Specialist } from '../types'
 import Sheet from '../Sheet'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
 import PriceListEditor from './PriceListEditor'
+import ProfileExtrasEditor from './ProfileExtrasEditor'
 import { useAuth } from '../auth'
 import { useToast } from '../toast'
 import { useI18n } from '../i18n'
@@ -123,6 +124,8 @@ export default function ListingTools({ listing, onChange }: { listing: Specialis
         </div>
         <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={addPhotos} style={{ display: 'none' }} />
       </div>
+
+      <ProfileExtrasEditor listing={listing} onChange={onChange} />
 
       {editing && (
         <Sheet title={t('dash.editListing')} onClose={() => setEditing(false)}>

@@ -8,6 +8,7 @@ import { fetchReviews } from '../lib/queries'
 import { useI18n, formatDate } from '../i18n'
 import { useAuth } from '../auth'
 import ReportModal from './ReportModal'
+import { VideosBlock, CertificatesBlock, LinksBlock } from './ProfileExtrasView'
 import Segmented from '../Segmented'
 import { LEVEL_ICONS, ArrowLeft, Heart, Share2, BadgeCheck, Star, MessageCircle, MapPin, Flag } from '../icons'
 
@@ -247,7 +248,8 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
       <div className="fade-in" key={tab}>
         {tab === 'portfolio' && (
           <div style={{ padding: '0 20px' }}>
-            {sp.portfolio.length === 0 && (
+            <VideosBlock sp={sp} />
+            {sp.portfolio.length === 0 && sp.videos.length === 0 && (
               <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', fontSize: 13 }}>
                 {t('spec.noPortfolio')}
               </div>
@@ -287,6 +289,10 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
                 <p style={{ margin: 0, fontSize: 14, lineHeight: 1.7, color: 'rgba(var(--fg-rgb),calc(0.8 * var(--tb)))', whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>{sp.qualification}</p>
               </div>
             )}
+
+            <CertificatesBlock sp={sp} />
+
+            <LinksBlock sp={sp} />
 
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
               <h3 style={{ margin: '0 0 10px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.skills')}</h3>

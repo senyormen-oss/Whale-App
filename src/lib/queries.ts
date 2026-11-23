@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import type { Specialist, Review, Order } from '../types'
+import type { Specialist, Review, Order, Socials } from '../types'
 import { t, formatTime } from '../i18n'
 
 export function mapSpecialistRow(row: Record<string, any>): Specialist {
@@ -29,6 +29,9 @@ export function mapSpecialistRow(row: Record<string, any>): Specialist {
     moderationStatus: (row.moderation_status ?? (row.approved === false ? 'pending' : 'approved')) as Specialist['moderationStatus'],
     moderationComment: row.moderation_comment ?? '',
     published: row.published ?? true,
+    videos: row.videos ?? [],
+    certificates: row.certificates ?? [],
+    socials: row.socials && typeof row.socials === 'object' ? row.socials : {},
     isNew: row.is_new,
   }
 }
@@ -151,7 +154,9 @@ export async function createSpecialistListing(userId: string, input: SpecialistL
   return mapSpecialistRow(data)
 }
 
-export async function updateSpecialistListing(specialistId: string, patch: Partial<SpecialistListingInput> & { available?: boolean; portfolio?: string[]; cover?: string }): Promise<Specialist> {
+export async function updateSpecialistListing(specialistId: string, patch: Partial<SpecialistListingInput> & {
+  available?: boolean; portfolio?: string[]; cover?: string; videos?: string[]; certificates?: string[]; socials?: Socials
+}): Promise<Specialist> {
   const dbPatch: Record<string, any> = {}
   if (patch.name !== undefined) dbPatch.name = patch.name
   if (patch.category !== undefined) dbPatch.category = patch.category
@@ -167,6 +172,9 @@ export async function updateSpecialistListing(specialistId: string, patch: Parti
   if (patch.available !== undefined) dbPatch.available = patch.available
   if (patch.portfolio !== undefined) dbPatch.portfolio = patch.portfolio
   if (patch.cover !== undefined) dbPatch.cover = patch.cover
+  if (patch.videos !== undefined) dbPatch.videos = patch.videos
+  if (patch.certificates !== undefined) dbPatch.certificates = patch.certificates
+  if (patch.socials !== undefined) dbPatch.socials = patch.socials
 
   const { data, error } = await supabase.from('specialists').update(dbPatch).eq('id', specialistId).select().single()
   if (error) throw error

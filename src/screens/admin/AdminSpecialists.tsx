@@ -9,6 +9,7 @@ import Sheet from '../../Sheet'
 import NoteEditor from './NoteEditor'
 import PriceListEditor from '../PriceListEditor'
 import { fetchServices } from '../../lib/services'
+import { fetchPrivateContacts, type PrivateContacts } from '../../lib/profile'
 import { formatServicePrice } from '../../data'
 import type { ListingService } from '../../types'
 import { smallBtn } from './AdminRequests'
@@ -231,8 +232,11 @@ function ModerationSheet({ listing, onClose, onDone }: { listing: Specialist; on
     fetchUserContact(listing.ownerId).then(setContact).catch(err => console.error(err))
   }, [listing.ownerId])
 
+  const [privateContacts, setPrivateContacts] = useState<PrivateContacts | null>(null)
+
   useEffect(() => {
     fetchServices(listing.id).then(setServices).catch(err => console.error(err))
+    fetchPrivateContacts(listing.id).then(setPrivateContacts).catch(err => console.error(err))
   }, [listing.id])
 
   async function decide(status: 'approved' | 'rejected' | 'needs_changes' | 'pending') {
@@ -302,6 +306,38 @@ function ModerationSheet({ listing, onClose, onDone }: { listing: Specialist; on
             </a>
           ))}
         </div>
+      )}
+
+      {listing.videos.length > 0 && (
+        <>
+          <p style={heading}>{t('profile.videos')} · {listing.videos.length}</p>
+          {listing.videos.map(url => <a key={url} href={url} target="_blank" rel="noopener noreferrer" style={{ ...row, display: 'block', color: 'var(--accent-text)' }}>{url.replace(/^https:\/\//, '')}</a>)}
+        </>
+      )}
+      {Object.keys(listing.socials).length > 0 && (
+        <>
+          <p style={heading}>{t('profile.links')}</p>
+          {Object.entries(listing.socials).map(([k, url]) => <a key={k} href={url} target="_blank" rel="noopener noreferrer" style={{ ...row, display: 'block', color: 'var(--accent-text)' }}>{url?.replace(/^https:\/\//, '')}</a>)}
+        </>
+      )}
+      {(privateContacts?.telegram || privateContacts?.whatsapp) && (
+        <>
+          <p style={heading}>{t('profile.private')}</p>
+          {privateContacts.telegram && <p style={row}>Telegram: {privateContacts.telegram}</p>}
+          {privateContacts.whatsapp && <p style={row}>WhatsApp: {privateContacts.whatsapp}</p>}
+        </>
+      )}
+      {listing.certificates.length > 0 && (
+        <>
+          <p style={heading}>{t('profile.certificates')} · {listing.certificates.length}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+            {listing.certificates.map(url => (
+              <a key={url} href={url} target="_blank" rel="noreferrer" style={{ aspectRatio: '3/4', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)', display: 'block' }}>
+                <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </a>
+            ))}
+          </div>
+        </>
       )}
 
       <p style={heading}>{t('mod.reason')}</p>

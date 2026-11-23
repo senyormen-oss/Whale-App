@@ -35,8 +35,17 @@ export interface Specialist {
   moderationComment: string
   /** Owner switch: an approved listing can be hidden from the catalog without deleting it. */
   published: boolean
+  /** Links to YouTube / Instagram / TikTok videos. */
+  videos: string[]
+  /** Photos of diplomas and certificates. */
+  certificates: string[]
+  /** Public links that show work (never messengers). */
+  socials: Socials
   isNew?: boolean
 }
+
+export type SocialKey = 'instagram' | 'youtube' | 'tiktok' | 'behance' | 'website'
+export type Socials = Partial<Record<SocialKey, string>>
 
 export interface Review {
   id: string
