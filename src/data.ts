@@ -1,5 +1,6 @@
 import { t, formatNumber } from './i18n'
 import type { Key } from './locales/en'
+import type { Billing, Currency, ListingService } from './types'
 
 // `label` is the canonical (English) value stored in the database; use categoryLabel() for display.
 export const CATEGORIES = [
@@ -43,14 +44,36 @@ export function getSubscriptionPlans(basePrice: number) {
 
 /** Order service names are stored in English; show them in the active language. */
 export function localizeService(stored: string): string {
+  if (stored === CUSTOM_QUOTE_SERVICE) return t('price.customQuote')
   const plan = PLAN_TEMPLATES.find(p => p.canonical === stored)
   return plan ? t(('plan.' + plan.id + '.name') as Key) : stored
 }
 
 export const AVAILABLE_SLOTS = ['09:00', '11:00', '13:00', '15:00', '17:00']
 
-export function formatPrice(amount: number) {
-  return `${formatNumber(amount)} ${t('common.uzs')}`
+/** Service name the database stores for a custom quote request. */
+export const CUSTOM_QUOTE_SERVICE = 'Custom quote'
+
+export function formatPrice(amount: number, currency: Currency = 'UZS') {
+  return currency === 'USD' ? `$${formatNumber(amount)}` : `${formatNumber(amount)} ${t('common.uzs')}`
+}
+
+/** An order's price: "Price on request" until a quote is agreed, "/ month" for monthly services. */
+export function formatOrderPrice(o: { amount: number; currency: Currency; billing: Billing }) {
+  if (o.billing === 'quote' && o.amount === 0) return t('price.onRequest')
+  return formatPrice(o.amount, o.currency) + (o.billing === 'monthly' ? ` ${t('price.perMonth')}` : '')
+}
+
+/** A price-list line as clients see it: "from 500 000 sum", "$300 / month", "Price on request". */
+export function formatServicePrice(s: Pick<ListingService, 'billing' | 'price' | 'priceFrom' | 'currency'>) {
+  if (s.billing === 'quote' || s.price == null) return t('price.onRequest')
+  const base = formatPrice(s.price, s.currency)
+  return (s.priceFrom ? `${t('common.from')} ${base}` : base) + (s.billing === 'monthly' ? ` ${t('price.perMonth')}` : '')
+}
+
+/** Sum of UZS amounts only: other currencies are never converted. */
+export function sumUzs(items: { amount: number; currency: Currency }[]) {
+  return items.reduce((sum, o) => sum + (o.currency === 'UZS' ? o.amount : 0), 0)
 }
 
 export function getLevelConfig(level: string) {

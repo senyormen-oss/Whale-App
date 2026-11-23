@@ -9,7 +9,7 @@ import { useConfirm } from '../confirm'
 import { fetchMyPackages, isPackageUsable } from '../lib/packages'
 import type { PackageInfo } from '../lib/admin'
 import { formatDate as fmtDate } from '../i18n'
-import { localizeService } from '../data'
+import { localizeService, formatOrderPrice } from '../data'
 import ReviewModal from './ReviewModal'
 import { ClipboardList, Star } from '../icons'
 
@@ -136,7 +136,7 @@ export default function BookingsScreen({ onNavigate }: Props) {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
-                      {formatNumber(order.amount)}
+                      {formatOrderPrice(order)}
                     </p>
                     <span style={{ padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: status.bg, color: status.color }}>
                       {t(status.label)}

@@ -1,7 +1,7 @@
 import { supabase } from './supabaseClient'
 import { mapSpecialistRow } from './queries'
 import { t } from '../i18n'
-import type { Specialist } from '../types'
+import type { Billing, Currency, Specialist } from '../types'
 
 // ---------- Administration (agency model) ----------
 // Every call here is protected by row-level security / SECURITY DEFINER functions:
@@ -20,6 +20,7 @@ export interface PackageInfo {
   status: 'pending' | 'active' | 'completed' | 'cancelled'
   expiresAt: string | null
   price: number
+  currency: Currency
   plan: string
   specialistId: string
   userId: string
@@ -37,6 +38,8 @@ export interface AdminRequest {
   slot: string
   service: string
   amount: number
+  currency: Currency
+  billing: Billing
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   createdAt: string
   package: PackageInfo | null
@@ -50,6 +53,7 @@ export function mapPackageRow(r: Record<string, any>): PackageInfo {
     status: r.status,
     expiresAt: r.expires_at ?? null,
     price: r.price,
+    currency: r.currency ?? 'UZS',
     plan: r.plan,
     specialistId: r.specialist_id,
     userId: r.user_id,
@@ -92,6 +96,8 @@ export async function fetchAdminRequests(): Promise<AdminRequest[]> {
     slot: r.booking_slot as string,
     service: r.service,
     amount: r.amount,
+    currency: r.currency ?? 'UZS',
+    billing: r.billing ?? 'one_time',
     status: r.status,
     createdAt: r.created_at as string,
     package: r.package_id ? packagesById[r.package_id] ?? null : null,

@@ -17,6 +17,8 @@ function mapOrderRow(row: Record<string, any>): Order {
     service: row.service,
     status: row.status,
     amount: row.amount,
+    currency: row.currency ?? 'UZS',
+    billing: row.billing ?? 'one_time',
   }
 }
 
@@ -50,8 +52,12 @@ interface BookingInput {
   amount: number
   phone: string
   note: string
-  /** 1 for a single session; 5, 10 or 20 for a package. */
+  /** 1 for a single session; 5, 10 or 20 for a package (legacy plans only). */
   sessions?: number
+  /** A service from the listing's price list: the database takes its price and currency. */
+  serviceId?: string
+  /** A custom quote request (no price yet; the note describes the task). */
+  custom?: boolean
 }
 
 interface PackageSessionInput {
@@ -105,6 +111,7 @@ function bookingServerMessage(message: string): string | null {
     ['Choose a valid date', 'err.dateRange'],
     ['Specialist not found', 'err.bookingFailed'],
     ['Invalid service', 'err.bookingFailed'],
+    ['Describe the task', 'book.needService'],
     ['Invalid status', 'err.bookingFailed'],
   ]
   for (const [text, key] of map) if (message.includes(text)) return t(key)
@@ -204,6 +211,8 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
       p_phone: input.phone,
       p_note: input.note,
       p_sessions: input.sessions ?? 1,
+      p_service_id: input.serviceId ?? null,
+      p_custom: input.custom ?? false,
     })
     if (error || !data) return { error: bookingErrorMessage(error ?? { message: '' }) }
     const order = mapOrderRow(data as Record<string, any>)

@@ -6,7 +6,7 @@ import { useSpecialists } from '../specialistsData'
 import { useToast } from '../toast'
 import { useI18n, formatDate, formatNumber, monthName } from '../i18n'
 import { useConfirm } from '../confirm'
-import { categoryLabel, localizeService } from '../data'
+import { categoryLabel, localizeService, formatOrderPrice, sumUzs } from '../data'
 import LanguageSwitcher from '../LanguageSwitcher'
 import ThemeSwitcher from '../ThemeSwitcher'
 import UserAvatar from '../UserAvatar'
@@ -80,12 +80,12 @@ export default function DashboardScreen({ onNavigate }: Props) {
     d.setMonth(d.getMonth() - (4 - i))
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     const amount = orders
-      .filter(o => o.status !== 'cancelled' && o.rawDate?.startsWith(key))
+      .filter(o => o.status !== 'cancelled' && o.currency === 'UZS' && o.rawDate?.startsWith(key))
       .reduce((sum, o) => sum + o.amount, 0)
     return { key, label: monthName(d.getMonth()).slice(0, 3), amount, current: i === 4 }
   })
   const maxSpend = Math.max(...spendByMonth.map(m => m.amount))
-  const totalSpent = orders.reduce((sum, o) => sum + o.amount, 0)
+  const totalSpent = sumUzs(orders)
   const completedCount = orders.filter(o => o.status === 'completed').length
   const favoriteSpecialists = specialists.filter(s => favorites.includes(s.id))
 
@@ -192,7 +192,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <p style={{ margin: '0 0 6px', fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>
-                        {formatNumber(order.amount)}
+                        {formatOrderPrice(order)}
                       </p>
                       <span style={{
                         padding: '3px 10px', borderRadius: 20, fontSize: 10, fontWeight: 700,

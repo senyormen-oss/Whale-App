@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice } from '../data'
-import type { Screen } from '../types'
+import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice, formatServicePrice, CUSTOM_QUOTE_SERVICE } from '../data'
+import type { Screen, ListingService } from '../types'
+import { fetchServices } from '../lib/services'
 import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { fetchMyPackages } from '../lib/packages'
@@ -9,12 +10,16 @@ import { localizeService } from '../data'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatDate, formatNumber, monthName, weekdayLabels } from '../i18n'
 import { fetchBookedSlotsInRange } from '../lib/queries'
-import { ArrowLeft, ChevronLeft, ChevronRight, Lock, PartyPopper, Phone, AlertCircle, SUBSCRIPTION_ICONS } from '../icons'
+import { ArrowLeft, ChevronLeft, ChevronRight, Lock, PartyPopper, Phone, AlertCircle, Loader2, SUBSCRIPTION_ICONS } from '../icons'
 
 interface Props {
   specialistId: string
   /** When set, the client books a further session of this package instead of buying a plan. */
   packageId?: string
+  /** Pre-selects this price-list service (tapped on the listing page). */
+  serviceId?: string
+  /** Opens straight on a custom quote request. */
+  custom?: boolean
   onNavigate: (screen: Screen) => void
   onBack: () => void
 }
@@ -24,7 +29,7 @@ function pad2(n: number) {
   return String(n).padStart(2, '0')
 }
 
-export default function BookingScreen({ specialistId, packageId, onNavigate, onBack }: Props) {
+export default function BookingScreen({ specialistId, packageId, serviceId, custom, onNavigate, onBack }: Props) {
   const { t } = useI18n()
   const { specialists } = useSpecialists()
   const sp = specialists.find(s => s.id === specialistId)
@@ -36,7 +41,9 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
   const [selectedDay, setSelectedDay] = useState<number | null>(null)
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null)
   const plans = getSubscriptionPlans(sp?.price ?? 0)
-  const [selectedSub, setSelectedSub] = useState('sub1')
+  const [services, setServices] = useState<ListingService[] | null>(null)
+  // 'plan:<id>' (legacy plans), 'svc:<id>' (price list) or 'custom' (quote request)
+  const [choice, setChoice] = useState<string>(custom ? 'custom' : serviceId ? `svc:${serviceId}` : '')
   const { user } = useAuth()
   const [phone, setPhone] = useState(() => (user?.phone ? `+${user.phone}` : (user?.user_metadata?.phone as string | undefined) ?? ''))
   const [note, setNote] = useState('')
@@ -68,6 +75,25 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sp?.id, viewYear, viewMonth])
+
+  useEffect(() => {
+    if (packageId) return
+    let cancelled = false
+    fetchServices(specialistId)
+      .then(list => {
+        if (cancelled) return
+        setServices(list)
+        setChoice(prev => {
+          if (prev === 'custom' || (prev.startsWith('svc:') && list.some(x => `svc:${x.id}` === prev))) return prev
+          return list.length > 0 ? `svc:${list[0].id}` : 'plan:sub1'
+        })
+      })
+      .catch(err => {
+        console.error('Failed to load price list', err)
+        if (!cancelled) { setServices([]); setChoice(prev => (prev === 'custom' ? prev : 'plan:sub1')) }
+      })
+    return () => { cancelled = true }
+  }, [specialistId, packageId])
 
   useEffect(() => {
     if (!packageId || !user) return
@@ -117,14 +143,20 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
     setSelectedSlot(null)
   }
 
-  const sub = plans.find(s => s.id === selectedSub) ?? plans[0]
+  const isCustom = choice === 'custom'
+  const svc = choice.startsWith('svc:') ? (services ?? []).find(x => `svc:${x.id}` === choice) ?? null : null
+  const sub = plans.find(s => `plan:${s.id}` === choice) ?? plans[0]
+  const hasPriceList = (services?.length ?? 0) > 0
   const dateLabel = selectedDay ? formatDate(new Date(viewYear, viewMonth, selectedDay)) : '—'
   const dateKey = selectedDay ? dayKey(selectedDay) : ''
   const takenSlotsForSelectedDay = selectedDay ? (bookedByDate[dateKey] ?? []) : []
   const availableSlots = AVAILABLE_SLOTS.filter(slot => !takenSlotsForSelectedDay.includes(slot))
 
-  const summaryService = pkg ? localizeService(pkg.plan) : sub.name
-  const summaryPrice = pkg ? Math.max(1, Math.round(pkg.price / pkg.planTotal)) : sub.price
+  const summaryService = pkg ? localizeService(pkg.plan) : isCustom ? t('price.customQuote') : svc ? svc.title : sub.name
+  const summaryPrice = pkg
+    ? formatPrice(Math.max(1, Math.round(pkg.price / pkg.planTotal)), pkg.currency)
+    : isCustom ? t('price.onRequest') : svc ? formatServicePrice(svc) : formatPrice(sub.price)
+  const choiceReady = !!packageId || isCustom || !!svc || (!hasPriceList && services !== null)
 
   async function handleConfirm() {
     if (!selectedDay || !selectedSlot || confirming) return
@@ -146,11 +178,13 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
           specialistId,
           dateKey,
           slot: selectedSlot,
-          serviceName: sub.canonical,
-          amount: sub.price,
+          serviceName: isCustom ? CUSTOM_QUOTE_SERVICE : svc ? svc.title : sub.canonical,
+          amount: isCustom || svc ? 0 : sub.price,
           phone: phone.trim(),
           note: note.trim(),
-          sessions: sub.sessions,
+          sessions: isCustom || svc ? 1 : sub.sessions,
+          serviceId: svc?.id,
+          custom: isCustom,
         })
     setConfirming(false)
 
@@ -364,19 +398,44 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
       {/* Step: Service */}
       {step === 'sub' && (
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }} className="fade-in">
-          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('book.choosePlan')}</p>
-          {plans.map(s => {
+          <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{hasPriceList ? t('price.chooseService') : t('book.choosePlan')}</p>
+          {services === null && <Loader2 className="spin" size={20} color="var(--accent-text)" strokeWidth={2} />}
+          {(services ?? []).map(x => {
+            const sel = choice === `svc:${x.id}`
+            return (
+              <button
+                key={x.id}
+                onClick={() => setChoice(`svc:${x.id}`)}
+                style={{
+                  borderRadius: 18, padding: '14px 16px', borderStyle: 'solid', borderWidth: 1,
+                  borderColor: sel ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
+                  background: sel ? 'linear-gradient(135deg, rgba(10,186,181,0.2) 0%, rgba(10,186,181,0.05) 100%)' : 'rgba(var(--fg-rgb),0.05)',
+                  textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, transition: 'all 0.15s',
+                }}
+              >
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ margin: '0 0 2px', fontSize: 15, fontWeight: 700, color: 'var(--ink)', overflowWrap: 'anywhere' }}>{x.title}</p>
+                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', overflowWrap: 'anywhere' }}>
+                    {x.billing === 'package' ? t('price.sessions', { n: x.sessions }) : t(`price.billing.${x.billing}` as 'price.billing.one_time')}
+                    {x.description && ` · ${x.description}`}
+                  </p>
+                </div>
+                <p style={{ margin: 0, fontSize: 14.5, fontWeight: 800, color: sel ? 'var(--accent-text)' : 'var(--ink)', flexShrink: 0, textAlign: 'right' }}>{formatServicePrice(x)}</p>
+              </button>
+            )
+          })}
+          {services !== null && !hasPriceList && plans.map(s => {
             const SubIcon = SUBSCRIPTION_ICONS[s.level]
             return (
             <button
               key={s.id}
-              onClick={() => setSelectedSub(s.id)}
+              onClick={() => setChoice(`plan:${s.id}`)}
               style={{
                 borderRadius: 18, padding: '16px 18px', border: 'none',
-                background: selectedSub === s.id
+                background: choice === `plan:${s.id}`
                   ? 'linear-gradient(135deg, rgba(10,186,181,0.2) 0%, rgba(10,186,181,0.05) 100%)'
                   : 'rgba(var(--fg-rgb),0.05)',
-                borderColor: selectedSub === s.id ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
+                borderColor: choice === `plan:${s.id}` ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
                 borderStyle: 'solid', borderWidth: 1,
                 textAlign: 'left', cursor: 'pointer',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -397,9 +456,9 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
                 <span style={{
                   width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: selectedSub === s.id ? 'rgba(10,186,181,0.2)' : 'rgba(var(--fg-rgb),0.06)',
+                  background: choice === `plan:${s.id}` ? 'rgba(10,186,181,0.2)' : 'rgba(var(--fg-rgb),0.06)',
                 }}>
-                  <SubIcon size={20} color={selectedSub === s.id ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))'} strokeWidth={1.8} />
+                  <SubIcon size={20} color={choice === `plan:${s.id}` ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))'} strokeWidth={1.8} />
                 </span>
                 <div>
                   <p style={{ margin: '0 0 2px', fontSize: 16, fontWeight: 700, color: 'var(--ink)' }}>{s.name}</p>
@@ -407,13 +466,27 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: selectedSub === s.id ? 'var(--accent-text)' : 'var(--ink)' }}>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: choice === `plan:${s.id}` ? 'var(--accent-text)' : 'var(--ink)' }}>
                   {formatNumber(s.price)}
                 </p>
                 <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('common.uzs')}</p>
               </div>
             </button>
           )})}
+          {services !== null && (
+            <button
+              onClick={() => setChoice('custom')}
+              style={{
+                borderRadius: 18, padding: '14px 16px', borderStyle: 'dashed', borderWidth: 1.5,
+                borderColor: isCustom ? '#0ABAB5' : 'rgba(10,186,181,0.4)',
+                background: isCustom ? 'rgba(10,186,181,0.14)' : 'transparent',
+                textAlign: 'left', transition: 'all 0.15s',
+              }}
+            >
+              <p style={{ margin: '0 0 2px', fontSize: 15, fontWeight: 700, color: 'var(--ink)' }}>{t('price.customQuote')}</p>
+              <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('price.customQuoteDesc')}</p>
+            </button>
+          )}
         </div>
       )}
 
@@ -440,7 +513,7 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
             onChange={e => setNote(e.target.value)}
             rows={2}
             maxLength={500}
-            placeholder={t('book.notePlaceholder')}
+            placeholder={isCustom ? t('price.customNote') : t('book.notePlaceholder')}
             style={{ width: '100%', marginBottom: 20, background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 14, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }}
           />
 
@@ -460,7 +533,7 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
             ))}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0 0', marginTop: 4 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{t('book.total')}</span>
-              <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-text)' }}>{formatPrice(summaryPrice)}</span>
+              <span style={{ fontSize: 18, fontWeight: 900, color: 'var(--accent-text)', textAlign: 'right' }}>{summaryPrice}</span>
             </div>
           </div>
 
@@ -513,11 +586,12 @@ export default function BookingScreen({ specialistId, packageId, onNavigate, onB
           <div style={{ display: 'flex', gap: 12 }}>
             <button onClick={() => setStep('date')} className="glass" style={{ padding: '16px 18px', borderRadius: 18, border: '1px solid rgba(var(--fg-rgb),0.15)', color: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ArrowLeft size={18} strokeWidth={2} /></button>
             <button
-              onClick={() => setStep('pay')}
-              className="tiffany-glow"
-              style={{ flex: 1, padding: '16px', borderRadius: 18, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif' }}
+              onClick={() => choiceReady && setStep('pay')}
+              disabled={!choiceReady}
+              className={choiceReady ? 'tiffany-glow' : ''}
+              style={{ flex: 1, padding: '16px', borderRadius: 18, border: 'none', background: choiceReady ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)', color: choiceReady ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif' }}
             >
-              {t('book.continuePrice', { price: formatPrice(sub.price) })}
+              {t('book.continuePrice', { price: summaryPrice })}
             </button>
           </div>
         )}

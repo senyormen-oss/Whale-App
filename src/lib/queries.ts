@@ -208,6 +208,8 @@ export async function fetchSpecialistOrders(specialistIds: string[], names: Reco
     service: row.service,
     status: row.status,
     amount: row.amount,
+    currency: row.currency ?? 'UZS',
+    billing: row.billing ?? 'one_time',
     clientName: namesById[row.user_id] ?? t('common.client'),
     bookingSlot: row.booking_slot,
     phone: row.phone ?? '',

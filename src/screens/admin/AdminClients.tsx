@@ -67,7 +67,7 @@ export default function AdminClients({ requests }: { requests: AdminRequest[] | 
       const row = map.get(r.userId) ?? { userId: r.userId, name: r.clientName, phone: '', requests: [], completedTotal: 0, lastAt: r.createdAt, packages: [] }
       row.requests.push(r)
       if (!row.phone && r.phone) row.phone = r.phone
-      if (r.status === 'completed') row.completedTotal += r.amount
+      if (r.status === 'completed' && r.currency === 'UZS') row.completedTotal += r.amount
       if (r.createdAt > row.lastAt) row.lastAt = r.createdAt
       if (r.package && !row.packages.some(p => p.id === r.package!.id)) row.packages.push(r.package)
       map.set(r.userId, row)

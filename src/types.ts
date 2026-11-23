@@ -69,6 +69,23 @@ export interface Conversation {
   specialistUnread?: number
 }
 
+export type Currency = 'UZS' | 'USD'
+export type Billing = 'one_time' | 'package' | 'monthly' | 'quote'
+
+/** One line of a listing's price list. `price` is null for "price on request". */
+export interface ListingService {
+  id: string
+  specialistId: string
+  title: string
+  description: string
+  billing: Billing
+  sessions: number
+  price: number | null
+  priceFrom: boolean
+  currency: Currency
+  position: number
+}
+
 export interface Order {
   id: string
   specialistId: string
@@ -77,13 +94,15 @@ export interface Order {
   service: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   amount: number
+  currency: Currency
+  billing: Billing
 }
 
 export type Screen =
   | { name: 'home' }
   | { name: 'search'; category?: CategoryKey; query?: string }
   | { name: 'specialist'; id: string }
-  | { name: 'booking'; specialistId: string; packageId?: string }
+  | { name: 'booking'; specialistId: string; packageId?: string; serviceId?: string; custom?: boolean }
   | { name: 'chats' }
   | { name: 'chat'; conversationId: string }
   | { name: 'dashboard' }

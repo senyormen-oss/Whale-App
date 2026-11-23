@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import type { Specialist } from '../types'
 import Sheet from '../Sheet'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
+import PriceListEditor from './PriceListEditor'
 import { useAuth } from '../auth'
 import { useToast } from '../toast'
 import { useI18n } from '../i18n'
@@ -79,6 +80,8 @@ export default function ListingTools({ listing, onChange }: { listing: Specialis
         <PenSquare size={18} color="var(--accent-text)" strokeWidth={1.8} />
         <span style={{ flex: 1, fontSize: 14, fontWeight: 600 }}>{t('dash.editListing')}</span>
       </button>
+
+      <PriceListEditor specialistId={listing.id} />
 
       <div>
         <h2 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>

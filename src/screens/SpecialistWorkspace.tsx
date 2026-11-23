@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Specialist } from '../types'
-import { categoryLabel, localizeService } from '../data'
+import { categoryLabel, localizeService, formatOrderPrice, sumUzs } from '../data'
 import { useAuth } from '../auth'
 import { useToast } from '../toast'
 import { useConfirm } from '../confirm'
@@ -154,7 +154,7 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
   const pendingOrders = orders.filter(o => o.status === 'pending')
   const upcomingOrders = orders.filter(o => o.status === 'confirmed')
   const completedOrders = orders.filter(o => o.status === 'completed')
-  const totalIncome = completedOrders.reduce((sum, o) => sum + o.amount, 0)
+  const totalIncome = sumUzs(completedOrders)
   const clientCount = new Set(orders.map(o => o.clientName)).size
 
   if (listings === undefined) {
@@ -256,7 +256,7 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
               <div key={o.id} className="glass" style={{ borderRadius: 18, padding: '14px 16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <p style={{ margin: 0, fontSize: 14, fontWeight: 800 }}>{o.clientName}</p>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatNumber(o.amount)} {t('common.uzs')}</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatOrderPrice(o)}</p>
                 </div>
                 <p style={{ margin: '3px 0 0', fontSize: 12.5, color: 'rgba(var(--fg-rgb),calc(0.65 * var(--tb)))' }}>
                   {o.specialistName && <>{o.specialistName} · </>}{formatDate(o.date)}, {o.bookingSlot} · {localizeService(o.service)}
@@ -324,7 +324,7 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{o.clientName}</p>
                     <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{localizeService(o.service)} · {formatDate(o.date)}</p>
                   </div>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatNumber(o.amount)}</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatOrderPrice(o)}</p>
                 </div>
               ))}
             </div>

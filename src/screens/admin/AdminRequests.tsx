@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useToast } from '../../toast'
 import { useI18n, formatDate, formatNumber } from '../../i18n'
 import { useConfirm } from '../../confirm'
-import { localizeService } from '../../data'
+import { localizeService, formatOrderPrice } from '../../data'
 import { adminSetOrderStatus, type AdminRequest } from '../../lib/admin'
 import Sheet from '../../Sheet'
 import NoteEditor from './NoteEditor'
@@ -98,7 +98,7 @@ export default function AdminRequests({ requests, onChanged }: { requests: Admin
               {r.specialistName} · {formatDate(r.date)}, {r.slot}
             </p>
             <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>
-              {localizeService(r.service)} · {formatNumber(r.amount)} {t('common.uzs')}
+              {localizeService(r.service)} · {formatOrderPrice(r)}
               {r.package && <> · <strong style={{ color: 'var(--accent-text)' }}>{t('admin.packageBadge', { used: r.package.used, total: r.package.planTotal })}</strong></>}
             </p>
             {r.note && (

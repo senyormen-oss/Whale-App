@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { getLevelConfig, formatPrice, getSubscriptionPlans, categoryLabel } from '../data'
-import type { Screen, Review } from '../types'
+import { getLevelConfig, formatPrice, formatServicePrice, getSubscriptionPlans, categoryLabel } from '../data'
+import type { Screen, Review, ListingService } from '../types'
+import { fetchServices } from '../lib/services'
 import { useAppStore } from '../store'
 import { useSpecialists } from '../specialistsData'
 import { fetchReviews } from '../lib/queries'
@@ -28,7 +29,16 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
   const [reporting, setReporting] = useState(false)
   const { user } = useAuth()
   const [reviews, setReviews] = useState<Review[]>([])
+  const [services, setServices] = useState<ListingService[] | null>(null)
   const liked = favorites.includes(specialistId)
+
+  useEffect(() => {
+    let cancelled = false
+    fetchServices(specialistId)
+      .then(list => { if (!cancelled) setServices(list) })
+      .catch(err => { console.error('Failed to load price list', err); if (!cancelled) setServices([]) })
+    return () => { cancelled = true }
+  }, [specialistId])
 
   useEffect(() => {
     let cancelled = false
@@ -295,15 +305,43 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
 
             <div className="glass" style={{ borderRadius: 16, padding: 16 }}>
               <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 700, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('spec.pricing')}</h3>
-              {getSubscriptionPlans(sp.price).map(item => (
-                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
-                  <div>
-                    <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.name}</p>
-                    <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{item.description}</p>
+              {services === null ? null : services.length > 0 ? (
+                services.map(s => (
+                  <button
+                    key={s.id}
+                    onClick={() => sp.available && onNavigate({ name: 'booking', specialistId: sp.id, serviceId: s.id })}
+                    disabled={!sp.available}
+                    style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '10px 0', border: 'none', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)', background: 'none', color: 'var(--ink)', textAlign: 'left', cursor: sp.available ? 'pointer' : 'default' }}
+                  >
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, overflowWrap: 'anywhere' }}>{s.title}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))', overflowWrap: 'anywhere' }}>
+                        {s.billing === 'package' ? t('price.sessions', { n: s.sessions }) : t(`price.billing.${s.billing}` as 'price.billing.one_time')}
+                        {s.description && ` · ${s.description}`}
+                      </p>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: 'var(--accent-text)', flexShrink: 0, textAlign: 'right' }}>{formatServicePrice(s)}</p>
+                  </button>
+                ))
+              ) : (
+                getSubscriptionPlans(sp.price).map(item => (
+                  <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
+                    <div>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>{item.name}</p>
+                      <p style={{ margin: 0, fontSize: 11, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{item.description}</p>
+                    </div>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--accent-text)' }}>{formatPrice(item.price)}</p>
                   </div>
-                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--accent-text)' }}>{formatPrice(item.price)}</p>
-                </div>
-              ))}
+                ))
+              )}
+              {sp.available && sp.ownerId !== user?.id && (
+                <button
+                  onClick={() => onNavigate({ name: 'booking', specialistId: sp.id, custom: true })}
+                  style={{ width: '100%', marginTop: 12, padding: '11px 0', borderRadius: 12, border: '1px solid rgba(10,186,181,0.35)', background: 'rgba(10,186,181,0.08)', color: 'var(--accent-text)', fontSize: 13.5, fontWeight: 800 }}
+                >
+                  {t('price.requestCustom')}
+                </button>
+              )}
             </div>
 
             {/* Level badge */}
@@ -425,7 +463,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
               cursor: sp.available ? 'pointer' : 'not-allowed',
             }}
           >
-            {sp.available ? t('spec.book', { price: formatPrice(sp.price) }) : t('spec.unavailable')}
+            {!sp.available ? t('spec.unavailable') : services && services.length > 0 ? t('price.bookCta') : t('spec.book', { price: formatPrice(sp.price) })}
           </button>
         </div>
       </div>

@@ -7,6 +7,10 @@ import { useI18n, formatNumber } from '../../i18n'
 import { Select, Switch } from '../../Controls'
 import Sheet from '../../Sheet'
 import NoteEditor from './NoteEditor'
+import PriceListEditor from '../PriceListEditor'
+import { fetchServices } from '../../lib/services'
+import { formatServicePrice } from '../../data'
+import type { ListingService } from '../../types'
 import { smallBtn } from './AdminRequests'
 import { adminUpsertSpecialist, adminModerateListing, fetchUserContact, type UserContact } from '../../lib/admin'
 import { uploadChatImage, removeUploadedFiles } from '../../lib/queries'
@@ -195,6 +199,8 @@ function Editor({ existing, onClose, onSaved }: { existing?: Specialist; onClose
           <Switch checked={approved} onChange={setApproved}>{t('admin.visible')}</Switch>
         </div>
 
+        {existing && <PriceListEditor specialistId={existing.id} />}
+
         {existing && <NoteEditor kind="specialist" keyId={existing.id} />}
 
         {error && <p role="alert" style={{ margin: 0, fontSize: 12.5, color: '#ff4d6d' }}>{error}</p>}
@@ -218,11 +224,16 @@ function ModerationSheet({ listing, onClose, onDone }: { listing: Specialist; on
   const [comment, setComment] = useState(listing.moderationComment)
   const [busy, setBusy] = useState(false)
   const [contact, setContact] = useState<UserContact | null>(null)
+  const [services, setServices] = useState<ListingService[] | null>(null)
 
   useEffect(() => {
     if (!listing.ownerId) return
     fetchUserContact(listing.ownerId).then(setContact).catch(err => console.error(err))
   }, [listing.ownerId])
+
+  useEffect(() => {
+    fetchServices(listing.id).then(setServices).catch(err => console.error(err))
+  }, [listing.id])
 
   async function decide(status: 'approved' | 'rejected' | 'needs_changes' | 'pending') {
     if ((status === 'rejected' || status === 'needs_changes') && comment.trim().length < 3) {
@@ -269,6 +280,17 @@ function ModerationSheet({ listing, onClose, onDone }: { listing: Specialist; on
       {listing.qualification && (<><p style={heading}>{t('spec.qualification')}</p><p style={row}>{listing.qualification}</p></>)}
       <p style={heading}>{t('spec.pricing')}</p>
       <p style={row}>{formatNumber(listing.price)} {t('common.uzs')} · {t('spec.stat.experience')}: {listing.experience} · {t('spec.stat.age')}: {listing.age}</p>
+      {services && services.length > 0 && (
+        <>
+          <p style={heading}>{t('price.title')} · {services.length}</p>
+          {services.map(s => (
+            <p key={s.id} style={row}>
+              <strong>{s.title}</strong> — {formatServicePrice(s)}{s.billing === 'package' ? ` · ${t('price.sessions', { n: s.sessions })}` : ''}
+              {s.description && <><br /><span style={{ color: 'rgba(var(--fg-rgb),calc(0.55 * var(--tb)))' }}>{s.description}</span></>}
+            </p>
+          ))}
+        </>
+      )}
       {listing.tags.length > 0 && (<><p style={heading}>{t('spec.skills')}</p><p style={row}>{listing.tags.join(', ')}</p></>)}
 
       <p style={heading}>{t('admin.portfolio')} · {listing.portfolio.length}</p>
