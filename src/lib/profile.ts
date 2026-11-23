@@ -52,10 +52,15 @@ export function normalizeSocial(key: SocialKey, raw: string): string | null {
   const input = raw.trim()
   if (!input) return ''
   if (MESSENGER.test(input)) return null
-  const handle = input.replace(/^@/, '')
-  if (/^[\w.]{2,30}$/.test(handle) && !handle.includes('..') && key !== 'website' && !/\.[a-z]{2,}$/i.test(handle)) {
-    const base = { instagram: 'https://instagram.com/', youtube: 'https://youtube.com/@', tiktok: 'https://tiktok.com/@', behance: 'https://behance.net/', website: '' }[key]
-    return base + handle
+  if (key !== 'website') {
+    // "@name", or a bare name that is not a link to this network ("studio.uz" on Instagram is a username).
+    const looksLikeLink = input.includes('/') || SOCIAL_HOSTS[key].test(input.toLowerCase().replace(/^https?:\/\//, ''))
+    if (input.startsWith('@') || !looksLikeLink) {
+      const handle = input.replace(/^@/, '')
+      if (!/^[\w.-]{2,30}$/.test(handle) || handle.includes('..')) return null
+      const base = { instagram: 'https://instagram.com/', youtube: 'https://youtube.com/@', tiktok: 'https://tiktok.com/@', behance: 'https://behance.net/' }[key]
+      return base + handle
+    }
   }
   let u: URL
   try {
