@@ -7,7 +7,7 @@ import { updateSpecialistListing, uploadChatImage, removeUploadedFiles } from '.
 import { resizeImage } from '../lib/image'
 import {
   MAX_CERTIFICATES, MAX_VIDEOS, SOCIAL_KEYS, fetchPrivateContacts, normalizeSocial, normalizeTelegram, normalizeWhatsapp,
-  parseVideo, savePrivateContacts,
+  parseVideo, savePrivateContacts, isUploadedVideo, removePortfolioVideo,
 } from '../lib/profile'
 import { Award, Globe, Loader2, Lock, Video, X } from '../icons'
 
@@ -69,6 +69,7 @@ export default function ProfileExtrasEditor({ listing, onChange }: { listing: Sp
     setVideoBusy(true)
     try {
       onChange(await updateSpecialistListing(listing.id, { videos: listing.videos.filter(v => v !== url) }))
+      await removePortfolioVideo(url)
     } catch (err) {
       console.error(err)
       notify(t('profile.failed'))
@@ -153,7 +154,7 @@ export default function ProfileExtrasEditor({ listing, onChange }: { listing: Sp
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: listing.videos.length ? 10 : 0 }}>
           {listing.videos.map(url => (
             <div key={url} className="glass" style={{ borderRadius: 12, padding: '8px 8px 8px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{url.replace(/^https:\/\//, '')}</span>
+              <span style={{ flex: 1, minWidth: 0, fontSize: 12.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{isUploadedVideo(url) ? t('profile.videoFile') : url.replace(/^https:\/\//, '')}</span>
               <button type="button" disabled={videoBusy} onClick={() => removeVideo(url)} aria-label={t('profile.removeVideo')} style={{ width: 28, height: 28, borderRadius: 9, border: 'none', background: 'rgba(255,77,109,0.12)', color: '#ff4d6d', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <X size={14} strokeWidth={2.4} />
               </button>

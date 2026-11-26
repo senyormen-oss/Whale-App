@@ -616,4 +616,12 @@ export const uz: Record<Key, string> = {
   "cal.noUpcoming": "Kelgusi bronlar yo'q.",
   'cal.waiting': 'Kutmoqda',
   'cal.booked': 'Tasdiqlangan',
+  'profile.uploadVideo': 'Video yuklash',
+  'profile.videoUploading': 'Yuklanmoqda…',
+  "profile.videoHint": "MP4, WebM yoki MOV, 50 MB gacha. Uzun videolarni YouTube havolasi bilan qo'shgan ma'qul.",
+  "profile.videoAdded": "Video qo'shildi.",
+  'profile.videoType': 'Faqat MP4, WebM yoki MOV videolar.',
+  "profile.videoSize": "Video juda katta (ko'pi bilan 50 MB).",
+  "profile.videoFailed": "Videoni yuklab bo'lmadi.",
+  'profile.videoFile': 'Video fayl',
 }

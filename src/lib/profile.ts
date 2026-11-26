@@ -10,10 +10,39 @@ const MESSENGER = /(t\.me\/|telegram|wa\.me\/|whatsapp|viber)/i
 export type VideoLink =
   | { kind: 'youtube'; id: string; url: string }
   | { kind: 'instagram' | 'tiktok'; url: string }
+  | { kind: 'file'; url: string }
 
-/** Recognises a YouTube / Instagram / TikTok link; null for anything else. */
+const VIDEO_BUCKET = 'portfolio-videos'
+export const MAX_VIDEO_BYTES = 50 * 1024 * 1024
+export const VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime']
+
+/** Uploads a video file of the portfolio; returns its public link. */
+export async function uploadPortfolioVideo(file: File, userId: string): Promise<string> {
+  const type = file.type || (/\.mov$/i.test(file.name) ? 'video/quicktime' : '')
+  if (!VIDEO_TYPES.includes(type)) throw new Error('video-type')
+  if (file.size > MAX_VIDEO_BYTES) throw new Error('video-size')
+  const ext = (file.name.split('.').pop() ?? 'mp4').replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'mp4'
+  const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+  const { error } = await supabase.storage.from(VIDEO_BUCKET).upload(path, file, { contentType: type })
+  if (error) throw error
+  return supabase.storage.from(VIDEO_BUCKET).getPublicUrl(path).data.publicUrl
+}
+
+/** Best-effort removal of an uploaded portfolio video (links to other sites are ignored). */
+export async function removePortfolioVideo(url: string): Promise<void> {
+  const marker = `/${VIDEO_BUCKET}/`
+  if (!url.includes(marker)) return
+  const path = decodeURIComponent(url.split(marker)[1].split('?')[0])
+  const { error } = await supabase.storage.from(VIDEO_BUCKET).remove([path])
+  if (error) console.error('Failed to remove video', error)
+}
+
+export const isUploadedVideo = (url: string) => url.includes(`/storage/v1/object/public/${VIDEO_BUCKET}/`)
+
+/** Recognises an uploaded video or a YouTube / Instagram / TikTok link; null for anything else. */
 export function parseVideo(raw: string): VideoLink | null {
   const input = raw.trim()
+  if (isUploadedVideo(input) && input.startsWith('https://')) return { kind: 'file', url: input }
   let u: URL
   try {
     u = new URL(/^https?:\/\//i.test(input) ? input : `https://${input}`)

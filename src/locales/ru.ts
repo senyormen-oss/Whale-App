@@ -616,4 +616,12 @@ export const ru: Record<Key, string> = {
   'cal.noUpcoming': 'Предстоящих бронирований нет.',
   'cal.waiting': 'Ждёт',
   'cal.booked': 'Подтверждено',
+  'profile.uploadVideo': 'Загрузить видео',
+  'profile.videoUploading': 'Загрузка…',
+  'profile.videoHint': 'MP4, WebM или MOV до 50 МБ. Длинные видео лучше добавлять ссылкой на YouTube.',
+  'profile.videoAdded': 'Видео добавлено.',
+  'profile.videoType': 'Поддерживаются только видео MP4, WebM или MOV.',
+  'profile.videoSize': 'Видео слишком большое (максимум 50 МБ).',
+  'profile.videoFailed': 'Не удалось загрузить видео.',
+  'profile.videoFile': 'Видеофайл',
 }

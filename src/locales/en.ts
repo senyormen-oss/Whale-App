@@ -630,6 +630,14 @@ export const en = {
   'cal.noUpcoming': 'No upcoming bookings.',
   'cal.waiting': 'Waiting',
   'cal.booked': 'Confirmed',
+  'profile.uploadVideo': 'Upload a video',
+  'profile.videoUploading': 'Uploading…',
+  'profile.videoHint': 'MP4, WebM or MOV up to 50 MB. Long videos are better as YouTube links.',
+  'profile.videoAdded': 'Video added.',
+  'profile.videoType': 'Only MP4, WebM or MOV videos.',
+  'profile.videoSize': 'The video is too large (maximum 50 MB).',
+  'profile.videoFailed': 'Could not upload the video.',
+  'profile.videoFile': 'Video file',
 } as const
 
 export type Key = keyof typeof en

@@ -4,7 +4,8 @@ import { useI18n } from '../i18n'
 import { SOCIAL_KEYS, parseVideo, type VideoLink } from '../lib/profile'
 import { ExternalLink, Play } from '../icons'
 
-const PLATFORM: Record<'youtube' | 'instagram' | 'tiktok', { name: string; color: string }> = {
+const PLATFORM: Record<'youtube' | 'instagram' | 'tiktok' | 'file', { name: string; color: string }> = {
+  file: { name: '', color: '#0ABAB5' },
   youtube: { name: 'YouTube', color: '#FF3B30' },
   instagram: { name: 'Instagram', color: '#E1306C' },
   tiktok: { name: 'TikTok', color: '#25F4EE' },
@@ -18,6 +19,18 @@ function VideoCard({ v }: { v: VideoLink }) {
   const { t } = useI18n()
   const [playing, setPlaying] = useState(false)
   const platform = PLATFORM[v.kind]
+
+  if (v.kind === 'file') {
+    return (
+      <video
+        src={v.url}
+        controls
+        playsInline
+        preload="metadata"
+        style={{ width: '100%', maxHeight: 520, borderRadius: 14, background: '#000', display: 'block' }}
+      />
+    )
+  }
 
   if (v.kind === 'youtube') {
     return (

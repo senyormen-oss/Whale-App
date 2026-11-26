@@ -10,7 +10,8 @@ import { useI18n } from '../i18n'
 import { useConfirm } from '../confirm'
 import { uploadChatImage, updateSpecialistListing, removeUploadedFiles } from '../lib/queries'
 import { resizeImage } from '../lib/image'
-import { Folder, Loader2, X, PenSquare } from '../icons'
+import { MAX_VIDEOS, uploadPortfolioVideo } from '../lib/profile'
+import { Folder, Loader2, X, PenSquare, Video } from '../icons'
 
 const MAX_PORTFOLIO = 12
 
@@ -23,6 +24,29 @@ export default function ListingTools({ listing, onChange }: { listing: Specialis
   const [editing, setEditing] = useState(false)
   const [busy, setBusy] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLInputElement>(null)
+  const [videoBusy, setVideoBusy] = useState(false)
+
+  async function addVideos(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ''
+    if (!files.length || !user) return
+    const room = MAX_VIDEOS - listing.videos.length
+    if (room <= 0) return notify(t('profile.maxVideos', { n: MAX_VIDEOS }))
+    setVideoBusy(true)
+    try {
+      const urls: string[] = []
+      for (const file of files.slice(0, room)) urls.push(await uploadPortfolioVideo(file, user.id))
+      onChange(await updateSpecialistListing(listing.id, { videos: [...listing.videos, ...urls] }))
+      notify(t('profile.videoAdded'), 'success')
+    } catch (err) {
+      console.error('Failed to upload video', err)
+      const msg = err instanceof Error ? err.message : ''
+      notify(msg === 'video-type' ? t('profile.videoType') : msg === 'video-size' ? t('profile.videoSize') : t('profile.videoFailed'))
+    } finally {
+      setVideoBusy(false)
+    }
+  }
 
   async function save(portfolio: string[], extra: { cover?: string } = {}) {
     const saved = await updateSpecialistListing(listing.id, { portfolio, ...extra })
@@ -123,6 +147,20 @@ export default function ListingTools({ listing, onChange }: { listing: Specialis
           )}
         </div>
         <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" multiple onChange={addPhotos} style={{ display: 'none' }} />
+        <button
+          type="button"
+          onClick={() => videoRef.current?.click()}
+          disabled={videoBusy || listing.videos.length >= MAX_VIDEOS}
+          style={{
+            width: '100%', marginTop: 10, padding: '12px 0', borderRadius: 12, border: '1.5px dashed rgba(10,186,181,0.55)', background: 'rgba(10,186,181,0.07)',
+            color: 'var(--accent-text)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13, fontWeight: 800,
+            opacity: listing.videos.length >= MAX_VIDEOS ? 0.4 : 1,
+          }}
+        >
+          {videoBusy ? <><Loader2 className="spin" size={16} /> {t('profile.videoUploading')}</> : <><Video size={16} strokeWidth={2} /> {t('profile.uploadVideo')}</>}
+        </button>
+        <p style={{ margin: '6px 0 0', fontSize: 11.5, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{t('profile.videoHint')}</p>
+        <input ref={videoRef} type="file" accept="video/mp4,video/webm,video/quicktime,.mov" multiple onChange={addVideos} style={{ display: 'none' }} />
       </div>
 
       <ProfileExtrasEditor listing={listing} onChange={onChange} />
