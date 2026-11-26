@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { getSubscriptionPlans, AVAILABLE_SLOTS, formatPrice, formatServicePrice, CUSTOM_QUOTE_SERVICE } from '../data'
+import { getSubscriptionPlans, formatPrice, formatServicePrice, CUSTOM_QUOTE_SERVICE } from '../data'
 import type { Screen, ListingService } from '../types'
 import { fetchServices } from '../lib/services'
+import PriceListView from './PriceListView'
 import { useAppStore } from '../store'
 import { useAuth } from '../auth'
 import { fetchMyPackages } from '../lib/packages'
@@ -9,7 +10,7 @@ import type { PackageInfo } from '../lib/admin'
 import { localizeService } from '../data'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatDate, formatNumber, monthName, weekdayLabels } from '../i18n'
-import { fetchBookedSlotsInRange } from '../lib/queries'
+import { fetchFreeSlots, showSlot } from '../lib/schedule'
 import { ArrowLeft, ChevronLeft, ChevronRight, Lock, PartyPopper, Phone, AlertCircle, Loader2, SUBSCRIPTION_ICONS } from '../icons'
 
 interface Props {
@@ -51,7 +52,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
   const [confirming, setConfirming] = useState(false)
   const [confirmError, setConfirmError] = useState<string | null>(null)
   const [step, setStep] = useState<'date' | 'sub' | 'pay'>('date')
-  const [bookedByDate, setBookedByDate] = useState<Record<string, string[]>>({})
+  const [freeByDate, setFreeByDate] = useState<Record<string, string[]>>({})
   const [slotsLoading, setSlotsLoading] = useState(true)
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
@@ -62,11 +63,11 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
     setSlotsLoading(true)
     const startKey = `${viewYear}-${pad2(viewMonth + 1)}-01`
     const endKey = `${viewYear}-${pad2(viewMonth + 1)}-${pad2(daysInMonth)}`
-    fetchBookedSlotsInRange(sp.id, startKey, endKey)
+    fetchFreeSlots(sp.id, startKey, endKey)
       .then(data => {
-        if (!cancelled) setBookedByDate(data)
+        if (!cancelled) setFreeByDate(data)
       })
-      .catch(err => console.error('Failed to load booked slots', err))
+      .catch(err => console.error('Failed to load free time', err))
       .finally(() => {
         if (!cancelled) setSlotsLoading(false)
       })
@@ -119,8 +120,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
   }
   const isBusy = (day: number) => {
     if (isPast(day)) return true
-    const taken = bookedByDate[dayKey(day)] ?? []
-    return taken.length >= AVAILABLE_SLOTS.length
+    return !(freeByDate[dayKey(day)]?.length)
   }
   const isToday = (day: number) =>
     viewYear === today.getFullYear() && viewMonth === today.getMonth() && day === today.getDate()
@@ -149,8 +149,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
   const hasPriceList = (services?.length ?? 0) > 0
   const dateLabel = selectedDay ? formatDate(new Date(viewYear, viewMonth, selectedDay)) : '—'
   const dateKey = selectedDay ? dayKey(selectedDay) : ''
-  const takenSlotsForSelectedDay = selectedDay ? (bookedByDate[dateKey] ?? []) : []
-  const availableSlots = AVAILABLE_SLOTS.filter(slot => !takenSlotsForSelectedDay.includes(slot))
+  const availableSlots = selectedDay ? (freeByDate[dateKey] ?? []) : []
 
   const summaryService = pkg ? localizeService(pkg.plan) : isCustom ? t('price.customQuote') : svc ? svc.title : sub.name
   const summaryPrice = pkg
@@ -211,7 +210,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
         </h2>
         <p className="slide-up" style={{ margin: 0, fontSize: 14, color: 'rgba(var(--fg-rgb),calc(0.6 * var(--tb)))', lineHeight: 1.6, animationDelay: '0.2s' }}>
           {t('book.requestFor')} <strong style={{ color: 'var(--ink)' }}>{sp.name}</strong><br />
-          <strong style={{ color: 'var(--accent-text)' }}>{dateLabel}, {selectedSlot}</strong>
+          <strong style={{ color: 'var(--accent-text)' }}>{dateLabel}, {showSlot(selectedSlot ?? "")}</strong>
         </p>
         <p className="slide-up" style={{ margin: 0, fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))', animationDelay: '0.3s' }}>
           {t('book.willCall')}
@@ -373,7 +372,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
                   {t('book.allBooked')}
                 </p>
               )}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(112px, 1fr))', gap: 10 }}>
                 {availableSlots.map(slot => (
                   <button
                     key={slot}
@@ -386,7 +385,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
                       transition: 'all 0.15s',
                     }}
                   >
-                    {slot}
+                    {showSlot(slot)}
                   </button>
                 ))}
               </div>
@@ -400,30 +399,9 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
         <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }} className="fade-in">
           <p style={{ margin: '0 0 4px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{hasPriceList ? t('price.chooseService') : t('book.choosePlan')}</p>
           {services === null && <Loader2 className="spin" size={20} color="var(--accent-text)" strokeWidth={2} />}
-          {(services ?? []).map(x => {
-            const sel = choice === `svc:${x.id}`
-            return (
-              <button
-                key={x.id}
-                onClick={() => setChoice(`svc:${x.id}`)}
-                style={{
-                  borderRadius: 18, padding: '14px 16px', borderStyle: 'solid', borderWidth: 1,
-                  borderColor: sel ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
-                  background: sel ? 'linear-gradient(135deg, rgba(10,186,181,0.2) 0%, rgba(10,186,181,0.05) 100%)' : 'rgba(var(--fg-rgb),0.05)',
-                  textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, transition: 'all 0.15s',
-                }}
-              >
-                <div style={{ minWidth: 0 }}>
-                  <p style={{ margin: '0 0 2px', fontSize: 15, fontWeight: 700, color: 'var(--ink)', overflowWrap: 'anywhere' }}>{x.title}</p>
-                  <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', overflowWrap: 'anywhere' }}>
-                    {x.billing === 'package' ? t('price.sessions', { n: x.sessions }) : t(`price.billing.${x.billing}` as 'price.billing.one_time')}
-                    {x.description && ` · ${x.description}`}
-                  </p>
-                </div>
-                <p style={{ margin: 0, fontSize: 14.5, fontWeight: 800, color: sel ? 'var(--accent-text)' : 'var(--ink)', flexShrink: 0, textAlign: 'right' }}>{formatServicePrice(x)}</p>
-              </button>
-            )
-          })}
+          {hasPriceList && (
+            <PriceListView services={services ?? []} selectedId={svc?.id ?? null} onPick={x => setChoice(`svc:${x.id}`)} />
+          )}
           {services !== null && !hasPriceList && plans.map(s => {
             const SubIcon = SUBSCRIPTION_ICONS[s.level]
             return (
@@ -523,7 +501,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
             {[
               { label: t('book.specialist'), value: sp.name },
               { label: t('book.date'), value: dateLabel },
-              { label: t('book.time'), value: selectedSlot ?? '—' },
+              { label: t('book.time'), value: selectedSlot ? showSlot(selectedSlot) : '—' },
               { label: t('book.service'), value: summaryService },
             ].map(row => (
               <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)' }}>
@@ -579,7 +557,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
               transition: 'all 0.2s',
             }}
           >
-            {selectedDay && selectedSlot ? t('book.continueDate', { date: `${dateLabel}, ${selectedSlot}` }) : t('book.selectDate')}
+            {selectedDay && selectedSlot ? t('book.continueDate', { date: `${dateLabel}, ${showSlot(selectedSlot)}` }) : t('book.selectDate')}
           </button>
         )}
         {step === 'sub' && (

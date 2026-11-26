@@ -93,7 +93,19 @@ export interface ListingService {
   priceFrom: boolean
   currency: Currency
   position: number
+  /** Set for the three main tariffs. */
+  tier: Tier | null
+  /** Number of works / videos (per month for monthly contracts). */
+  quantity: number | null
+  /** Shooting days per month (monthly contracts). */
+  shootDays: number | null
+  /** Delivery time, free text: "5 days". */
+  duration: string
+  /** Extra conditions. */
+  terms: string
 }
+
+export type Tier = 'basic' | 'standard' | 'premium'
 
 export interface Order {
   id: string

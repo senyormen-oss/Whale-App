@@ -71,6 +71,20 @@ export function formatServicePrice(s: Pick<ListingService, 'billing' | 'price' |
   return (s.priceFrom ? `${t('common.from')} ${base}` : base) + (s.billing === 'monthly' ? ` ${t('price.perMonth')}` : '')
 }
 
+/** Short details line: "5 sessions · 10 works · Delivery: 5 days" / "8 videos a month · 4 shooting days". */
+export function serviceDetails(s: Pick<ListingService, 'billing' | 'sessions' | 'quantity' | 'shootDays' | 'duration'>) {
+  const parts: string[] = []
+  if (s.billing === 'monthly') {
+    if (s.quantity) parts.push(t('price.videosPerMonth', { n: s.quantity }))
+    if (s.shootDays) parts.push(t('price.shootDaysN', { n: s.shootDays }))
+  } else {
+    if (s.billing === 'package') parts.push(t('price.sessions', { n: s.sessions }))
+    if (s.quantity) parts.push(t('price.qty', { n: s.quantity }))
+    if (s.duration) parts.push(t('price.deadline', { d: s.duration }))
+  }
+  return parts.join(' · ')
+}
+
 /** Sum of UZS amounts only: other currencies are never converted. */
 export function sumUzs(items: { amount: number; currency: Currency }[]) {
   return items.reduce((sum, o) => sum + (o.currency === 'UZS' ? o.amount : 0), 0)

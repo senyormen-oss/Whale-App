@@ -95,7 +95,7 @@ export default function AdminRequests({ requests, onChanged }: { requests: Admin
               </span>
             </div>
             <p style={{ margin: '0 0 2px', fontSize: 13, color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))' }}>
-              {r.specialistName} · {formatDate(r.date)}, {r.slot}
+              {r.specialistName} · {formatDate(r.date)}, {r.slot.replace('-', '–')}
             </p>
             <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>
               {localizeService(r.service)} · {formatOrderPrice(r)}

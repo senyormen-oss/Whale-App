@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient'
-import type { Billing, Currency, ListingService } from '../types'
+import type { Billing, Currency, ListingService, Tier } from '../types'
 
 export function mapServiceRow(r: Record<string, any>): ListingService {
   return {
@@ -13,6 +13,11 @@ export function mapServiceRow(r: Record<string, any>): ListingService {
     priceFrom: !!r.price_from,
     currency: (r.currency ?? 'UZS') as Currency,
     position: r.position ?? 0,
+    tier: (r.tier ?? null) as Tier | null,
+    quantity: r.quantity ?? null,
+    shootDays: r.shoot_days ?? null,
+    duration: r.duration ?? '',
+    terms: r.terms ?? '',
   }
 }
 
@@ -31,10 +36,12 @@ export async function fetchServices(specialistId: string): Promise<ListingServic
 export type ServiceInput = Omit<ListingService, 'id' | 'position'>
 
 /** Checks a service the way the database does, so the form can say what is wrong before saving. */
-export function validateService(s: ServiceInput): 'price.errTitle' | 'price.errPrice' | 'price.errSessions' | null {
+export function validateService(s: ServiceInput): 'price.errTitle' | 'price.errPrice' | 'price.errSessions' | 'price.errQuantity' | null {
   const title = s.title.trim()
   if (title.length < 2 || title.length > 80) return 'price.errTitle'
   if (s.billing === 'package' && (!Number.isInteger(s.sessions) || s.sessions < 2 || s.sessions > 50)) return 'price.errSessions'
+  if (s.quantity != null && (!Number.isInteger(s.quantity) || s.quantity < 1 || s.quantity > 1000)) return 'price.errQuantity'
+  if (s.shootDays != null && (!Number.isInteger(s.shootDays) || s.shootDays < 1 || s.shootDays > 31)) return 'price.errQuantity'
   if (s.billing !== 'quote') {
     const p = s.price ?? 0
     const ok = s.currency === 'UZS' ? p >= 1000 && p <= 100_000_000 : p >= 1 && p <= 100_000
@@ -54,6 +61,11 @@ function toRow(s: ServiceInput) {
     price: quote ? null : s.price,
     price_from: quote ? false : s.priceFrom,
     currency: s.currency,
+    tier: s.tier,
+    quantity: s.quantity,
+    shoot_days: s.billing === 'monthly' ? s.shootDays : null,
+    duration: s.duration.trim(),
+    terms: s.terms.trim(),
   }
 }
 

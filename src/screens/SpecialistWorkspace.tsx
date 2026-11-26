@@ -15,6 +15,8 @@ import { Switch } from '../Controls'
 import Sheet from '../Sheet'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
 import ListingTools from './ListingTools'
+import SpecialistCalendar from './SpecialistCalendar'
+import { specialistSetOrderStatus, showSlot } from '../lib/schedule'
 import { SpecialistInbox } from './SpecialistInbox'
 import { Briefcase, Calendar, ClipboardList, Loader2, MessageSquareText, Phone, TrendingUp, Trash2, Users, Wallet, type IconType } from '../icons'
 
@@ -140,6 +142,25 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
     }
   }
 
+  const [busyOrder, setBusyOrder] = useState<string | null>(null)
+  async function decide(orderId: string, status: 'confirmed' | 'cancelled') {
+    if (status === 'cancelled') {
+      const ok = await confirm({ title: t('cal.declineTitle'), confirmLabel: t('cal.decline'), danger: true })
+      if (!ok) return
+    }
+    setBusyOrder(orderId)
+    try {
+      await specialistSetOrderStatus(orderId, status)
+      notify(status === 'confirmed' ? t('cal.confirmed') : t('cal.declined'), 'success')
+      loadOrders()
+    } catch (err) {
+      console.error(err)
+      notify((err as { code?: string }).code === '23505' ? t('cal.slotTaken') : t('err.updateSession'))
+    } finally {
+      setBusyOrder(null)
+    }
+  }
+
   async function markDone(orderId: string) {
     try {
       await markOrderCompleted(orderId)
@@ -245,6 +266,9 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
         </div>
       </div>
 
+      {/* My calendar */}
+      {listings.length > 0 && <SpecialistCalendar listings={listings} orders={orders} onOrdersChanged={loadOrders} />}
+
       {/* New requests */}
       {listings.length > 0 && (
         <div>
@@ -259,7 +283,7 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: 'var(--accent-text)' }}>{formatOrderPrice(o)}</p>
                 </div>
                 <p style={{ margin: '3px 0 0', fontSize: 12.5, color: 'rgba(var(--fg-rgb),calc(0.65 * var(--tb)))' }}>
-                  {o.specialistName && <>{o.specialistName} · </>}{formatDate(o.date)}, {o.bookingSlot} · {localizeService(o.service)}
+                  {o.specialistName && <>{o.specialistName} · </>}{formatDate(o.date)}, {showSlot(o.bookingSlot)} · {localizeService(o.service)}
                 </p>
                 {o.note && <p style={{ margin: '8px 0 0', padding: '8px 10px', borderRadius: 10, fontSize: 12.5, lineHeight: 1.5, background: 'rgba(var(--fg-rgb),0.05)', overflowWrap: 'anywhere' }}>{o.note}</p>}
                 {o.phone && (
@@ -267,7 +291,10 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
                     <Phone size={13} strokeWidth={2.2} /> {o.phone}
                   </a>
                 )}
-                <p style={{ margin: '8px 0 0', fontSize: 11.5, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{t('orders.waitingTeam')}</p>
+                <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                  <button disabled={busyOrder === o.id} onClick={() => decide(o.id, 'confirmed')} style={{ padding: '8px 14px', borderRadius: 18, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 12, fontWeight: 800 }}>{t('cal.confirm')}</button>
+                  <button disabled={busyOrder === o.id} onClick={() => decide(o.id, 'cancelled')} style={{ padding: '8px 14px', borderRadius: 18, border: 'none', background: 'rgba(255,77,109,0.12)', color: '#ff4d6d', fontSize: 12, fontWeight: 800 }}>{t('cal.decline')}</button>
+                </div>
               </div>
             ))}
           </div>
@@ -298,7 +325,7 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
                   <div style={{ flexShrink: 0, textAlign: 'center', padding: '8px 10px', borderRadius: 12, background: 'rgba(10,186,181,0.1)', border: '1px solid rgba(10,186,181,0.2)', minWidth: 52 }}>
                     <p style={{ margin: '0 0 1px', fontSize: 11, color: 'var(--accent-text)', fontWeight: 700 }}>{monthDay}</p>
                     <p style={{ margin: '0 0 1px', fontSize: 16, fontWeight: 900 }}>{dayNum}</p>
-                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{o.bookingSlot}</p>
+                    <p style={{ margin: 0, fontSize: 10, color: 'rgba(var(--fg-rgb),calc(0.45 * var(--tb)))' }}>{showSlot(o.bookingSlot)}</p>
                   </div>
                   <div style={{ flex: 1, overflow: 'hidden' }}>
                     <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.clientName}</p>

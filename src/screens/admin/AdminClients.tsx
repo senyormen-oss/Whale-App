@@ -131,7 +131,7 @@ export default function AdminClients({ requests }: { requests: AdminRequest[] | 
                   <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, padding: '8px 0', borderBottom: '1px solid rgba(var(--fg-rgb),0.06)' }}>
                     <div style={{ minWidth: 0 }}>
                       <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{r.specialistName}</p>
-                      <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{formatDate(r.date)}, {r.slot} · {localizeService(r.service)}</p>
+                      <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{formatDate(r.date)}, {r.slot.replace('-', '–')} · {localizeService(r.service)}</p>
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 700, color: sc.color, alignSelf: 'center' }}>{t(statusLabelKey(r.status))}</span>
                   </div>

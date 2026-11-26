@@ -275,3 +275,10 @@ body { font-weight: 450; letter-spacing: 0.005em; }
   color: #067A76;
   box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
+/* Tariff cards: stacked on phones, side by side on wide screens */
+.tier-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 900px) { .tier-grid { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); } }
+
+/* Specialist calendar: month and day panel side by side on wide screens */
+.cal-layout { display: grid; grid-template-columns: 1fr; gap: 12px; }
+@media (min-width: 900px) { .cal-layout { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; } }
