@@ -371,7 +371,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             <Sparkles size={17} color="var(--accent-text)" strokeWidth={2} /> {t('home.new')}
           </h2>
         </div>
-        <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="card-grid" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {newOnes.map(sp => (
             <button
               key={sp.id}

@@ -153,7 +153,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
 
   return (
     // Full-screen layer above the bottom navigation so the reply box is never covered.
-    <div style={{
+    <div className="dock-panel" style={{
       position: 'fixed', top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 430,
       zIndex: 200, background: 'var(--bg)', backgroundImage: 'var(--shell-glow)', display: 'flex', flexDirection: 'column',
     }}>

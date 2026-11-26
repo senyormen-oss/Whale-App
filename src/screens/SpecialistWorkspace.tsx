@@ -185,7 +185,7 @@ export default function SpecialistWorkspace({ onOpenChat }: { onOpenChat: (item:
   return (
     <>
       {listings.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
           <Stat icon={Wallet} label={t('dash.totalIncome')} value={(totalIncome / 1_000_000).toFixed(2) + 'M'} accent />
           <Stat icon={ClipboardList} label={t('orders.new')} value={String(pendingOrders.length)} />
           <Stat icon={Briefcase} label={t('listings.count')} value={String(listings.length)} />

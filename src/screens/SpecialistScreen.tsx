@@ -425,7 +425,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
       </div>
 
       {/* Bottom CTA */}
-      <div style={{
+      <div className="dock-bottom" style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 430,
         padding: '16px 20px 32px',

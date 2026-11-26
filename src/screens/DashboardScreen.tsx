@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { useState, useEffect, useCallback } from 'react'
 import type { Screen, Specialist } from '../types'
 import { useAppStore } from '../store'
@@ -151,7 +152,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
         <div className="fade-in" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
           {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
             <StatCard icon={ClipboardList} label={t('dash.totalOrders')} value={String(orders.length)} accent />
             <StatCard icon={Wallet} label={t('dash.totalSpent')} value={(totalSpent / 1_000_000).toFixed(2) + 'M'} sub={t('common.uzs')} />
             <StatCard icon={CheckCircle2} label={t('dash.completed')} value={String(completedCount)} />
@@ -280,8 +281,9 @@ export default function DashboardScreen({ onNavigate }: Props) {
         </div>
       )}
 
-      {showSettings && (
+      {showSettings && createPortal(
         <div
+          className="sheet-backdrop"
           style={{
             position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.6)',
             display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
@@ -289,7 +291,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
           onClick={() => setShowSettings(false)}
         >
           <div
-            className="glass slide-up"
+            className="glass slide-up sheet-panel"
             style={{
               width: '100%', maxWidth: 430, borderRadius: '24px 24px 0 0',
               padding: '20px 20px 40px', border: '1px solid rgba(var(--fg-rgb),0.1)', borderBottom: 'none',
@@ -397,7 +399,7 @@ export default function DashboardScreen({ onNavigate }: Props) {
             </button>
           </div>
         </div>
-      )}
+      , document.body)}
       {editProfile && <EditProfileModal onClose={() => setEditProfile(false)} />}
     </div>
   )

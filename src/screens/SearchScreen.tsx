@@ -155,7 +155,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
       </div>
 
       {/* Specialist cards */}
-      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="card-grid" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
         {results.map((sp, i) => (
           <button
             key={sp.id}

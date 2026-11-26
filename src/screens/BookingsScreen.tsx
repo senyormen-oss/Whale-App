@@ -108,7 +108,7 @@ export default function BookingsScreen({ onNavigate }: Props) {
           <p>{t('bookings.empty')}</p>
         </div>
       ) : (
-        <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div className="card-grid" style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {orders.map(order => {
             const sp = specialists.find(s => s.id === order.specialistId)
             if (!sp) return null

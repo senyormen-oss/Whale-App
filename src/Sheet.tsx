@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from './icons'
 import { useI18n } from './i18n'
 
@@ -12,16 +13,18 @@ export default function Sheet({ title, onClose, children }: { title: string; onC
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  return (
+  // Rendered at the top of the page so no animated parent can put it under the menu.
+  return createPortal(
     <div
       onClick={onClose}
+      className="sheet-backdrop"
       style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', animation: 'fadeIn 0.2s ease both' }}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="slide-up"
+        className="slide-up sheet-panel"
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 430, maxHeight: '92vh', overflowY: 'auto', borderRadius: '24px 24px 0 0', padding: '18px 18px 32px',
@@ -41,5 +44,5 @@ export default function Sheet({ title, onClose, children }: { title: string; onC
         {children}
       </div>
     </div>
-  )
+  , document.body)
 }

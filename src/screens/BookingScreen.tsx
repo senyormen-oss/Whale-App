@@ -536,7 +536,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
       )}
 
       {/* Bottom nav buttons */}
-      <div style={{
+      <div className="dock-bottom" style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 430,
         padding: '16px 20px 32px',

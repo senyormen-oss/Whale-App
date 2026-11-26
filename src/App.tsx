@@ -24,15 +24,18 @@ const TABS: { name: TabName; icon: IconType; label: Parameters<typeof import('./
   { name: 'profile',  icon: User,          label: 'nav.profile' },
 ]
 
-function BottomNav({ activeTab, onTabChange, unreadMessages }: {
+function BottomNav({ activeTab, onTabChange, unreadMessages, hideOnMobile }: {
   activeTab: TabName
   onTabChange: (tab: TabName) => void
   unreadMessages: number
+  /** Detail screens hide the bar on phones; on a computer the side menu always stays. */
+  hideOnMobile?: boolean
 }) {
   const { t } = useI18n()
   const index = Math.max(0, TABS.findIndex(tab => tab.name === activeTab))
   return (
     <div
+      className={`nav-dock${hideOnMobile ? ' nav-hide-mobile' : ''}`}
       style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 430, zIndex: 100,
@@ -42,9 +45,11 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
         className="glass-dark nav-bar"
         style={{ position: 'relative', display: 'flex', padding: '8px 8px 24px', borderRadius: '24px 24px 0 0' }}
       >
+        <div className="nav-brand" aria-hidden>Whale</div>
         {/* Sliding highlight: glides from tab to tab */}
         <span
           aria-hidden
+          className="nav-glide"
           style={{
             position: 'absolute', top: 8, bottom: 24, left: 8, width: `calc((100% - 16px) / ${TABS.length})`,
             transform: `translateX(${index * 100}%)`, transition: 'transform 0.42s cubic-bezier(.34,1.2,.5,1)',
@@ -71,7 +76,7 @@ function BottomNav({ activeTab, onTabChange, unreadMessages }: {
                 color={isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))'}
                 style={{ transform: isActive ? 'translateY(-1px) scale(1.12)' : 'scale(1)', transition: 'transform 0.3s cubic-bezier(.34,1.4,.5,1), stroke 0.25s ease' }}
               />
-              <span style={{
+              <span className="nav-label" style={{
                 fontSize: 10, fontWeight: isActive ? 700 : 500,
                 color: isActive ? 'var(--accent-text)' : 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))',
                 transition: 'color 0.25s ease',
@@ -224,6 +229,7 @@ function AuthenticatedApp() {
 
       {/* App shell */}
       <div
+        className="app-shell"
         style={{
           width: '100%',
           maxWidth: 430,
@@ -238,20 +244,20 @@ function AuthenticatedApp() {
         {/* Screen content */}
         <div
           key={currentScreen.name + (currentScreen.name === 'specialist' ? (currentScreen as any).id : '') + (currentScreen.name === 'chat' ? (currentScreen as any).conversationId : '')}
-          className="screen-enter"
+          className="screen-enter screen-wrap"
+          data-screen={currentScreen.name}
           style={{ minHeight: '100vh' }}
         >
           {renderScreen(currentScreen)}
         </div>
 
         {/* Bottom nav */}
-        {showBottomNav && (
-          <BottomNav
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-            unreadMessages={unreadMessages}
-          />
-        )}
+        <BottomNav
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          unreadMessages={unreadMessages}
+          hideOnMobile={!showBottomNav}
+        />
       </div>
     </div>
   )

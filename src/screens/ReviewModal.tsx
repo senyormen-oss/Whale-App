@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useAuth } from '../auth'
 import { useToast } from '../toast'
 import { createReview } from '../lib/queries'
@@ -67,8 +68,9 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
     }
   }
 
-  return (
+  return createPortal(
     <div
+      className="sheet-backdrop"
       style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
       onClick={onClose}
     >
@@ -76,7 +78,7 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
         role="dialog"
         aria-modal="true"
         aria-label={t('review.title', { name: specialistName })}
-        className="glass slide-up"
+        className="glass slide-up sheet-panel"
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 430, borderRadius: '24px 24px 0 0', padding: '20px 20px 32px',
@@ -121,5 +123,5 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
         </button>
       </div>
     </div>
-  )
+  , document.body)
 }
