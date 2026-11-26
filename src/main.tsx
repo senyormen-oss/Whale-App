@@ -10,6 +10,7 @@ import { ThemeProvider } from './theme'
 import { ConfirmProvider } from './confirm'
 import { SpecialistsProvider } from './specialistsData'
 import { AppStoreProvider } from './store'
+import { NotificationsProvider } from './notifications'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -22,8 +23,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <ConfirmProvider>
               <SpecialistsProvider>
                 <AppStoreProvider>
-                  <OfflineBanner />
-                  <App />
+                  <NotificationsProvider>
+                    <OfflineBanner />
+                    <App />
+                  </NotificationsProvider>
                 </AppStoreProvider>
               </SpecialistsProvider>
             </ConfirmProvider>

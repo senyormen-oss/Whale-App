@@ -18,6 +18,8 @@ import EditProfileModal from './EditProfileModal'
 import Segmented from '../Segmented'
 import type { InboxItem } from '../lib/queries'
 import BecomeSpecialistForm from './BecomeSpecialistForm'
+import { TELEGRAM_BOT, fetchTelegramLinked, telegramLinkUrl, unlinkTelegram } from '../notifications'
+import { Send } from '../icons'
 import { SpecialistInbox, SpecialistChatThread } from './SpecialistInbox'
 import LegalScreen from './LegalScreen'
 import {
@@ -350,6 +352,8 @@ export default function DashboardScreen({ onNavigate }: Props) {
               </span>
             </button>
 
+            <TelegramRow />
+
             {(['terms', 'privacy'] as const).map(doc => (
               <button
                 key={doc}
@@ -401,6 +405,73 @@ export default function DashboardScreen({ onNavigate }: Props) {
         </div>
       , document.body)}
       {editProfile && <EditProfileModal onClose={() => setEditProfile(false)} />}
+    </div>
+  )
+}
+
+
+/** "Telegram notifications": opens the bot with a one-time code; shows the state once linked. */
+function TelegramRow() {
+  const { t } = useI18n()
+  const { user } = useAuth()
+  const { notify } = useToast()
+  const [linked, setLinked] = useState<boolean | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (!user) return
+    fetchTelegramLinked(user.id).then(setLinked).catch(() => setLinked(false))
+    // After the user presses Start in the bot and comes back, refresh the state.
+    const onFocus = () => fetchTelegramLinked(user.id).then(setLinked).catch(() => {})
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [user])
+
+  if (!TELEGRAM_BOT) return null
+
+  async function connect() {
+    setBusy(true)
+    // Open the window first (in the click) so browsers do not block it, then point it at the bot.
+    const win = window.open('', '_blank')
+    try {
+      const url = await telegramLinkUrl()
+      if (win) win.location.href = url
+      else window.location.href = url
+      notify(t('notif.afterConnect'), 'success')
+    } catch (err) {
+      console.error(err)
+      win?.close()
+      notify(t('notif.connectFailed'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function disconnect() {
+    if (!user) return
+    setBusy(true)
+    try {
+      await unlinkTelegram(user.id)
+      setLinked(false)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 4px', borderBottom: '1px solid rgba(var(--fg-rgb),0.08)' }}>
+      <Send size={17} color="rgba(var(--fg-rgb),calc(0.7 * var(--tb)))" strokeWidth={1.8} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--ink)' }}>{linked ? t('notif.connected') : t('notif.telegram')}</p>
+        {!linked && <p style={{ margin: '2px 0 0', fontSize: 11.5, lineHeight: 1.4, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' }}>{t('notif.telegramHint')}</p>}
+      </div>
+      {linked === null ? null : linked ? (
+        <button onClick={disconnect} disabled={busy} style={{ padding: '7px 12px', borderRadius: 16, border: 'none', background: 'rgba(var(--fg-rgb),0.08)', color: 'var(--ink)', fontSize: 12, fontWeight: 700 }}>{t('notif.disconnect')}</button>
+      ) : (
+        <button onClick={connect} disabled={busy} style={{ padding: '7px 12px', borderRadius: 16, border: 'none', background: '#0ABAB5', color: '#080808', fontSize: 12, fontWeight: 800, flexShrink: 0 }}>{t('notif.connect')}</button>
+      )}
     </div>
   )
 }

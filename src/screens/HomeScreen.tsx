@@ -6,7 +6,8 @@ import { useAuth } from '../auth'
 import { useSpecialists } from '../specialistsData'
 import { useI18n, formatNumber } from '../i18n'
 import UserAvatar from '../UserAvatar'
-import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase, X } from '../icons'
+import { useNotifications, describeNotification, type AppNotification } from '../notifications'
+import { CATEGORY_ICONS, LEVEL_ICONS, Bell, Search, BadgeCheck, Star, Sparkles, MessageSquareText, User, Briefcase, X, ClipboardList } from '../icons'
 
 function greetingKey() {
   const h = new Date().getHours()
@@ -54,7 +55,22 @@ export default function HomeScreen({ onNavigate }: Props) {
   const featured = specialists.filter(s => s.reviews > 0).sort((a, b) => b.rating - a.rating).slice(0, 5)
   const newOnes  = specialists.filter(s => s.isNew).slice(0, 4)
   const unreadConversations = conversations.filter(c => c.unread > 0)
-  const hasNotifications = notificationsEnabled && unreadConversations.length > 0
+  const { items: notifications, unread: unreadNotifications, markAllRead } = useNotifications()
+  const recent = notifications.slice(0, 12)
+  const hasNotifications = notificationsEnabled && (unreadConversations.length > 0 || unreadNotifications > 0)
+
+  function toggleNotifications() {
+    setShowNotifications(v => {
+      if (!v) window.setTimeout(markAllRead, 1500)
+      return !v
+    })
+  }
+
+  function openNotification(n: AppNotification) {
+    setShowNotifications(false)
+    const forSpecialist = n.kind === 'new_request' || n.kind === 'client_cancelled' || n.kind.startsWith('listing_')
+    onNavigate(forSpecialist ? { name: 'dashboard' } : { name: 'bookings' })
+  }
 
   function openConversation(conversationId: string) {
     markConversationRead(conversationId)
@@ -83,7 +99,7 @@ export default function HomeScreen({ onNavigate }: Props) {
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', position: 'relative' }}>
             <button
-              onClick={() => setShowNotifications(v => !v)}
+              onClick={toggleNotifications}
               aria-label={t('home.notifications')}
               style={{
                 width: 44, height: 44, borderRadius: '50%', border: 'none',
@@ -111,7 +127,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               <div
                 className="glass pop-in"
                 style={{
-                  position: 'absolute', top: 52, right: 0, width: 280, zIndex: 200,
+                  position: 'absolute', top: 52, right: 0, width: 320, maxWidth: 'calc(100vw - 40px)', maxHeight: 440, overflowY: 'auto', zIndex: 200,
                   borderRadius: 16, border: '1px solid rgba(var(--fg-rgb),0.1)',
                   overflow: 'hidden', boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
                   background: 'var(--sheet)',
@@ -127,7 +143,26 @@ export default function HomeScreen({ onNavigate }: Props) {
                     <X size={14} strokeWidth={2.2} />
                   </button>
                 </div>
-                {unreadConversations.length === 0 ? (
+                {recent.map(n => {
+                  const { title, detail } = describeNotification(n)
+                  return (
+                    <button
+                      key={n.id}
+                      onClick={() => openNotification(n)}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 16px', border: 'none',
+                        background: n.read ? 'none' : 'rgba(10,186,181,0.08)', borderBottom: '1px solid rgba(var(--fg-rgb),0.05)', textAlign: 'left', cursor: 'pointer',
+                      }}
+                    >
+                      <ClipboardList size={15} color="var(--accent-text)" strokeWidth={1.8} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: '0 0 2px', fontSize: 12.5, fontWeight: n.read ? 600 : 800, color: 'var(--ink)', overflowWrap: 'anywhere' }}>{title}</p>
+                        {detail && <p style={{ margin: 0, fontSize: 11.5, lineHeight: 1.4, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', overflowWrap: 'anywhere' }}>{detail}</p>}
+                      </div>
+                    </button>
+                  )
+                })}
+                {unreadConversations.length === 0 && recent.length === 0 ? (
                   <div style={{ padding: '24px 16px', textAlign: 'center' }}>
                     <p style={{ margin: 0, fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.4 * var(--tb)))' }}>{t('home.caughtUp')}</p>
                   </div>

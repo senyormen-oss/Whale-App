@@ -638,6 +638,23 @@ export const en = {
   'profile.videoSize': 'The video is too large (maximum 50 MB).',
   'profile.videoFailed': 'Could not upload the video.',
   'profile.videoFile': 'Video file',
+  // notifications
+  'notif.newRequest': 'New request: {name}',
+  'notif.confirmed': 'Request confirmed: {name}',
+  'notif.cancelled': 'Request declined: {name}',
+  'notif.completed': 'Order completed: {name}',
+  'notif.leaveReview': 'Leave a review in Bookings.',
+  'notif.clientCancelled': 'Client cancelled a request: {name}',
+  'notif.listingApproved': 'Listing approved: {name}',
+  'notif.listingRejected': 'Listing rejected: {name}',
+  'notif.listingNeedsChanges': 'Listing needs changes: {name}',
+  'notif.telegram': 'Telegram notifications',
+  'notif.telegramHint': 'New requests and their status will come to your Telegram.',
+  'notif.connect': 'Connect Telegram',
+  'notif.connected': 'Telegram connected',
+  'notif.disconnect': 'Disconnect',
+  'notif.connectFailed': 'Could not open Telegram. Try again.',
+  'notif.afterConnect': 'Press Start in the bot, then come back here.',
 } as const
 
 export type Key = keyof typeof en
