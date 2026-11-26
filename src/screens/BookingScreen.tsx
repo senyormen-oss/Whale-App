@@ -338,7 +338,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
                       fontSize: 13, fontWeight: sel ? 800 : 500,
                       cursor: busy ? 'not-allowed' : 'pointer',
                       textDecoration: busy ? 'line-through' : 'none',
-                      fontFamily: 'Outfit, sans-serif',
+                      fontFamily: 'Outfit, Onest, sans-serif',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -379,7 +379,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
                     onClick={() => setSelectedSlot(slot)}
                     style={{
                       padding: '14px 0', borderRadius: 14, border: 'none', fontSize: 15, fontWeight: 700,
-                      fontFamily: 'Outfit, sans-serif',
+                      fontFamily: 'Outfit, Onest, sans-serif',
                       background: selectedSlot === slot ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
                       color: selectedSlot === slot ? '#080808' : 'var(--ink)',
                       transition: 'all 0.15s',
@@ -483,7 +483,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
               maxLength={20}
               placeholder="+998 90 123 45 67"
               aria-label={t('book.phone')}
-              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, sans-serif' }}
+              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, Onest, sans-serif' }}
             />
           </div>
           <textarea
@@ -492,7 +492,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
             rows={2}
             maxLength={500}
             placeholder={isCustom ? t('price.customNote') : t('book.notePlaceholder')}
-            style={{ width: '100%', marginBottom: 20, background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 14, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }}
+            style={{ width: '100%', marginBottom: 20, background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 14, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif', outline: 'none', resize: 'vertical' }}
           />
 
           {/* Order summary */}
@@ -552,7 +552,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
               width: '100%', padding: '16px', borderRadius: 18, border: 'none',
               background: selectedDay && selectedSlot ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
               color: selectedDay && selectedSlot ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))',
-              fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+              fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif',
               cursor: selectedDay && selectedSlot ? 'pointer' : 'not-allowed',
               transition: 'all 0.2s',
             }}
@@ -567,7 +567,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
               onClick={() => choiceReady && setStep('pay')}
               disabled={!choiceReady}
               className={choiceReady ? 'tiffany-glow' : ''}
-              style={{ flex: 1, padding: '16px', borderRadius: 18, border: 'none', background: choiceReady ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)', color: choiceReady ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif' }}
+              style={{ flex: 1, padding: '16px', borderRadius: 18, border: 'none', background: choiceReady ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)', color: choiceReady ? '#080808' : 'rgba(var(--fg-rgb),calc(0.3 * var(--tb)))', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif' }}
             >
               {t('book.continuePrice', { price: summaryPrice })}
             </button>
@@ -582,7 +582,7 @@ export default function BookingScreen({ specialistId, packageId, serviceId, cust
               className={confirming ? '' : 'tiffany-glow'}
               style={{
                 flex: 1, padding: '16px', borderRadius: 18, border: 'none',
-                background: '#0ABAB5', color: '#080808', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+                background: '#0ABAB5', color: '#080808', fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif',
                 opacity: confirming ? 0.7 : 1, cursor: confirming ? 'wait' : 'pointer',
               }}
             >

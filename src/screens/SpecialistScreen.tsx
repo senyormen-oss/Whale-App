@@ -454,7 +454,7 @@ export default function SpecialistScreen({ specialistId, onNavigate, onBack }: P
               flex: 1, padding: '14px 0', borderRadius: 16, border: 'none',
               background: sp.available ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
               color: sp.available ? '#080808' : 'rgba(var(--fg-rgb),calc(0.35 * var(--tb)))',
-              fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+              fontSize: 16, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif',
               cursor: sp.available ? 'pointer' : 'not-allowed',
             }}
           >

@@ -14,7 +14,7 @@ type Mode = 'tier' | 'single' | 'monthly'
 
 const inputStyle: React.CSSProperties = {
   width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)',
-  borderRadius: 12, padding: '11px 13px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none',
+  borderRadius: 12, padding: '11px 13px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif', outline: 'none',
 }
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', marginBottom: 6, fontWeight: 600 }
 const iconBtn: React.CSSProperties = {

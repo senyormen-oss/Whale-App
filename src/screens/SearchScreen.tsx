@@ -62,7 +62,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
             placeholder={t('search.placeholder')}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif',
+              color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, Onest, sans-serif',
             }}
           />
           <button
@@ -72,7 +72,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
               background: showFilters ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)',
               border: 'none', borderRadius: 8, padding: '5px 12px',
               color: showFilters ? '#080808' : 'var(--ink)', fontSize: 12, fontWeight: 600,
-              fontFamily: 'Outfit, sans-serif',
+              fontFamily: 'Outfit, Onest, sans-serif',
             }}
           >
             <SlidersHorizontal size={13} strokeWidth={2} />
@@ -98,7 +98,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
                   onClick={() => setSortBy(opt.key as any)}
                   style={{
                     padding: '6px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-                    border: 'none', fontFamily: 'Outfit, sans-serif',
+                    border: 'none', fontFamily: 'Outfit, Onest, sans-serif',
                     background: sortBy === opt.key ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.08)',
                     color: sortBy === opt.key ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
                   }}
@@ -117,7 +117,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
           onClick={() => setActiveCategory(null)}
           style={{
             flexShrink: 0, padding: '8px 16px', borderRadius: 20,
-            border: 'none', fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
+            border: 'none', fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, Onest, sans-serif',
             background: !activeCategory ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
             color: !activeCategory ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
           }}
@@ -134,7 +134,7 @@ export default function SearchScreen({ initialCategory, initialQuery, onNavigate
               style={{
                 flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
                 padding: '8px 14px', borderRadius: 20, border: 'none',
-                fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, sans-serif',
+                fontSize: 13, fontWeight: 600, fontFamily: 'Outfit, Onest, sans-serif',
                 background: active ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.07)',
                 color: active ? '#080808' : 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
                 transition: 'all 0.15s ease',

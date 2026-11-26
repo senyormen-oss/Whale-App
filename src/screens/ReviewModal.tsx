@@ -105,7 +105,7 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
           placeholder={t('review.placeholder')}
           style={{
             width: '100%', marginTop: 12, background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)',
-            borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical',
+            borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif', outline: 'none', resize: 'vertical',
           }}
         />
 
@@ -115,7 +115,7 @@ export default function ReviewModal({ orderId, specialistId, specialistName, onC
           className={busy ? '' : 'tiffany-glow'}
           style={{
             width: '100%', marginTop: 14, padding: '14px 0', borderRadius: 14, border: 'none',
-            background: '#0ABAB5', color: '#080808', fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+            background: '#0ABAB5', color: '#080808', fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif',
             opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
           }}
         >

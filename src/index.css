@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Onest:wght@300;400;500;600;700;800;900&display=swap');
 @import 'tailwindcss';
 
 @theme {
@@ -72,7 +72,7 @@ html, body, #root {
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', 'Onest', sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -222,10 +222,10 @@ img { transition: opacity 0.3s ease; }
 }
 
 input, textarea, select {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Outfit', 'Onest', sans-serif;
 }
 
-button { cursor: pointer; font-family: 'Outfit', sans-serif; }
+button { cursor: pointer; font-family: 'Outfit', 'Onest', sans-serif; }
 
 .hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
 .hide-scrollbar::-webkit-scrollbar { display: none; }

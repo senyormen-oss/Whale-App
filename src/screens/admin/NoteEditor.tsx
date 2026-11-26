@@ -47,7 +47,7 @@ export default function NoteEditor({ kind, keyId }: { kind: 'client' | 'order' |
         rows={3}
         maxLength={2000}
         placeholder={t('admin.notesPlaceholder')}
-        style={{ width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 12, padding: '10px 12px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }}
+        style={{ width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 12, padding: '10px 12px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif', outline: 'none', resize: 'vertical' }}
       />
       <button
         onClick={save}

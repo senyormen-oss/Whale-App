@@ -83,7 +83,7 @@ export default function AdminClients({ requests }: { requests: AdminRequest[] | 
     <>
       <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', borderRadius: 14 }}>
         <Search size={15} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
-        <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('admin.search')} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif' }} />
+        <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('admin.search')} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, Onest, sans-serif' }} />
       </div>
 
       {requests === null && <Loader2 className="spin" size={20} color="var(--accent-text)" strokeWidth={2} />}

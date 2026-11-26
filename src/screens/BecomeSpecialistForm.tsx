@@ -19,7 +19,7 @@ interface Props {
 
 const inputStyle: React.CSSProperties = {
   width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)',
-  borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif',
+  borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif',
   outline: 'none',
 }
 const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))', marginBottom: 6, fontWeight: 600 }
@@ -157,12 +157,12 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
 
         <div>
           <label style={labelStyle}>{t('form.bio')}</label>
-          <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder={t('form.bioPlaceholder')} maxLength={1000} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, sans-serif' }} />
+          <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder={t('form.bioPlaceholder')} maxLength={1000} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, Onest, sans-serif' }} />
         </div>
 
         <div>
           <label style={labelStyle}>{t('form.qualification')}</label>
-          <textarea value={qualification} onChange={e => setQualification(e.target.value)} rows={2} maxLength={600} placeholder={t('form.qualificationPlaceholder')} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, sans-serif' }} />
+          <textarea value={qualification} onChange={e => setQualification(e.target.value)} rows={2} maxLength={600} placeholder={t('form.qualificationPlaceholder')} style={{ ...inputStyle, resize: 'vertical', fontFamily: 'Outfit, Onest, sans-serif' }} />
         </div>
 
         <div>
@@ -188,7 +188,7 @@ export default function BecomeSpecialistForm({ onCreated, existing, onSaved, onC
             className={busy ? '' : 'tiffany-glow'}
             style={{
               flex: 2, padding: '14px 0', borderRadius: 14, border: 'none',
-              background: '#0ABAB5', color: '#080808', fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, sans-serif',
+              background: '#0ABAB5', color: '#080808', fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif',
               opacity: busy ? 0.7 : 1, cursor: busy ? 'wait' : 'pointer',
             }}
           >

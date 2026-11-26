@@ -65,7 +65,7 @@ export function Select<T extends string>({ value, options, onChange, ariaLabel }
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
           background: 'rgba(var(--fg-rgb),0.05)', border: `1px solid ${open ? '#0ABAB5' : 'rgba(var(--fg-rgb),0.1)'}`,
-          borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif',
+          borderRadius: 12, padding: '12px 14px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif',
           textAlign: 'left', transition: 'border-color 0.2s ease',
         }}
       >

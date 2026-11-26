@@ -22,7 +22,7 @@ import { useEffect } from 'react'
 const LEVELS = ['bronze', 'silver', 'gold', 'platinum'] as const
 const input = {
   width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)',
-  borderRadius: 12, padding: '11px 13px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none',
+  borderRadius: 12, padding: '11px 13px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif', outline: 'none',
 } as const
 const label = { display: 'block', fontSize: 12, fontWeight: 600, marginBottom: 5, color: 'rgba(var(--fg-rgb),calc(0.5 * var(--tb)))' } as const
 
@@ -347,7 +347,7 @@ function ModerationSheet({ listing, onClose, onDone }: { listing: Specialist; on
         rows={3}
         maxLength={1000}
         placeholder={t('admin.commentPlaceholder')}
-        style={{ width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 12, padding: '10px 12px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, sans-serif', outline: 'none', resize: 'vertical' }}
+        style={{ width: '100%', background: 'rgba(var(--fg-rgb),0.05)', border: '1px solid rgba(var(--fg-rgb),0.1)', borderRadius: 12, padding: '10px 12px', color: 'var(--ink)', fontSize: 14, fontFamily: 'Outfit, Onest, sans-serif', outline: 'none', resize: 'vertical' }}
       />
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>

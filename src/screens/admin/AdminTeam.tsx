@@ -67,7 +67,7 @@ export default function AdminTeam() {
       <form onSubmit={add} style={{ display: 'flex', gap: 8 }}>
         <div className="glass" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 14 }}>
           <Mail size={15} color="rgba(var(--fg-rgb),calc(0.5 * var(--tb)))" strokeWidth={1.8} />
-          <input value={email} onChange={e => setEmail(e.target.value)} type="text" autoComplete="off" placeholder={t('admin.memberEmail')} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif' }} />
+          <input value={email} onChange={e => setEmail(e.target.value)} type="text" autoComplete="off" placeholder={t('admin.memberEmail')} style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, Onest, sans-serif' }} />
         </div>
         <button type="submit" disabled={busy} style={{ ...smallBtn, background: '#0ABAB5', color: '#080808', padding: '0 18px', opacity: busy ? 0.6 : 1 }}>{t('admin.add')}</button>
       </form>

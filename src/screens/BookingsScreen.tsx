@@ -26,7 +26,7 @@ const STATUS_CONFIG: Record<string, { label: Parameters<typeof import('../i18n')
 
 const actionBtn = {
   padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700, border: 'none', cursor: 'pointer',
-  fontFamily: 'Outfit, sans-serif',
+  fontFamily: 'Outfit, Onest, sans-serif',
 } as const
 
 export default function BookingsScreen({ onNavigate }: Props) {

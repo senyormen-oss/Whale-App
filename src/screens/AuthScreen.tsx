@@ -13,20 +13,20 @@ type View = 'signin' | 'signup' | 'forgot' | 'confirm' | 'reset-sent' | 'phone'
 
 const inputStyle = {
   flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)',
-  fontSize: 16, fontFamily: 'Outfit, sans-serif',
+  fontSize: 16, fontFamily: 'Outfit, Onest, sans-serif',
 } as const
 
 const fieldStyle = { display: 'flex', alignItems: 'center', gap: 10, padding: '13px 16px', borderRadius: 14 } as const
 
 const primaryBtn = {
   marginTop: 8, padding: '15px 0', borderRadius: 16, border: 'none', background: '#0ABAB5', color: '#080808',
-  fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, sans-serif', display: 'flex', alignItems: 'center',
+  fontSize: 15, fontWeight: 800, fontFamily: 'Outfit, Onest, sans-serif', display: 'flex', alignItems: 'center',
   justifyContent: 'center', gap: 8, width: '100%',
 } as const
 
 const linkBtn = {
   background: 'none', border: 'none', color: 'var(--accent-text)', fontSize: 13, fontWeight: 700, padding: 0,
-  fontFamily: 'Outfit, sans-serif',
+  fontFamily: 'Outfit, Onest, sans-serif',
 } as const
 
 function Shell({ children, center }: { children: React.ReactNode; center?: boolean }) {

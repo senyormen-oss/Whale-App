@@ -249,7 +249,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
             padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer',
             background: 'rgba(var(--fg-rgb),0.07)', color: 'rgba(var(--fg-rgb),calc(0.7 * var(--tb)))',
-            fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 500,
+            fontSize: 12, fontFamily: 'Outfit, Onest, sans-serif', fontWeight: 500,
             opacity: uploading ? 0.5 : 1,
           }}
         >
@@ -294,7 +294,7 @@ function ChatThread({ conversationId, onBack }: { conversationId: string; onBack
             placeholder={t('chat.placeholder')}
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
-              color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif',
+              color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, Onest, sans-serif',
             }}
           />
           <button

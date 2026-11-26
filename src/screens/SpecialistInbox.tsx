@@ -217,7 +217,7 @@ export function SpecialistChatThread({ conversationId, clientName, onBack }: {
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             maxLength={4000}
             placeholder={t('inbox.reply')}
-            style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif' }}
+            style={{ width: '100%', background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, Onest, sans-serif' }}
           />
         </div>
         <button

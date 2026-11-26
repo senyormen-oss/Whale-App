@@ -50,7 +50,7 @@ export default function EditProfileModal({ onClose, onSaved }: { onClose: () => 
               onChange={e => setName(e.target.value)}
               maxLength={100}
               autoComplete="name"
-              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, sans-serif' }}
+              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, Onest, sans-serif' }}
             />
           </div>
         </div>

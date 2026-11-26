@@ -47,7 +47,7 @@ export default function NamePrompt() {
               placeholder={t('auth.fullName')}
               autoComplete="name"
               maxLength={100}
-              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, sans-serif' }}
+              style={{ flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none', color: 'var(--ink)', fontSize: 16, fontFamily: 'Outfit, Onest, sans-serif' }}
             />
           </div>
           <button

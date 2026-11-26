@@ -179,7 +179,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               placeholder={t('home.searchPlaceholder')}
               style={{
                 flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, sans-serif',
+                color: 'var(--ink)', fontSize: 15, fontFamily: 'Outfit, Onest, sans-serif',
               }}
             />
             <button
@@ -187,7 +187,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               style={{
                 background: '#0ABAB5', border: 'none', borderRadius: 10,
                 padding: '6px 14px', color: '#080808', fontWeight: 700, fontSize: 13,
-                fontFamily: 'Outfit, sans-serif',
+                fontFamily: 'Outfit, Onest, sans-serif',
               }}
             >
               {t('home.find')}
@@ -224,7 +224,7 @@ export default function HomeScreen({ onNavigate }: Props) {
               style={{
                 background: 'white', border: 'none', borderRadius: 10,
                 padding: '9px 18px', color: '#080808', fontWeight: 700, fontSize: 13,
-                fontFamily: 'Outfit, sans-serif',
+                fontFamily: 'Outfit, Onest, sans-serif',
               }}
             >
               {t('home.promo.cta')} →
@@ -446,7 +446,7 @@ export default function HomeScreen({ onNavigate }: Props) {
             style={{
               background: '#0ABAB5', border: 'none', borderRadius: 12,
               padding: '11px 20px', color: '#080808', fontWeight: 700, fontSize: 14,
-              fontFamily: 'Outfit, sans-serif', width: '100%',
+              fontFamily: 'Outfit, Onest, sans-serif', width: '100%',
             }}
             className="tiffany-glow"
           >
