@@ -36,16 +36,64 @@ async function eskizLogin(): Promise<string> {
   if (!res.ok || !token) throw new Error(`Eskiz login failed (${res.status})`)
   // Tokens live about 30 days; refresh after 25.
   cachedToken = { value: token, expires: Date.now() + 25 * 24 * 3600 * 1000 }
+  await saveStoredToken(cachedToken)
   return token
 }
 
-async function getToken(): Promise<string> {
-  if (cachedToken && cachedToken.expires > Date.now()) return cachedToken.value
+// The token is also kept in the database (table sms_gateway_tokens, service role only). A function
+// that has just started would otherwise log in to Eskiz before every first SMS, and together they
+// can exceed the few seconds Supabase Auth waits for the hook, so the code is never sent.
+function dbHeaders(): Record<string, string> | null {
+  const url = Deno.env.get('SUPABASE_URL')
+  const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!url || !key) return null
+  return { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }
+}
+
+async function loadStoredToken(): Promise<{ value: string; expires: number } | null> {
+  const headers = dbHeaders()
+  if (!headers) return null
+  try {
+    const res = await fetch(
+      `${Deno.env.get('SUPABASE_URL')}/rest/v1/sms_gateway_tokens?provider=eq.eskiz&select=token,expires_at`,
+      { headers, signal: AbortSignal.timeout(1500) },
+    )
+    if (!res.ok) return null
+    const rows = await res.json() as { token: string; expires_at: string }[]
+    const expires = rows[0] ? Date.parse(rows[0].expires_at) : 0
+    return expires > Date.now() ? { value: rows[0].token, expires } : null
+  } catch {
+    return null
+  }
+}
+
+async function saveStoredToken(t: { value: string; expires: number }): Promise<void> {
+  const headers = dbHeaders()
+  if (!headers) return
+  try {
+    await fetch(`${Deno.env.get('SUPABASE_URL')}/rest/v1/sms_gateway_tokens?on_conflict=provider`, {
+      method: 'POST',
+      headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ provider: 'eskiz', token: t.value, expires_at: new Date(t.expires).toISOString() }),
+      signal: AbortSignal.timeout(1500),
+    })
+  } catch (err) {
+    console.error('Could not store the Eskiz token', err instanceof Error ? err.message : err)
+  }
+}
+
+async function getToken(forceLogin = false): Promise<string> {
+  if (!forceLogin) {
+    if (cachedToken && cachedToken.expires > Date.now()) return cachedToken.value
+    cachedToken = await loadStoredToken()
+    if (cachedToken) return cachedToken.value
+  }
   return eskizLogin()
 }
 
 async function sendThroughEskiz(phone: string, message: string, retry = true): Promise<void> {
-  const token = await getToken()
+  // The retry after a 401 logs in again instead of reusing the rejected token from the database.
+  const token = await getToken(!retry)
   const form = new FormData()
   form.append('mobile_phone', phone)
   form.append('message', message)
@@ -137,12 +185,14 @@ Deno.serve(async req => {
   if (!/^\d{4,8}$/.test(code)) return fail(400, 'Invalid code')
 
   const template = Deno.env.get('SMS_TEMPLATE') ?? 'Код подтверждения для входа в Whale: {code}. Никому не сообщайте его.'
+  const started = Date.now()
   try {
     await sendSms(phone, code, template.replace('{code}', code))
   } catch (err) {
-    console.error(err instanceof Error ? err.message : err)
+    console.error(err instanceof Error ? err.message : err, `(${Date.now() - started} ms)`)
     return fail(502, 'Could not send the SMS')
   }
+  console.log(`SMS sent in ${Date.now() - started} ms`)
 
   return new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } })
 })
