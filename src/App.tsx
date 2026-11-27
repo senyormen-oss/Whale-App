@@ -8,6 +8,7 @@ import ChatScreen from './screens/ChatScreen'
 import DashboardScreen from './screens/DashboardScreen'
 import AuthScreen from './screens/AuthScreen'
 import NamePrompt from './screens/NamePrompt'
+import BlockedBanner from './BlockedBanner'
 import type { Screen, TabName } from './types'
 import { useAppStore } from './store'
 import { useI18n } from './i18n'
@@ -248,6 +249,7 @@ function AuthenticatedApp() {
           data-screen={currentScreen.name}
           style={{ minHeight: '100vh' }}
         >
+          <BlockedBanner />
           {renderScreen(currentScreen)}
         </div>
 

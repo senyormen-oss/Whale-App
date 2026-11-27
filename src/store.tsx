@@ -112,6 +112,7 @@ function bookingServerMessage(message: string): string | null {
     ['Specialist not found', 'err.bookingFailed'],
     ['Invalid service', 'err.bookingFailed'],
     ['Describe the task', 'book.needService'],
+    ['Account blocked', 'blocked.action'],
     ['Invalid status', 'err.bookingFailed'],
   ]
   for (const [text, key] of map) if (message.includes(text)) return t(key)
